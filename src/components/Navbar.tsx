@@ -67,17 +67,17 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+          <Link to="/" className="flex items-center gap-4 flex-shrink-0 mr-auto">
             <img
               src={logo}
               alt="Tumāninah Veritas Store"
-              className="h-12 w-12 md:h-14 md:w-14 object-contain rounded-lg"
+              className="h-16 w-16 md:h-20 md:w-20 object-contain rounded-lg"
             />
             <div className="hidden md:flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-foreground leading-tight">
+              <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-foreground leading-tight">
                 Tumāninah Veritas
               </span>
-              <span className="text-xs text-foreground/80">One Stop Store</span>
+              <span className="text-sm md:text-base text-foreground/80">One Stop Store</span>
             </div>
           </Link>
 
