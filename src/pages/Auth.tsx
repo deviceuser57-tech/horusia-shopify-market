@@ -9,6 +9,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Mail, Lock, User, Facebook } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { z } from "zod";
+
+const signInSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password must be less than 128 characters")
+});
+
+const signUpSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password must be less than 128 characters"),
+  fullName: z.string().trim().min(1, "Full name is required").max(100, "Full name must be less than 100 characters")
+});
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -40,9 +52,18 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = signInSchema.safeParse({ email, password });
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => err.message).join(", ");
+        toast.error(errors);
+        setIsLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
       });
 
       if (error) {
@@ -66,13 +87,22 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = signUpSchema.safeParse({ email, password, fullName });
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => err.message).join(", ");
+        toast.error(errors);
+        setIsLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: fullName,
+            full_name: validationResult.data.fullName,
           }
         }
       });
