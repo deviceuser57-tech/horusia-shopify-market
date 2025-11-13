@@ -7,10 +7,9 @@ import { toast } from "sonner";
 
 interface ProductCardProps {
   product: ShopifyProduct;
-  badge?: string;
 }
 
-export const ProductCard = ({ product, badge }: ProductCardProps) => {
+export const ProductCard = ({ product }: ProductCardProps) => {
   const addItem = useCartStore(state => state.addItem);
   const { node } = product;
   const price = node.priceRange.minVariantPrice;
@@ -40,13 +39,6 @@ export const ProductCard = ({ product, badge }: ProductCardProps) => {
     <div className="group bg-gradient-to-br from-card to-card/80 rounded-xl border border-border overflow-hidden hover:shadow-[var(--shadow-medium)] hover:border-accent/50 transition-all duration-300 hover:-translate-y-1">
       <Link to={`/product/${node.handle}`}>
         <div className="aspect-square bg-secondary/30 overflow-hidden relative">
-          {badge && (
-            <div className="absolute -left-8 top-8 z-10 w-64 transform -rotate-45 origin-center">
-              <div className="bg-gradient-to-r from-accent via-accent-hover to-accent text-accent-foreground py-2 px-4 text-center font-bold text-xs shadow-2xl border-y-2 border-accent-foreground/20 backdrop-blur-sm">
-                <div className="drop-shadow-lg">Free Gift on All Orders above $50</div>
-              </div>
-            </div>
-          )}
           {image ? (
             <img
               src={image.url}
