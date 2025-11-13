@@ -52,7 +52,7 @@ const Index = () => {
           />
 
           {/* Gradient overlay - Light theme: dark shadow, Dark theme: light transparent */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 dark:from-white/10 dark:via-transparent dark:to-white/20 transition-opacity duration-500 group-hover:opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/55 dark:from-white/10 dark:via-transparent dark:to-white/20 transition-opacity duration-500 group-hover:opacity-90" />
 
           <div className="relative z-10 container mx-auto px-4 text-center">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-foreground animate-fade-in drop-shadow-lg">
