@@ -41,8 +41,10 @@ export const ProductCard = ({ product, badge }: ProductCardProps) => {
       <Link to={`/product/${node.handle}`}>
         <div className="aspect-square bg-secondary/30 overflow-hidden relative">
           {badge && (
-            <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-accent to-accent-hover text-accent-foreground px-3 py-1.5 rounded-md font-semibold text-sm shadow-lg backdrop-blur-sm">
-              {badge}
+            <div className="absolute -left-8 top-8 z-10 w-64 transform -rotate-45 origin-center">
+              <div className="bg-gradient-to-r from-accent via-accent-hover to-accent text-accent-foreground py-2 px-4 text-center font-bold text-xs shadow-2xl border-y-2 border-accent-foreground/20 backdrop-blur-sm">
+                <div className="drop-shadow-lg">Free Gift on All Orders above $50</div>
+              </div>
             </div>
           )}
           {image ? (
