@@ -1,16 +1,97 @@
+import { useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProducts } from "@/lib/shopify";
-import { ShoppingBag } from "lucide-react";
+import { fetchProducts, ShopifyProduct } from "@/lib/shopify";
+import { ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/StructuredData";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useSearchParams } from "react-router-dom";
 
 const Shop = () => {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
+  
+  const [sortBy, setSortBy] = useState<string>("featured");
+  const [filterAvailability, setFilterAvailability] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
+  
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['all-products'],
     queryFn: () => fetchProducts(50),
   });
+
+  // Extract unique product types
+  const productTypes = useMemo(() => {
+    const types = new Set<string>();
+    products.forEach(product => {
+      if (product.node.productType) {
+        types.add(product.node.productType);
+      }
+    });
+    return Array.from(types).sort();
+  }, [products]);
+
+  // Filter and sort products
+  const filteredProducts = useMemo(() => {
+    let filtered = [...products];
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(product => 
+        product.node.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.node.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Availability filter
+    if (filterAvailability !== "all") {
+      filtered = filtered.filter(product => {
+        const available = product.node.variants.edges.some(v => v.node.availableForSale);
+        return filterAvailability === "in-stock" ? available : !available;
+      });
+    }
+
+    // Product type filter
+    if (filterType !== "all") {
+      filtered = filtered.filter(product => product.node.productType === filterType);
+    }
+
+    // Sort products
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "price-asc":
+          return parseFloat(a.node.priceRange.minVariantPrice.amount) - 
+                 parseFloat(b.node.priceRange.minVariantPrice.amount);
+        case "price-desc":
+          return parseFloat(b.node.priceRange.minVariantPrice.amount) - 
+                 parseFloat(a.node.priceRange.minVariantPrice.amount);
+        case "title-asc":
+          return a.node.title.localeCompare(b.node.title);
+        case "title-desc":
+          return b.node.title.localeCompare(a.node.title);
+        case "featured":
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [products, sortBy, filterAvailability, filterType, searchQuery]);
+
+  const handleResetFilters = () => {
+    setSortBy("featured");
+    setFilterAvailability("all");
+    setFilterType("all");
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -31,26 +112,107 @@ const Shop = () => {
             Shop All Products
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Explore our complete collection of quality products
+            {searchQuery ? `Search results for "${searchQuery}"` : "Explore our complete collection of quality products"}
           </p>
         </div>
+
+        {/* Filters */}
+        {!isLoading && products.length > 0 && (
+          <div className="mb-8 bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 shadow-[var(--shadow-soft)]">
+            <div className="flex items-center gap-3 mb-4">
+              <SlidersHorizontal className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Filter & Sort</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">Sort By</label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card z-50">
+                    <SelectItem value="featured">Featured</SelectItem>
+                    <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                    <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                    <SelectItem value="title-asc">Name: A to Z</SelectItem>
+                    <SelectItem value="title-desc">Name: Z to A</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">Availability</label>
+                <Select value={filterAvailability} onValueChange={setFilterAvailability}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All products" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card z-50">
+                    <SelectItem value="all">All Products</SelectItem>
+                    <SelectItem value="in-stock">In Stock</SelectItem>
+                    <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">Product Type</label>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card z-50">
+                    <SelectItem value="all">All Types</SelectItem>
+                    {productTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-end">
+                <Button 
+                  variant="outline" 
+                  onClick={handleResetFilters}
+                  className="w-full"
+                >
+                  Reset Filters
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 text-sm text-muted-foreground">
+              Showing {filteredProducts.length} of {products.length} products
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="text-center py-16">
             <div className="inline-block h-14 w-14 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent mb-4"></div>
             <p className="text-muted-foreground">Loading products...</p>
           </div>
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-gradient-to-br from-card to-card/80 rounded-3xl border-2 border-border shadow-[var(--shadow-medium)]">
             <ShoppingBag className="h-24 w-24 text-muted-foreground/50 mx-auto mb-6" />
-            <h2 className="text-3xl font-semibold text-foreground mb-3">No Products Found</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Our store is being set up. Please check back soon for our amazing products!
+            <h2 className="text-3xl font-semibold text-foreground mb-3">
+              {products.length === 0 ? "No Products Found" : "No Products Match Your Filters"}
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto mb-6">
+              {products.length === 0 
+                ? "Our store is being set up. Please check back soon for our amazing products!"
+                : "Try adjusting your filters or search query to find what you're looking for."
+              }
             </p>
+            {products.length > 0 && (
+              <Button onClick={handleResetFilters} variant="outline">
+                Reset All Filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <ProductCard key={product.node.id} product={product} />
             ))}
           </div>
