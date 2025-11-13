@@ -211,11 +211,7 @@ const CollectionDetail = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {products.map((product) => (
-                  <ProductCard 
-                    key={product.node.id} 
-                    product={product}
-                    badge={isFreeGifts ? "Orders $50+" : undefined}
-                  />
+                  <ProductCard key={product.node.id} product={product} />
                 ))}
               </div>
             </>
