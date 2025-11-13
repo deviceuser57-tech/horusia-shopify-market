@@ -24,7 +24,7 @@ export const Navbar = () => {
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
   const location = useLocation();
 
-  const showSearch = location.pathname === "/" || location.pathname === "/shop";
+  const showSearch = true; // Search enabled on all pages
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
