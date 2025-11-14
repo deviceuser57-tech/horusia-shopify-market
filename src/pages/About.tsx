@@ -3,10 +3,25 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Heart, Shield, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { BreadcrumbSchema } from "@/components/StructuredData";
 
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>About Us - Tumāninah Veritas Store | Our Philosophy</title>
+        <meta name="description" content="Learn about Tumāninah Veritas Store's philosophy of calmness and truth. Discover our values of quality, trust, and excellence in every product we offer." />
+        <meta property="og:title" content="About Us - Tumāninah Veritas Store" />
+        <meta property="og:description" content="Discover the story behind Tumāninah Veritas Store and our commitment to quality products and trusted service." />
+        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/about" />
+      </Helmet>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "https://eagles-veritas-shop.lovable.app" },
+          { name: "About Us", url: "https://eagles-veritas-shop.lovable.app/about" }
+        ]}
+      />
       <Navbar />
       
       <main className="flex-1">
