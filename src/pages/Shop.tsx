@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -95,6 +96,13 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Shop - Tumāninah Veritas Store | Quality Products</title>
+        <meta name="description" content="Browse quality products at Tumāninah Veritas Store. Shop modern lifestyle items with trusted service and authentic products for your everyday needs." />
+        <meta property="og:title" content="Shop - Tumāninah Veritas Store" />
+        <meta property="og:description" content="Discover quality products at Tumāninah Veritas Store. Modern lifestyle items with trusted service." />
+        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/shop" />
+      </Helmet>
       <BreadcrumbSchema
         items={[
           { name: "Home", url: "https://eagles-veritas-shop.lovable.app" },

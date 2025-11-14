@@ -9,6 +9,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ProductSchema, BreadcrumbSchema } from "@/components/StructuredData";
+import { Helmet } from "react-helmet";
 
 const ProductDetail = () => {
   const { handle } = useParams();
@@ -78,6 +79,14 @@ const ProductDetail = () => {
     <div className="min-h-screen flex flex-col">
       {firstVariant && (
         <>
+          <Helmet>
+            <title>{node.title} - Tumāninah Veritas Store</title>
+            <meta name="description" content={node.description || `Buy ${node.title} at Tumāninah Veritas Store. Quality products with trusted service.`} />
+            <meta property="og:title" content={`${node.title} - Tumāninah Veritas Store`} />
+            <meta property="og:description" content={node.description || `Shop ${node.title} online`} />
+            <meta property="og:image" content={image?.url || ''} />
+            <link rel="canonical" href={`https://eagles-veritas-shop.lovable.app/product/${handle}`} />
+          </Helmet>
           <ProductSchema
             name={node.title}
             description={node.description || ''}

@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet";
+import { BreadcrumbSchema } from "@/components/StructuredData";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -39,6 +41,19 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Contact Us - Tumāninah Veritas Store | Get in Touch</title>
+        <meta name="description" content="Contact Tumāninah Veritas Store for inquiries, support, or questions. Reach us via email at tumaninahveritasstore@gmail.com or WhatsApp." />
+        <meta property="og:title" content="Contact Us - Tumāninah Veritas Store" />
+        <meta property="og:description" content="Get in touch with Tumāninah Veritas Store. We're here to help with any questions or concerns." />
+        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/contact" />
+      </Helmet>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "https://eagles-veritas-shop.lovable.app" },
+          { name: "Contact", url: "https://eagles-veritas-shop.lovable.app/contact" }
+        ]}
+      />
       <Navbar />
       
       <main className="flex-1">

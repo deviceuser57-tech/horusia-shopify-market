@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchProducts, fetchLatestProducts } from "@/lib/shopify";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import heroBanner from "@/assets/hero-banner.jpg";
+import { Helmet } from "react-helmet";
 
 const Index = () => {
   const { data: featuredProducts, isLoading: loadingFeatured } = useQuery({
@@ -24,6 +25,11 @@ const Index = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Tumāninah Veritas Store | One Stop Store - Quality Products</title>
+        <meta name="description" content="Tumāninah Veritas Store - Your one stop store for quality products, modern lifestyle, and trusted service. Shop with confidence." />
+        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app" />
+      </Helmet>
       <Navbar />
       <EgyptianPopup />
       <OrganizationSchema

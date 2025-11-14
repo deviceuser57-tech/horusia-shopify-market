@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, Lock, User, Facebook } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
+import { Mail, Lock, User } from "lucide-react";
 import { z } from "zod";
 
 const signInSchema = z.object({
@@ -273,38 +272,6 @@ const Auth = () => {
               </TabsContent>
             </Tabs>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => handleSocialLogin('google')}
-                disabled={isLoading}
-              >
-                <FcGoogle className="mr-2 h-5 w-5" />
-                Google
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => handleSocialLogin('facebook')}
-                disabled={isLoading}
-              >
-                <Facebook className="mr-2 h-5 w-5 text-blue-600" />
-                Facebook
-              </Button>
-            </div>
 
             <p className="text-center text-sm text-muted-foreground mt-6">
               By continuing, you agree to our{" "}
