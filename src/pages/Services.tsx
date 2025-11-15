@@ -56,73 +56,142 @@ const Services = () => {
 
         {/* Services Grid */}
         <section className="py-16 container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto mb-16">
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
-              <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Palette className="h-8 w-8 text-gold" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
+            {/* Custom Handmade Creations */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-gold/20 p-6 text-center hover:border-gold/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-gold/20 to-gold/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Palette className="h-10 w-10 text-gold" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Custom Handmade Creations</h3>
-              <p className="text-muted-foreground mb-4">
-                Unique, handcrafted pieces customized for:
+              <h3 className="text-lg font-bold text-foreground mb-2">Custom Handmade Creations</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Unique, handcrafted pieces for:
               </p>
-              <ul className="text-sm text-muted-foreground space-y-1 text-left">
-                <li>• Engagements & Weddings</li>
-                <li>• Corporate Gifts</li>
-                <li>• Home Décor</li>
-                <li>• Religious Gifts</li>
-                <li>• Personalized Accessories</li>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-gold mr-2">✦</span>Engagements & Weddings</li>
+                <li className="flex items-start"><span className="text-gold mr-2">✦</span>Corporate Gifts</li>
+                <li className="flex items-start"><span className="text-gold mr-2">✦</span>Home Décor</li>
+                <li className="flex items-start"><span className="text-gold mr-2">✦</span>Religious Gifts</li>
               </ul>
-              <p className="text-sm text-gold mt-3 font-medium">You dream it — we design & craft it.</p>
+              <p className="text-sm text-gold font-semibold mt-4">You dream it — we craft it</p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
-              <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Landmark className="h-8 w-8 text-gold" />
+            {/* Heritage Restoration */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-primary/20 p-6 text-center hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Landmark className="h-10 w-10 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Heritage Restoration & Replication</h3>
-              <p className="text-muted-foreground mb-4">
-                We create:
+              <h3 className="text-lg font-bold text-foreground mb-2">Heritage Restoration</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Authentic Egyptian replicas:
               </p>
-              <ul className="text-sm text-muted-foreground space-y-1 text-left">
-                <li>• Replica artifacts</li>
-                <li>• Historical-inspired art</li>
-                <li>• Personalized museum-style décor</li>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-primary mr-2">◆</span>Replica artifacts</li>
+                <li className="flex items-start"><span className="text-primary mr-2">◆</span>Historical-inspired art</li>
+                <li className="flex items-start"><span className="text-primary mr-2">◆</span>Museum-style décor</li>
               </ul>
-              <p className="text-sm text-gold mt-3 font-medium">Ideal for collectors & interior designers.</p>
+              <p className="text-sm text-primary font-semibold mt-4">For collectors & designers</p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
-              <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-8 w-8 text-gold" />
+            {/* Event Personalization */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-accent/20 p-6 text-center hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-accent/20 to-accent/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Calendar className="h-10 w-10 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Event Personalization Service</h3>
-              <p className="text-muted-foreground mb-4">
-                We design and craft custom items for:
+              <h3 className="text-lg font-bold text-foreground mb-2">Event Personalization</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Custom items for special occasions:
               </p>
-              <ul className="text-sm text-muted-foreground space-y-1 text-left">
-                <li>• Ramadan events</li>
-                <li>• National holidays</li>
-                <li>• Baby showers</li>
-                <li>• Weddings</li>
-                <li>• Corporate events</li>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-accent-foreground mr-2">★</span>Ramadan events</li>
+                <li className="flex items-start"><span className="text-accent-foreground mr-2">★</span>Weddings & celebrations</li>
+                <li className="flex items-start"><span className="text-accent-foreground mr-2">★</span>Corporate events</li>
               </ul>
-              <p className="text-sm text-gold mt-3 font-medium">Custom boxes, engraved pieces, premium packaging.</p>
+              <p className="text-sm text-accent-foreground font-semibold mt-4">Premium packaging included</p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
-              <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="h-8 w-8 text-gold" />
+            {/* Art Consultation */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-secondary/20 p-6 text-center hover:border-secondary/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-secondary/20 to-secondary/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <MessageSquare className="h-10 w-10 text-secondary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Art & Home Styling Consultation</h3>
-              <p className="text-muted-foreground mb-4">
-                15-minute consultation to help with:
+              <h3 className="text-lg font-bold text-foreground mb-2">Art & Styling Consultation</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                15-minute expert consultation:
               </p>
-              <ul className="text-sm text-muted-foreground space-y-1 text-left">
-                <li>• Choosing artwork</li>
-                <li>• Matching décor themes</li>
-                <li>• Personalized product recommendations</li>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-secondary-foreground mr-2">●</span>Choosing artwork</li>
+                <li className="flex items-start"><span className="text-secondary-foreground mr-2">●</span>Matching décor themes</li>
+                <li className="flex items-start"><span className="text-secondary-foreground mr-2">●</span>Product recommendations</li>
               </ul>
-              <p className="text-sm text-gold mt-3 font-medium">Expert guidance for your space.</p>
+              <p className="text-sm text-secondary-foreground font-semibold mt-4">Expert guidance for your space</p>
+            </div>
+
+            {/* Gift Services */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-gold/20 p-6 text-center hover:border-gold/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-gold/20 to-gold/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Gift className="h-10 w-10 text-gold" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">Premium Gift Services</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Luxury gift packaging & delivery:
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-gold mr-2">♦</span>Custom gift wrapping</li>
+                <li className="flex items-start"><span className="text-gold mr-2">♦</span>Personalized messages</li>
+                <li className="flex items-start"><span className="text-gold mr-2">♦</span>Express delivery options</li>
+              </ul>
+              <p className="text-sm text-gold font-semibold mt-4">Make every gift memorable</p>
+            </div>
+
+            {/* Corporate Solutions */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-primary/20 p-6 text-center hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Building2 className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">Corporate Solutions</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Business & bulk orders:
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-primary mr-2">■</span>Bulk order discounts</li>
+                <li className="flex items-start"><span className="text-primary mr-2">■</span>Corporate branding options</li>
+                <li className="flex items-start"><span className="text-primary mr-2">■</span>Dedicated account manager</li>
+              </ul>
+              <p className="text-sm text-primary font-semibold mt-4">Perfect for businesses</p>
+            </div>
+
+            {/* Custom Packaging */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-accent/20 p-6 text-center hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-accent/20 to-accent/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Package className="h-10 w-10 text-accent-foreground" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">Custom Packaging</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Elegant presentation solutions:
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-accent-foreground mr-2">▲</span>Luxury boxes & cases</li>
+                <li className="flex items-start"><span className="text-accent-foreground mr-2">▲</span>Branded packaging</li>
+                <li className="flex items-start"><span className="text-accent-foreground mr-2">▲</span>Eco-friendly options</li>
+              </ul>
+              <p className="text-sm text-accent-foreground font-semibold mt-4">First impression matters</p>
+            </div>
+
+            {/* International Shipping */}
+            <div className="group bg-gradient-to-br from-card to-card/50 rounded-xl border-2 border-secondary/20 p-6 text-center hover:border-secondary/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-[var(--shadow-elegant)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-secondary/20 to-secondary/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <ShoppingBag className="h-10 w-10 text-secondary-foreground" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">Worldwide Delivery</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Egyptian crafts to your door:
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1.5 text-left mb-3">
+                <li className="flex items-start"><span className="text-secondary-foreground mr-2">✈</span>International shipping</li>
+                <li className="flex items-start"><span className="text-secondary-foreground mr-2">✈</span>Secure packaging</li>
+                <li className="flex items-start"><span className="text-secondary-foreground mr-2">✈</span>Order tracking</li>
+              </ul>
+              <p className="text-sm text-secondary-foreground font-semibold mt-4">From Egypt to the world</p>
             </div>
           </div>
 
