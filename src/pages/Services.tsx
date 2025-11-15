@@ -3,7 +3,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Gift, Building2, Package, ShoppingBag } from "lucide-react";
+import { Gift, Building2, Package, ShoppingBag, Palette, Landmark, Calendar, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,35 +56,73 @@ const Services = () => {
 
         {/* Services Grid */}
         <section className="py-16 container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)]">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto mb-16">
+            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
               <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Package className="h-8 w-8 text-gold" />
+                <Palette className="h-8 w-8 text-gold" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Custom Orders</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Custom Handmade Creations</h3>
               <p className="text-muted-foreground mb-4">
-                Can't find exactly what you're looking for? We'll source it for you.
+                Unique, handcrafted pieces customized for:
               </p>
+              <ul className="text-sm text-muted-foreground space-y-1 text-left">
+                <li>• Engagements & Weddings</li>
+                <li>• Corporate Gifts</li>
+                <li>• Home Décor</li>
+                <li>• Religious Gifts</li>
+                <li>• Personalized Accessories</li>
+              </ul>
+              <p className="text-sm text-gold mt-3 font-medium">You dream it — we design & craft it.</p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)]">
+            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
               <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Gift className="h-8 w-8 text-gold" />
+                <Landmark className="h-8 w-8 text-gold" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Gift Cards</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Heritage Restoration & Replication</h3>
               <p className="text-muted-foreground mb-4">
-                Perfect gifts for any occasion. Available in various denominations.
+                We create:
               </p>
+              <ul className="text-sm text-muted-foreground space-y-1 text-left">
+                <li>• Replica artifacts</li>
+                <li>• Historical-inspired art</li>
+                <li>• Personalized museum-style décor</li>
+              </ul>
+              <p className="text-sm text-gold mt-3 font-medium">Ideal for collectors & interior designers.</p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)]">
+            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
               <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building2 className="h-8 w-8 text-gold" />
+                <Calendar className="h-8 w-8 text-gold" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Corporate Offers</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Event Personalization Service</h3>
               <p className="text-muted-foreground mb-4">
-                Bulk orders and special pricing for businesses and organizations.
+                We design and craft custom items for:
               </p>
+              <ul className="text-sm text-muted-foreground space-y-1 text-left">
+                <li>• Ramadan events</li>
+                <li>• National holidays</li>
+                <li>• Baby showers</li>
+                <li>• Weddings</li>
+                <li>• Corporate events</li>
+              </ul>
+              <p className="text-sm text-gold mt-3 font-medium">Custom boxes, engraved pieces, premium packaging.</p>
+            </div>
+
+            <div className="bg-card rounded-lg border border-border p-8 text-center shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
+              <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-8 w-8 text-gold" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Art & Home Styling Consultation</h3>
+              <p className="text-muted-foreground mb-4">
+                15-minute consultation to help with:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 text-left">
+                <li>• Choosing artwork</li>
+                <li>• Matching décor themes</li>
+                <li>• Personalized product recommendations</li>
+              </ul>
+              <p className="text-sm text-gold mt-3 font-medium">Expert guidance for your space.</p>
             </div>
           </div>
 
