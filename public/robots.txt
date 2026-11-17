@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://eagles-veritas-shop.lovable.app/sitemap.xml
