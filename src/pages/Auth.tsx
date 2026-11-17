@@ -54,7 +54,7 @@ const Auth = () => {
       // Validate inputs
       const validationResult = signInSchema.safeParse({ email, password });
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(err => err.message).join(", ");
+        const errors = validationResult.error.issues.map(err => err.message).join(", ");
         toast.error(errors);
         setIsLoading(false);
         return;
@@ -89,7 +89,7 @@ const Auth = () => {
       // Validate inputs
       const validationResult = signUpSchema.safeParse({ email, password, fullName });
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(err => err.message).join(", ");
+        const errors = validationResult.error.issues.map(err => err.message).join(", ");
         toast.error(errors);
         setIsLoading(false);
         return;
