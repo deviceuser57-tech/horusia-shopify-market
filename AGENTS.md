@@ -1,1 +1,0 @@
-- Keep opportunity-ranking calculations in a pure `src/lib` module, separate from page rendering and store connectors; AI insights must not directly change products, prices, or campaigns without server-verified roles, explicit approval, and an audit record.
