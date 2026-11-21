@@ -20,6 +20,7 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import TrendIntelligence from "./pages/TrendIntelligence";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import AdminBI from "./pages/AdminBI";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/admin/trends" element={<TrendIntelligence />} />
+            <Route path="/admin/bi" element={<AdminBI />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />

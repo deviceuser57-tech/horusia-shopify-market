@@ -14,6 +14,12 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_commissions: {
+        Row: { amount: number | null; conversion_id: string | null; currency: string | null; id: string; recorded_at: string; source: string; status: string }
+        Insert: { amount?: number | null; conversion_id?: string | null; currency?: string | null; id?: string; recorded_at?: string; source: string; status: string }
+        Update: { amount?: number | null; conversion_id?: string | null; currency?: string | null; id?: string; recorded_at?: string; source?: string; status?: string }
+        Relationships: []
+      }
       affiliate_click_events: {
         Row: {
           affiliate_link_id: string | null
@@ -45,6 +51,24 @@ export type Database = {
           source?: string | null
           user_agent?: string | null
         }
+        Relationships: []
+      }
+      external_product_snapshots: {
+        Row: { availability_status: string; created_at: string; currency: string | null; error_details: string | null; external_price: number | null; freshness_status: string; id: string; last_synced_at: string | null; product_id: string; provider_name: string; provider_product_id: string | null; source_type: string; source_url: string | null; sync_result: string | null; updated_at: string }
+        Insert: { availability_status?: string; created_at?: string; currency?: string | null; error_details?: string | null; external_price?: number | null; freshness_status?: string; id?: string; last_synced_at?: string | null; product_id: string; provider_name: string; provider_product_id?: string | null; source_type: string; source_url?: string | null; sync_result?: string | null; updated_at?: string }
+        Update: { availability_status?: string; created_at?: string; currency?: string | null; error_details?: string | null; external_price?: number | null; freshness_status?: string; id?: string; last_synced_at?: string | null; product_id?: string; provider_name?: string; provider_product_id?: string | null; source_type?: string; source_url?: string | null; sync_result?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      orders: {
+        Row: { business_model: string; created_at: string; currency: string | null; fulfillment_status: string; id: string; internal_order_number: string; payment_status: string; supplier_id: string | null; total_amount: number | null; updated_at: string }
+        Insert: { business_model?: string; created_at?: string; currency?: string | null; fulfillment_status?: string; id?: string; internal_order_number: string; payment_status?: string; supplier_id?: string | null; total_amount?: number | null; updated_at?: string }
+        Update: { business_model?: string; created_at?: string; currency?: string | null; fulfillment_status?: string; id?: string; internal_order_number?: string; payment_status?: string; supplier_id?: string | null; total_amount?: number | null; updated_at?: string }
+        Relationships: []
+      }
+      sync_jobs: {
+        Row: { completed_at: string | null; correlation_id: string; created_at: string; error_details: string | null; id: string; job_type: string; started_at: string | null; status: string }
+        Insert: { completed_at?: string | null; correlation_id?: string; created_at?: string; error_details?: string | null; id?: string; job_type: string; started_at?: string | null; status?: string }
+        Update: { completed_at?: string | null; correlation_id?: string; created_at?: string; error_details?: string | null; id?: string; job_type?: string; started_at?: string | null; status?: string }
         Relationships: []
       }
       contact_messages: {
