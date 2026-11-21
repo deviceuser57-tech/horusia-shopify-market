@@ -408,6 +408,12 @@ create table if not exists public.integration_events (
   created_at timestamptz not null default now()
 );
 
+grant usage on schema public to anon, authenticated;
+grant insert on table public.newsletter_subscriptions to anon, authenticated;
+grant insert on table public.contact_messages to anon, authenticated;
+grant insert on table public.service_requests to anon, authenticated;
+grant insert on table public.affiliate_click_events to anon, authenticated;
+
 alter table public.external_product_snapshots enable row level security;
 alter table public.suppliers enable row level security;
 alter table public.supplier_products enable row level security;
