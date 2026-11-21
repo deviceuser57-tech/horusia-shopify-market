@@ -9,9 +9,17 @@ import { classifyShopifyProduct, recordAffiliateClick } from "@/lib/productClass
 
 interface ProductCardProps {
   product: ShopifyProduct;
+  onCompare?: (item: {
+    id: string;
+    title: string;
+    price: number;
+    image: string;
+    category: string;
+    affiliateUrl?: string;
+  }) => void;
 }
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product, onCompare }: ProductCardProps) => {
   const addItem = useCartStore(state => state.addItem);
   const { node } = product;
   const price = node.priceRange.minVariantPrice;
@@ -92,24 +100,47 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             {price.currencyCode} {parseFloat(price.amount).toFixed(2)}
           </span>
           {classification.businessModel === "AFFILIATE" ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleAffiliateClick}
-              disabled={!classification.affiliateUrl}
-            >
-              <ExternalLink className="h-4 w-4 mr-1.5" />
-              Visit merchant
-            </Button>
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleAffiliateClick}
+                disabled={!classification.affiliateUrl}
+              >
+                <ExternalLink className="h-4 w-4 mr-1.5" />
+                Visit merchant
+              </Button>
+              {onCompare && (
+                <Button size="sm" variant="ghost" onClick={() => onCompare({
+                  id: node.id,
+                  title: node.title,
+                  price: Number(price.amount),
+                  image: image?.url ?? "/placeholder.svg",
+                  category: node.productType ?? "General",
+                  affiliateUrl: classification.affiliateUrl ?? undefined,
+                })}>Compare</Button>
+              )}
+            </>
           ) : (
-            <Button
-              size="sm"
-              className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-primary-foreground shadow-[var(--shadow-blue)] hover:shadow-[var(--shadow-medium)] transition-all duration-300"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-4 w-4 mr-1.5" />
-              Add
-            </Button>
+            <>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-primary-foreground shadow-[var(--shadow-blue)] hover:shadow-[var(--shadow-medium)] transition-all duration-300"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="h-4 w-4 mr-1.5" />
+                Add
+              </Button>
+              {onCompare && (
+                <Button size="sm" variant="ghost" onClick={() => onCompare({
+                  id: node.id,
+                  title: node.title,
+                  price: Number(price.amount),
+                  image: image?.url ?? "/placeholder.svg",
+                  category: node.productType ?? "General",
+                })}>Compare</Button>
+              )}
+            </>
           )}
         </div>
       </div>

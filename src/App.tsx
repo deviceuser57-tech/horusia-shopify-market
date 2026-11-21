@@ -21,6 +21,10 @@ import NotFound from "./pages/NotFound";
 import TrendIntelligence from "./pages/TrendIntelligence";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AdminBI from "./pages/AdminBI";
+import { AdminGuard } from "@/components/AdminGuard";
+import AdminHome from "./pages/admin/AdminHome";
+import AgentApprovalCenter from "./pages/admin/AgentApprovalCenter";
+import ConnectorManager from "./pages/admin/ConnectorManager";
 
 const queryClient = new QueryClient();
 
@@ -45,8 +49,11 @@ const App = () => (
             <Route path="/refund" element={<Refund />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/admin/trends" element={<TrendIntelligence />} />
-            <Route path="/admin/bi" element={<AdminBI />} />
+            <Route path="/admin" element={<AdminGuard><AdminHome /></AdminGuard>} />
+            <Route path="/admin/trends" element={<AdminGuard><TrendIntelligence /></AdminGuard>} />
+            <Route path="/admin/bi" element={<AdminGuard><AdminBI /></AdminGuard>} />
+            <Route path="/admin/approvals" element={<AdminGuard><AgentApprovalCenter /></AdminGuard>} />
+            <Route path="/admin/connectors" element={<AdminGuard><ConnectorManager /></AdminGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />

@@ -32,6 +32,8 @@ import {
   rankOpportunities,
 } from "@/lib/trend-scoring";
 import { toast } from "sonner";
+import { enrichProductWithAI } from "@/lib/ai-gateway";
+import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "tvs-trend-intelligence-v1";
 
@@ -193,6 +195,48 @@ const TrendIntelligence = () => {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
+  };
+
+  const enrichAndPublish = async (opportunity: RankedOpportunity) => {
+    try {
+      toast.info("Generating a bilingual AI draft...");
+      const ai = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
+      const businessModel = opportunity.recommendedChannel.includes("Affiliate") ? "AFFILIATE" : "DROPSHIPPING";
+
+      const insert: Record<string, unknown> = {
+        business_model: businessModel,
+        title: ai.titleEn || opportunity.product.name,
+        title_ar: ai.titleAr,
+        title_en: ai.titleEn,
+        description: ai.descriptionAr,
+        category: opportunity.product.category,
+        price: opportunity.product.sellingPrice,
+        supplier_cost: opportunity.product.unitCost,
+        currency: "USD",
+        status: "DRAFT",
+        tags: ai.suggestedTags,
+        ad_copy: ai.adCopy,
+        metadata: {
+          opportunityScore: opportunity.score,
+          recommendedChannel: opportunity.recommendedChannel,
+          evidenceStatus: ai.evidenceStatus,
+        },
+      };
+      if (businessModel === "AFFILIATE") {
+        const program = await supabase.from("affiliate_programs").select("id").limit(1).maybeSingle();
+        if (!program.data) {
+          toast.error("Create an affiliate program and destination link before publishing.");
+          return;
+        }
+        insert.affiliate_url = "";
+      }
+
+      const { error } = await supabase.from("store_products").insert(insert);
+      if (error) throw error;
+      toast.success("AI draft added to store products as DRAFT.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not create the AI draft.");
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -488,6 +532,9 @@ const TrendIntelligence = () => {
                             </td>
                             <td className="px-4 py-4">
                               <div className="flex justify-end gap-1">
+                                <Button variant="outline" size="sm" onClick={() => void enrichAndPublish(opportunity)}>
+                                  AI draft
+                                </Button>
                                 <Button variant="ghost" size="icon" aria-label={`Edit ${opportunity.product.name}`} title="Edit product" onClick={() => startEditing(opportunity.product)}>
                                   <Pencil aria-hidden="true" />
                                 </Button>
@@ -515,6 +562,7 @@ const TrendIntelligence = () => {
                           </div>
                         </div>
                         <div className="flex shrink-0 gap-1">
+                          <Button variant="outline" size="sm" onClick={() => void enrichAndPublish(opportunity)}>AI draft</Button>
                           <Button variant="ghost" size="icon" aria-label={`Edit ${opportunity.product.name}`} onClick={() => startEditing(opportunity.product)}><Pencil aria-hidden="true" /></Button>
                           <Button variant="ghost" size="icon" aria-label={`Remove ${opportunity.product.name}`} onClick={() => removeProduct(opportunity.product.id)}><Trash2 aria-hidden="true" /></Button>
                         </div>

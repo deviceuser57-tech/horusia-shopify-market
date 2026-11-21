@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import { supabase } from "@/integrations/supabase/client";
+import { ProductComparisonModal, CompareItem } from "@/components/ProductComparisonModal";
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +26,27 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState<string>("featured");
   const [filterAvailability, setFilterAvailability] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+  const [compareItems, setCompareItems] = useState<CompareItem[]>([]);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [localProducts, setLocalProducts] = useState<Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    category: string | null;
+    image_url: string | null;
+    price: number | null;
+    currency: string;
+    affiliate_url: string | null;
+    business_model: string;
+  }>>([]);
+
+  useEffect(() => {
+    supabase
+      .from("store_products")
+      .select("id,title,description,category,image_url,price,currency,affiliate_url,business_model")
+      .eq("status", "ACTIVE")
+      .then(({ data }) => setLocalProducts(data ?? []));
+  }, []);
   
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['all-products'],
@@ -221,10 +244,78 @@ const Shop = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.node.id} product={product} />
+              <ProductCard
+                key={product.node.id}
+                product={product}
+                onCompare={(item) => {
+                  if (compareItems.length >= 4) return;
+                  setCompareItems((current) => current.some((entry) => entry.id === item.id) ? current : [...current, item]);
+                  setComparisonOpen(true);
+                }}
+              />
             ))}
           </div>
         )}
+
+        {localProducts.length > 0 && (
+          <section className="mt-12">
+            <h2 className="mb-6 text-2xl font-bold">Connected store products</h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {localProducts.map((product) => {
+                const item: CompareItem = {
+                  id: product.id,
+                  title: product.title,
+                  price: Number(product.price ?? 0),
+                  image: product.image_url ?? "/placeholder.svg",
+                  category: product.category ?? "General",
+                  affiliateUrl: product.business_model === "AFFILIATE" ? product.affiliate_url ?? undefined : undefined,
+                };
+                return (
+                  <article key={product.id} className="space-y-3 rounded-xl border p-4">
+                    <img src={item.image} alt={item.title} className="aspect-square w-full rounded-lg object-cover" />
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs rounded-full bg-secondary px-2 py-1">{product.business_model}</span>
+                      <span className="text-xs text-muted-foreground">{product.currency}</span>
+                    </div>
+                    <h3 className="font-semibold">{item.title}</h3>
+                    {product.description && <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>}
+                    <p className="font-bold text-primary">{item.price.toFixed(2)}</p>
+                    <div className="flex gap-2">
+                      {item.affiliateUrl ? (
+                        <Button size="sm" className="flex-1" asChild><a href={item.affiliateUrl} target="_blank" rel="noopener noreferrer">Visit merchant</a></Button>
+                      ) : (
+                        <Button size="sm" className="flex-1" disabled>External supplier checkout</Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (compareItems.length >= 4) return;
+                          setCompareItems((current) => current.some((entry) => entry.id === item.id) ? current : [...current, item]);
+                          setComparisonOpen(true);
+                        }}
+                      >
+                        Compare
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {compareItems.length > 0 && (
+          <Button className="fixed bottom-6 right-6 z-50" onClick={() => setComparisonOpen(true)}>
+            Compare ({compareItems.length})
+          </Button>
+        )}
+        <ProductComparisonModal
+          items={compareItems}
+          isOpen={comparisonOpen}
+          onClose={() => setComparisonOpen(false)}
+          onRemove={(id) => setCompareItems((current) => current.filter((item) => item.id !== id))}
+        />
       </main>
 
       <Footer />

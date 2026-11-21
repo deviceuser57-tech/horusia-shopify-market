@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_action_proposals: {
+        Row: { action_type: string; agent_name: string; approval_id: string | null; confidence: string | null; created_at: string; decided_at: string | null; evidence: Json; id: string; proposed_value: Json; rejection_reason: string | null; reviewed_by: string | null; status: string; target_id: string | null; target_type: string | null }
+        Insert: { action_type: string; agent_name: string; approval_id?: string | null; confidence?: string | null; created_at?: string; decided_at?: string | null; evidence?: Json; id?: string; proposed_value: Json; rejection_reason?: string | null; reviewed_by?: string | null; status?: string; target_id?: string | null; target_type?: string | null }
+        Update: { action_type?: string; agent_name?: string; approval_id?: string | null; confidence?: string | null; created_at?: string; decided_at?: string | null; evidence?: Json; id?: string; proposed_value?: Json; rejection_reason?: string | null; reviewed_by?: string | null; status?: string; target_id?: string | null; target_type?: string | null }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: { action: string; actor_id: string | null; correlation_id: string | null; created_at: string; id: string; new_value: Json | null; previous_value: Json | null; reason: string | null; target_id: string | null; target_type: string | null }
+        Insert: { action: string; actor_id?: string | null; correlation_id?: string | null; created_at?: string; id?: string; new_value?: Json | null; previous_value?: Json | null; reason?: string | null; target_id?: string | null; target_type?: string | null }
+        Update: { action?: string; actor_id?: string | null; correlation_id?: string | null; created_at?: string; id?: string; new_value?: Json | null; previous_value?: Json | null; reason?: string | null; target_id?: string | null; target_type?: string | null }
+        Relationships: []
+      }
+      hero_banner_configs: {
+        Row: { badge_text: string | null; created_at: string; cta_link: string; cta_text_ar: string; cta_text_en: string | null; headline_ar: string; headline_en: string | null; id: string; image_url: string; is_active: boolean; overlay_opacity: number; subheadline_ar: string | null; subheadline_en: string | null; updated_at: string }
+        Insert: { badge_text?: string | null; created_at?: string; cta_link: string; cta_text_ar: string; cta_text_en?: string | null; headline_ar: string; headline_en?: string | null; id?: string; image_url: string; is_active?: boolean; overlay_opacity: number; subheadline_ar?: string | null; subheadline_en?: string | null; updated_at?: string }
+        Update: { badge_text?: string | null; created_at?: string; cta_link?: string; cta_text_ar?: string; cta_text_en?: string | null; headline_ar?: string; headline_en?: string | null; id?: string; image_url?: string; is_active?: boolean; overlay_opacity?: number; subheadline_ar?: string | null; subheadline_en?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      store_products: {
+        Row: { ad_copy: Json; affiliate_url: string | null; business_model: string; category: string | null; created_at: string; currency: string; description: string | null; id: string; image_url: string | null; metadata: Json; price: number | null; status: string; supplier_cost: number | null; supplier_sku: string | null; tags: Json; title: string; title_ar: string | null; title_en: string | null; updated_at: string }
+        Insert: { ad_copy?: Json; affiliate_url?: string | null; business_model: string; category?: string | null; created_at?: string; currency?: string; description?: string | null; id?: string; image_url?: string | null; metadata?: Json; price?: number | null; status?: string; supplier_cost?: number | null; supplier_sku?: string | null; tags?: Json; title: string; title_ar?: string | null; title_en?: string | null; updated_at?: string }
+        Update: { ad_copy?: Json; affiliate_url?: string | null; business_model?: string; category?: string | null; created_at?: string; currency?: string; description?: string | null; id?: string; image_url?: string | null; metadata?: Json; price?: number | null; status?: string; supplier_cost?: number | null; supplier_sku?: string | null; tags?: Json; title?: string; title_ar?: string | null; title_en?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      roles: {
+        Row: { created_at: string; description: string | null; id: string; name: string }
+        Insert: { created_at?: string; description?: string | null; id?: string; name: string }
+        Update: { created_at?: string; description?: string | null; id?: string; name?: string }
+        Relationships: []
+      }
+      user_roles: {
+        Row: { granted_at: string; granted_by: string | null; role_id: string; user_id: string }
+        Insert: { granted_at?: string; granted_by?: string | null; role_id: string; user_id: string }
+        Update: { granted_at?: string; granted_by?: string | null; role_id?: string; user_id?: string }
+        Relationships: [{ foreignKeyName: "user_roles_role_id_fkey"; columns: ["role_id"]; isOneToOne: false; referencedRelation: "roles"; referencedColumns: ["id"] }]
+      }
       affiliate_commissions: {
         Row: { amount: number | null; conversion_id: string | null; currency: string | null; id: string; recorded_at: string; source: string; status: string }
         Insert: { amount?: number | null; conversion_id?: string | null; currency?: string | null; id?: string; recorded_at?: string; source: string; status: string }
