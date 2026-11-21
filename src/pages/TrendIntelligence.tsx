@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner";
 import { enrichProductWithAI } from "@/lib/ai-gateway";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 const STORAGE_KEY = "tvs-trend-intelligence-v1";
 
@@ -203,7 +204,11 @@ const TrendIntelligence = () => {
       const ai = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
       const businessModel = opportunity.recommendedChannel.includes("Affiliate") ? "AFFILIATE" : "DROPSHIPPING";
 
-      const insert: Record<string, unknown> = {
+      if (businessModel === "AFFILIATE") {
+        toast.error("Add a verified affiliate destination in Connector Manager before publishing.");
+        return;
+      }
+      const insert: Database["public"]["Tables"]["store_products"]["Insert"] = {
         business_model: businessModel,
         title: ai.titleEn || opportunity.product.name,
         title_ar: ai.titleAr,
@@ -222,15 +227,6 @@ const TrendIntelligence = () => {
           evidenceStatus: ai.evidenceStatus,
         },
       };
-      if (businessModel === "AFFILIATE") {
-        const program = await supabase.from("affiliate_programs").select("id").limit(1).maybeSingle();
-        if (!program.data) {
-          toast.error("Create an affiliate program and destination link before publishing.");
-          return;
-        }
-        insert.affiliate_url = "";
-      }
-
       const { error } = await supabase.from("store_products").insert(insert);
       if (error) throw error;
       toast.success("AI draft added to store products as DRAFT.");

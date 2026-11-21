@@ -56,6 +56,24 @@ export type Database = {
         Update: { amount?: number | null; conversion_id?: string | null; currency?: string | null; id?: string; recorded_at?: string; source?: string; status?: string }
         Relationships: []
       }
+      affiliate_programs: {
+        Row: { created_at: string; id: string; name: string; network_name: string | null; status: string }
+        Insert: { created_at?: string; id?: string; name: string; network_name?: string | null; status?: string }
+        Update: { created_at?: string; id?: string; name?: string; network_name?: string | null; status?: string }
+        Relationships: []
+      }
+      affiliate_merchants: {
+        Row: { created_at: string; id: string; name: string; program_id: string | null; website_url: string | null }
+        Insert: { created_at?: string; id?: string; name: string; program_id?: string | null; website_url?: string | null }
+        Update: { created_at?: string; id?: string; name?: string; program_id?: string | null; website_url?: string | null }
+        Relationships: []
+      }
+      affiliate_products: {
+        Row: { affiliate_url: string; created_at: string; external_offer_id: string | null; id: string; internal_product_id: string | null; last_synced_at: string | null; merchant_id: string }
+        Insert: { affiliate_url: string; created_at?: string; external_offer_id?: string | null; id?: string; internal_product_id?: string | null; last_synced_at?: string | null; merchant_id: string }
+        Update: { affiliate_url?: string; created_at?: string; external_offer_id?: string | null; id?: string; internal_product_id?: string | null; last_synced_at?: string | null; merchant_id?: string }
+        Relationships: []
+      }
       affiliate_click_events: {
         Row: {
           affiliate_link_id: string | null
@@ -105,6 +123,12 @@ export type Database = {
         Row: { completed_at: string | null; correlation_id: string; created_at: string; error_details: string | null; id: string; job_type: string; started_at: string | null; status: string }
         Insert: { completed_at?: string | null; correlation_id?: string; created_at?: string; error_details?: string | null; id?: string; job_type: string; started_at?: string | null; status?: string }
         Update: { completed_at?: string | null; correlation_id?: string; created_at?: string; error_details?: string | null; id?: string; job_type?: string; started_at?: string | null; status?: string }
+        Relationships: []
+      }
+      suppliers: {
+        Row: { connector_type: string; created_at: string; id: string; name: string; status: string }
+        Insert: { connector_type: string; created_at?: string; id?: string; name: string; status?: string }
+        Update: { connector_type?: string; created_at?: string; id?: string; name?: string; status?: string }
         Relationships: []
       }
       contact_messages: {
