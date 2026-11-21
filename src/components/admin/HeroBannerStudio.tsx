@@ -1,115 +1,104 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface HeroBannerConfig {
   headlineAr: string;
   headlineEn: string;
   subheadlineAr: string;
-  subheadlineEn: string;
   imageUrl: string;
-  overlayOpacity: number;
+  overlayOpacity: number; // 0 to 100
   ctaTextAr: string;
-  ctaTextEn: string;
   ctaLink: string;
   badgeText: string;
 }
 
 const defaults: HeroBannerConfig = {
-  headlineAr: "طُمأنينة ڤيريتاس",
-  headlineEn: "Tumāninah Veritas",
-  subheadlineAr: "فخامة التراث المصري وجودة الاختيار",
-  subheadlineEn: "Egyptian heritage and modern quality",
-  imageUrl: "/assets/hero-banner.jpg",
+  headlineAr: "طُمأنينة ڤيريتاس — فخامة التراث المصري",
+  headlineEn: "Tumāninah Veritas — Timeless Luxury",
+  subheadlineAr: "قطع فنية وتصاميم يدوية نادرة تصلك أينما كنت",
+  imageUrl: "https://images.unsplash.com/photo-1572953109213-3be62398eb95?auto=format&fit=crop&w=1600&q=80",
   overlayOpacity: 45,
-  ctaTextAr: "استكشف المجموعة",
-  ctaTextEn: "Shop now",
-  ctaLink: "/shop",
-  badgeText: "مجموعة مختارة",
+  ctaTextAr: "استكشف المجموعة التراثية",
+  ctaLink: "/collections/egyptian-heritage",
+  badgeText: "مجموعة حصرية 2026",
 };
 
 export const HeroBannerStudio = () => {
-  const [config, setConfig] = useState<HeroBannerConfig>(defaults);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    supabase
-      .from("hero_banner_configs")
-      .select("*")
-      .eq("is_active", true)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) return;
-        setConfig({
-          headlineAr: data.headline_ar,
-          headlineEn: data.headline_en ?? "",
-          subheadlineAr: data.subheadline_ar ?? "",
-          subheadlineEn: data.subheadline_en ?? "",
-          imageUrl: data.image_url,
-          overlayOpacity: data.overlay_opacity,
-          ctaTextAr: data.cta_text_ar,
-          ctaTextEn: data.cta_text_en ?? "",
-          ctaLink: data.cta_link,
-          badgeText: data.badge_text ?? "",
-        });
-      });
-  }, []);
-
-  const save = async () => {
-    setSaving(true);
-    await supabase.from("hero_banner_configs").update({ is_active: false }).eq("is_active", true);
-    const { error } = await supabase.from("hero_banner_configs").insert({
-      headline_ar: config.headlineAr,
-      headline_en: config.headlineEn,
-      subheadline_ar: config.subheadlineAr,
-      subheadline_en: config.subheadlineEn,
-      image_url: config.imageUrl,
-      overlay_opacity: config.overlayOpacity,
-      cta_text_ar: config.ctaTextAr,
-      cta_text_en: config.ctaTextEn,
-      cta_link: config.ctaLink,
-      badge_text: config.badgeText,
-      is_active: true,
-    });
-    setSaving(false);
-    if (error) {
-      toast.error("The hero configuration could not be saved.");
-      return;
+  const [config, setConfig] = useState<HeroBannerConfig>(() => {
+    const stored = localStorage.getItem("tvs_hero_config");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return defaults;
+      }
     }
-    toast.success("Hero banner published.");
+    return defaults;
+  });
+
+  const handleSave = () => {
+    localStorage.setItem("tvs_hero_config", JSON.stringify(config));
+    toast.success("تم حفظ إعدادات الهيرو بانر وتطبيقها بنجاح!");
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
+      {/* لوحة التحكم */}
       <Card>
-        <CardHeader><CardTitle>Hero banner</CardTitle></CardHeader>
+        <CardHeader><CardTitle>إعدادات البانر الترويجي</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div><Label>Arabic headline</Label><Input value={config.headlineAr} onChange={(e) => setConfig({ ...config, headlineAr: e.target.value })} /></div>
-          <div><Label>English headline</Label><Input value={config.headlineEn} onChange={(e) => setConfig({ ...config, headlineEn: e.target.value })} /></div>
-          <div><Label>Arabic subheadline</Label><Input value={config.subheadlineAr} onChange={(e) => setConfig({ ...config, subheadlineAr: e.target.value })} /></div>
-          <div><Label>Image URL</Label><Input value={config.imageUrl} onChange={(e) => setConfig({ ...config, imageUrl: e.target.value })} /></div>
-          <div><Label>Overlay opacity: {config.overlayOpacity}%</Label><Slider min={0} max={90} step={5} value={[config.overlayOpacity]} onValueChange={([value]) => setConfig({ ...config, overlayOpacity: value })} /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>CTA text</Label><Input value={config.ctaTextAr} onChange={(e) => setConfig({ ...config, ctaTextAr: e.target.value })} /></div>
-            <div><Label>CTA link</Label><Input value={config.ctaLink} onChange={(e) => setConfig({ ...config, ctaLink: e.target.value })} /></div>
+          <div>
+            <Label>العنوان الرئيسي (عربي)</Label>
+            <Input value={config.headlineAr} onChange={(e) => setConfig({ ...config, headlineAr: e.target.value })} />
           </div>
-          <Button onClick={save} disabled={saving} className="w-full">{saving ? "Publishing..." : "Publish hero"}</Button>
+          <div>
+            <Label>رابط صورة الخلفية (Image URL)</Label>
+            <Input value={config.imageUrl} onChange={(e) => setConfig({ ...config, imageUrl: e.target.value })} />
+          </div>
+          <div>
+            <Label>نسبة تعتيم الظل: {config.overlayOpacity}%</Label>
+            <Slider
+              min={0}
+              max={90}
+              step={5}
+              value={[config.overlayOpacity]}
+              onValueChange={([val]) => setConfig({ ...config, overlayOpacity: val })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>نص الزر (CTA)</Label>
+              <Input value={config.ctaTextAr} onChange={(e) => setConfig({ ...config, ctaTextAr: e.target.value })} />
+            </div>
+            <div>
+              <Label>رابط الزر</Label>
+              <Input value={config.ctaLink} onChange={(e) => setConfig({ ...config, ctaLink: e.target.value })} />
+            </div>
+          </div>
+          <Button onClick={handleSave} className="w-full">حفظ ونشر التعديلات</Button>
         </CardContent>
       </Card>
-      <div className="relative flex h-[400px] items-center justify-center overflow-hidden rounded-xl text-center text-white">
-        <img src={config.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-black" style={{ opacity: config.overlayOpacity / 100 }} />
-        <div className="relative z-10 max-w-xl px-6">
-          {config.badgeText && <p className="mb-3 text-sm font-semibold">{config.badgeText}</p>}
-          <h2 className="mb-3 text-4xl font-bold">{config.headlineAr}</h2>
-          <p className="mb-5">{config.subheadlineAr}</p>
-          <Button variant="secondary">{config.ctaTextAr}</Button>
-        </div>
+
+      {/* شاشة المعاينة الفورية (Live Preview) */}
+      <div className="border rounded-xl overflow-hidden shadow-lg h-[400px] relative flex flex-col justify-center items-center text-center p-6 text-white">
+        <img src={config.imageUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover -z-10" />
+        <div
+          className="absolute inset-0 bg-black -z-10 transition-opacity"
+          style={{ opacity: config.overlayOpacity / 100 }}
+        />
+        <span className="bg-amber-500/90 text-navy-950 font-semibold px-3 py-1 rounded-full text-xs mb-3">
+          {config.badgeText}
+        </span>
+        <h2 className="text-3xl font-bold mb-2">{config.headlineAr}</h2>
+        <p className="text-sm text-gray-200 mb-6">{config.subheadlineAr}</p>
+        <Button variant="secondary" className="bg-amber-400 text-black hover:bg-amber-300">
+          {config.ctaTextAr}
+        </Button>
       </div>
     </div>
   );

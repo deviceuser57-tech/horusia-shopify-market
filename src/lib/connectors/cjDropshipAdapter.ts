@@ -16,19 +16,20 @@ export class CJDropshipAdapter implements UnifiedStoreConnector {
     externalPrice?: number;
     currency?: string;
   }> {
-    if (!supplierSku.trim()) return { status: "UNKNOWN" };
-    const endpoint = import.meta.env.VITE_CJ_AVAILABILITY_ENDPOINT;
-    if (!endpoint) return { status: "UNKNOWN" };
     try {
-      const response = await fetch(`${endpoint}?sku=${encodeURIComponent(supplierSku)}`);
-      if (!response.ok) return { status: "UNKNOWN" };
+      const response = await fetch(`https://developers.cjdropshipping.com/api2.0/v1/product/stock?sku=${supplierSku}`, {
+        headers: { "CJ-Access-Token": import.meta.env.VITE_CJ_API_TOKEN || "" }
+      });
       const data = await response.json();
-      if (typeof data.available !== "boolean") return { status: "UNKNOWN" };
-      return {
-        status: data.available ? "AVAILABLE" : "OUT_OF_STOCK",
-        externalPrice: typeof data.price === "number" ? data.price : undefined,
-        currency: typeof data.currency === "string" ? data.currency : "USD",
-      };
+      
+      if (data.code === 200 && data.data?.inventory > 0) {
+        return {
+          status: "AVAILABLE",
+          externalPrice: Number(data.data.costPrice),
+          currency: "USD"
+        };
+      }
+      return { status: "OUT_OF_STOCK" };
     } catch {
       return { status: "UNKNOWN" };
     }

@@ -198,40 +198,34 @@ const TrendIntelligence = () => {
     setEditingId(null);
   };
 
-  const enrichAndPublish = async (opportunity: RankedOpportunity) => {
+const enrichAndPublish = async (opportunity: RankedOpportunity) => {
     try {
-      toast.info("Generating a bilingual AI draft...");
-      const ai = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
-      const businessModel = opportunity.recommendedChannel.includes("Affiliate") ? "AFFILIATE" : "DROPSHIPPING";
+      toast.info("جاري تحليل المنتج وتوليد المحتوى الإعلاني عبر AI Gateway...");
+      
+      // 1. توليد وصف عربي/إنجليزي وهوية تسويقية عبر الوظيفة السحابية
+      const aiData = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
 
-      if (businessModel === "AFFILIATE") {
-        toast.error("Add a verified affiliate destination in Connector Manager before publishing.");
-        return;
-      }
-      const insert: Database["public"]["Tables"]["store_products"]["Insert"] = {
-        business_model: businessModel,
-        title: ai.titleEn || opportunity.product.name,
-        title_ar: ai.titleAr,
-        title_en: ai.titleEn,
-        description: ai.descriptionAr,
+      // 2. إدراج المنتج كمنتج أفلييت/دروب شيبنج في قاعدة البيانات
+      const { error } = await supabase.from("affiliate_products").insert({
+        title: aiData.titleAr || opportunity.product.name,
+        description: aiData.descriptionAr,
         category: opportunity.product.category,
         price: opportunity.product.sellingPrice,
-        supplier_cost: opportunity.product.unitCost,
-        currency: "USD",
-        status: "DRAFT",
-        tags: ai.suggestedTags,
-        ad_copy: ai.adCopy,
+        supplier_price: opportunity.product.unitCost,
+        status: "ACTIVE",
+        tags: aiData.suggestedTags,
+        ad_copy_hook: aiData.adCopy?.hook,
         metadata: {
-          opportunityScore: opportunity.score,
-          recommendedChannel: opportunity.recommendedChannel,
-          evidenceStatus: ai.evidenceStatus,
-        },
-      };
-      const { error } = await supabase.from("store_products").insert(insert);
+          score: opportunity.score,
+          channel: opportunity.recommendedChannel,
+          english_title: aiData.titleEn
+        }
+      });
+
       if (error) throw error;
-      toast.success("AI draft added to store products as DRAFT.");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not create the AI draft.");
+      toast.success(`تم إثراء ونشر "${opportunity.product.name}" بنجاح إلى المعرض!`);
+    } catch (err: any) {
+      toast.error(err.message || "حدث خطأ أثناء النشر");
     }
   };
 
