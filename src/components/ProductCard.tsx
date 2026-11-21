@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { ExternalLink } from "lucide-react";
+import { classifyShopifyProduct, recordAffiliateClick } from "@/lib/productClassification";
 
 interface ProductCardProps {
   product: ShopifyProduct;
@@ -15,6 +17,21 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const price = node.priceRange.minVariantPrice;
   const image = node.images.edges[0]?.node;
   const firstVariant = node.variants.edges[0]?.node;
+  const classification = classifyShopifyProduct(product);
+
+  const handleAffiliateClick = async () => {
+    if (!classification.affiliateUrl) {
+      toast.error("External product link is unavailable.");
+      return;
+    }
+
+    try {
+      const destination = await recordAffiliateClick(node.id, classification.affiliateUrl);
+      window.open(destination, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error("We could not start external tracking. Please try again.");
+    }
+  };
 
   const handleAddToCart = () => {
     if (!firstVariant) return;
@@ -55,6 +72,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </Link>
       
       <div className="p-5 space-y-3">
+        <span className="inline-flex rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+          {classification.sourceLabel}
+        </span>
         <Link to={`/product/${node.handle}`}>
           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
             {node.title}
@@ -71,14 +91,26 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <span className="text-xl font-bold text-primary">
             {price.currencyCode} {parseFloat(price.amount).toFixed(2)}
           </span>
-          <Button
-            size="sm"
-            className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-primary-foreground shadow-[var(--shadow-blue)] hover:shadow-[var(--shadow-medium)] transition-all duration-300"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="h-4 w-4 mr-1.5" />
-            Add
-          </Button>
+          {classification.businessModel === "AFFILIATE" ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleAffiliateClick}
+              disabled={!classification.affiliateUrl}
+            >
+              <ExternalLink className="h-4 w-4 mr-1.5" />
+              Visit merchant
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-primary-foreground shadow-[var(--shadow-blue)] hover:shadow-[var(--shadow-medium)] transition-all duration-300"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="h-4 w-4 mr-1.5" />
+              Add
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const serviceRequestSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -31,8 +32,19 @@ const Services = () => {
     },
   });
 
-  const onSubmit = (data: ServiceRequestFormData) => {
-    // Form submission would be implemented here with backend integration
+  const onSubmit = async (data: ServiceRequestFormData) => {
+    const { error } = await supabase.from("service_requests").insert({
+      name: data.name,
+      email: data.email,
+      service_type: data.serviceType,
+      message: data.message,
+    });
+
+    if (error) {
+      toast.error("We could not submit your request. Please try again.");
+      return;
+    }
+
     toast.success("Service request submitted successfully! We'll contact you soon.");
     form.reset();
   };

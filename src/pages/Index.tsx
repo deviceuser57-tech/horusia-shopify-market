@@ -11,8 +11,37 @@ import { fetchProducts, fetchLatestProducts } from "@/lib/shopify";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import heroBanner from "@/assets/hero-banner.jpg";
 import { Helmet } from "react-helmet";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const Index = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleNewsletterSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubscribing(true);
+
+    const email = newsletterEmail.trim().toLowerCase();
+    const { error } = await supabase
+      .from("newsletter_subscriptions")
+      .insert({ email, source: "homepage" });
+
+    if (error) {
+      if (error.code === "23505") {
+        toast.info("This email is already subscribed.");
+      } else {
+        toast.error("We could not complete your subscription. Please try again.");
+      }
+    } else {
+      toast.success("Subscription confirmed.");
+      setNewsletterEmail("");
+    }
+
+    setIsSubscribing(false);
+  };
+
   const { data: featuredProducts, isLoading: loadingFeatured } = useQuery({
     queryKey: ['featured-products'],
     queryFn: () => fetchProducts(8),
@@ -172,15 +201,21 @@ const Index = () => {
             <p className="text-muted-foreground mb-6">
               Subscribe to our newsletter for exclusive offers and updates
             </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <form
+              className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+              onSubmit={handleNewsletterSubmit}
+            >
               <Input
                 type="email"
                 placeholder="Enter your email"
                 className="flex-1 bg-background"
                 required
+                value={newsletterEmail}
+                onChange={(event) => setNewsletterEmail(event.target.value)}
               />
-              <Button type="submit" size="lg">
-                Subscribe <Sparkles className="ml-2 h-4 w-4" />
+              <Button type="submit" size="lg" disabled={isSubscribing}>
+                {isSubscribing ? "Subscribing..." : "Subscribe"}
+                {!isSubscribing && <Sparkles className="ml-2 h-4 w-4" />}
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-4">

@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_click_events: {
+        Row: {
+          affiliate_link_id: string | null
+          campaign: string | null
+          click_identifier: string
+          id: string
+          internal_product_id: string | null
+          redirected_at: string
+          source: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          affiliate_link_id?: string | null
+          campaign?: string | null
+          click_identifier: string
+          id?: string
+          internal_product_id?: string | null
+          redirected_at?: string
+          source?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          affiliate_link_id?: string | null
+          campaign?: string | null
+          click_identifier?: string
+          id?: string
+          internal_product_id?: string | null
+          redirected_at?: string
+          source?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscriptions: {
+        Row: {
+          consented_at: string
+          created_at: string
+          email: string
+          id: string
+          source: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          consented_at?: string
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          consented_at?: string
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,6 +128,36 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          service_type: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          service_type: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          service_type?: string
+          status?: string
         }
         Relationships: []
       }

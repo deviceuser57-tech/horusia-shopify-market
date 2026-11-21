@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "@/lib/shopify";
-import { ShoppingCart, ArrowLeft, Gift } from "lucide-react";
+import { ShoppingCart, ArrowLeft, ExternalLink } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ProductSchema, BreadcrumbSchema } from "@/components/StructuredData";
 import { Helmet } from "react-helmet";
+import { classifyShopifyProduct, recordAffiliateClick } from "@/lib/productClassification";
 
 const ProductDetail = () => {
   const { handle } = useParams();
@@ -55,6 +56,21 @@ const ProductDetail = () => {
   const { node } = product;
   const image = node.images.edges[0]?.node;
   const firstVariant = node.variants.edges[0]?.node;
+  const classification = classifyShopifyProduct(product);
+
+  const handleAffiliateClick = async () => {
+    if (!classification.affiliateUrl) {
+      toast.error("External product link is unavailable.");
+      return;
+    }
+
+    try {
+      const destination = await recordAffiliateClick(node.id, classification.affiliateUrl);
+      window.open(destination, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error("We could not start external tracking. Please try again.");
+    }
+  };
 
   const handleAddToCart = () => {
     if (!firstVariant) return;
@@ -93,7 +109,11 @@ const ProductDetail = () => {
             image={image?.url || ''}
             price={firstVariant.price.amount}
             currency={firstVariant.price.currencyCode}
-            availability={firstVariant.availableForSale}
+            availability={
+              classification.businessModel === "AFFILIATE"
+                ? "UNKNOWN"
+                : firstVariant.availableForSale
+            }
             url={`https://eagles-veritas-shop.lovable.app/product/${handle}`}
           />
           <BreadcrumbSchema
@@ -134,6 +154,9 @@ const ProductDetail = () => {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
+              <p className="mb-3 inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+                {classification.sourceLabel}
+              </p>
               <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">
                 {node.title}
               </h1>
@@ -144,59 +167,58 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Free Gifts Promotion Banner */}
-            <div className="product-free-gift-banner flex items-center gap-3 p-4 bg-gradient-to-r from-[#f8f6f0] to-[#fff9e6] border-l-4 border-[#d4af37] rounded-lg shadow-sm">
-              <Gift className="w-6 h-6 text-[#d4af37] flex-shrink-0" />
-              <p className="text-sm text-[#2c3e50]">
-                Orders <span className="font-semibold">$50+</span> receive a{' '}
-                <Link 
-                  to="/collections/free-gifts" 
-                  className="text-[#d4af37] font-semibold underline hover:text-[#c5a028] transition-colors"
-                >
-                  free Egyptian gift
-                </Link>
-              </p>
-            </div>
-
             <div className="border-t border-border pt-6">
               <p className="text-3xl font-bold text-primary">
                 {firstVariant?.price.currencyCode} {parseFloat(firstVariant?.price.amount || '0').toFixed(2)}
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <label className="text-sm font-medium text-foreground">Quantity:</label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  >
-                    -
-                  </Button>
-                  <span className="w-12 text-center">{quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setQuantity(quantity + 1)}
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-
+            {classification.businessModel === "AFFILIATE" ? (
               <Button
                 size="lg"
-                className="w-full bg-gold hover:bg-gold/90 text-gold-foreground"
-                onClick={handleAddToCart}
+                className="w-full"
+                variant="outline"
+                onClick={handleAffiliateClick}
+                disabled={!classification.affiliateUrl}
               >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
+                <ExternalLink className="mr-2 h-5 w-5" />
+                Visit external merchant
               </Button>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <label className="text-sm font-medium text-foreground">Quantity:</label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    >
+                      -
+                    </Button>
+                    <span className="w-12 text-center">{quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity(quantity + 1)}
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
 
-            {firstVariant && !firstVariant.availableForSale && (
+                <Button
+                  size="lg"
+                  className="w-full bg-gold hover:bg-gold/90 text-gold-foreground"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Add to Cart
+                </Button>
+              </div>
+            )}
+
+            {classification.businessModel === "DROPSHIPPING" && firstVariant && !firstVariant.availableForSale && (
               <p className="text-destructive">Currently out of stock</p>
             )}
           </div>

@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
 import { BreadcrumbSchema } from "@/components/StructuredData";
+import { supabase } from "@/integrations/supabase/client";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -33,8 +34,19 @@ const Contact = () => {
     },
   });
 
-  const onSubmit = (data: ContactFormData) => {
-    // Form submission would be implemented here with backend integration
+  const onSubmit = async (data: ContactFormData) => {
+    const { error } = await supabase.from("contact_messages").insert({
+      name: data.name,
+      email: data.email,
+      subject: data.subject,
+      message: data.message,
+    });
+
+    if (error) {
+      toast.error("We could not send your message. Please try again.");
+      return;
+    }
+
     toast.success("Message sent successfully! We'll get back to you soon.");
     form.reset();
   };

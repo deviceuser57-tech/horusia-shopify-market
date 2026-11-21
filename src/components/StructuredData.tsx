@@ -47,7 +47,7 @@ interface ProductSchemaProps {
   image: string;
   price: string;
   currency: string;
-  availability: boolean;
+  availability: boolean | "UNKNOWN";
   url: string;
   brand?: string;
 }
@@ -76,9 +76,13 @@ export const ProductSchema = ({
       "@type": "Offer",
       price,
       priceCurrency: currency,
-      availability: availability
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      ...(availability === "UNKNOWN"
+        ? {}
+        : {
+            availability: availability
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          }),
       url,
     },
   };
