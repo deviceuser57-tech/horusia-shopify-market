@@ -111,7 +111,7 @@ const Contact = () => {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">WhatsApp</h3>
                     <p className="text-muted-foreground text-sm">+20 111 9 111 9 26</p>
-                    <p className="text-muted-foreground text-sm">+20 100 484 7072</p>
+                    <p className="text-muted-foreground text-sm">+20 106 1172 109</p>
                     <div className="flex gap-2 mt-2">
                       <Button variant="outline" size="sm" asChild>
                         <a href="https://wa.me/201119111926" target="_blank" rel="noopener noreferrer">
