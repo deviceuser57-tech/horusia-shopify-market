@@ -1,19 +1,9 @@
-export function oauthReturnPath(value: unknown): string {
-  if (
-    typeof value !== "string" ||
-    !value.startsWith("/") ||
-    value.startsWith("//") ||
-    /[\\\u0000-\u001f\u007f]/.test(value)
-  ) {
-    return "/";
-  }
-
-  const origin = "https://app.invalid";
-  try {
-    const target = new URL(value, origin);
-    if (target.origin !== origin || target.pathname.startsWith("//")) return "/";
-    return target.pathname + target.search + target.hash;
-  } catch {
-    return "/";
-  }
+/**
+ * Sanitizes the OAuth `next` return path to prevent open redirects.
+ * Only same-origin absolute paths are allowed.
+ */
+export function oauthReturnPath(next: string | null, fallback = "/"): string {
+  if (!next) return fallback;
+  if (!next.startsWith("/") || next.startsWith("//")) return fallback;
+  return next;
 }

@@ -21,9 +21,11 @@ import { ProductComparisonModal, CompareItem } from "@/components/ProductCompari
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 const Shop = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   
   const [sortBy, setSortBy] = useState<string>("featured");
@@ -120,6 +122,44 @@ const Shop = () => {
     setFilterAvailability("all");
     setFilterType("all");
   };
+
+  useWebMCP({
+    name: "search_store_products",
+    description: "Search products on the shop page by title or description keyword.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search term to filter product titles and descriptions" },
+      },
+      required: ["query"],
+      additionalProperties: false,
+    },
+    execute: ({ query }: { query: string }) =>
+      runWebMCPTool("search_store_products", () => {
+        setSearchParams(query ? { search: query } : {}, { replace: true });
+        return `Search filter applied: "${query}".`;
+      }),
+  });
+
+  useWebMCP({
+    name: "list_visible_products",
+    description: "Get a summary of products currently displayed on the shop page.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    execute: () =>
+      runWebMCPTool("list_visible_products", () => {
+        const shopifyLines = filteredProducts.slice(0, 15).map((p) => {
+          const price = p.node.priceRange?.minVariantPrice;
+          return `• [Shopify] ${p.node.title} - ${price?.currencyCode ?? ""} ${price?.amount ?? ""}`;
+        });
+        const localLines = localProducts.slice(0, 15).map(
+          (p) => `• [${p.business_model}] ${p.title} - ${p.currency ?? "USD"} ${Number(p.price ?? 0).toFixed(2)}`,
+        );
+        const lines = [...shopifyLines, ...localLines];
+        if (lines.length === 0) return "No products found matching active filters.";
+        return `Showing ${lines.length} product(s):\n${lines.join("\n")}`;
+      }),
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
