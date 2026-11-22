@@ -9,47 +9,36 @@
 
 @layer base {
   :root {
-    /* Light Theme - Minimalist Luxury */
+    /* Light Theme - HP Parts Style */
     --background: 0 0% 100%;
-    --foreground: 210 10% 15%;
+    --foreground: 220 15% 15%;
 
-    --card: 0 0% 98%;
-    --card-foreground: 210 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
 
-    --popover: 0 0% 98%;
-    --popover-foreground: 210 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
 
-    /* Primary - Sophisticated Matte Charcoal */
-    --primary: 210 10% 15%;
+    /* HP Blue inspired */
+    --primary: 215 90% 25%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 210 10% 25%;
+    --primary-hover: 215 90% 20%;
 
-    /* Secondary - Soft Neutral Gray */
-    --secondary: 210 10% 92%;
-    --secondary-foreground: 210 10% 20%;
+    --secondary: 220 15% 96%;
+    --secondary-foreground: 220 15% 15%;
 
-    /* Muted tones */
-    --muted: 210 10% 94%;
-    --muted-foreground: 210 10% 45%;
+    --muted: 220 10% 90%;
+    --muted-foreground: 220 15% 40%;
 
-    /* Accent - Muted Sage (Modern Luxury Accent) */
-    --accent: 150 15% 90%;
-    --accent-foreground: 210 10% 15%;
-    --accent-hover: 150 15% 80%;
+    --accent: 220 15% 90%;
+    --accent-foreground: 220 15% 15%;
+    --accent-hover: 220 15% 85%;
 
-    /* Gold/Highlight - Neutral Gold/Bronze */
-    --gold: 35 25% 75%;
-    --gold-foreground: 0 0% 100%;
-    --gold-hover: 35 25% 65%;
+    --border: 220 15% 85%;
+    --input: 220 15% 85%;
+    --ring: 215 90% 25%;
 
-    --destructive: 0 60% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 210 10% 85%;
-    --input: 210 10% 90%;
-    --ring: 210 10% 15%;
-
-    --radius: 0.5rem;
+    --radius: 0px;
 
     /* Professional subtle shadows */
     --shadow-soft: 0 2px 15px -5px rgba(0,0,0,0.05);

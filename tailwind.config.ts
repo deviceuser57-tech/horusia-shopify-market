@@ -70,9 +70,10 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        none: "0px",
+        sm: "0px",
+        md: "0px",
+        lg: "0px",
       },
       boxShadow: {
         'soft': '0 2px 15px -5px rgba(0,0,0,0.05)',
