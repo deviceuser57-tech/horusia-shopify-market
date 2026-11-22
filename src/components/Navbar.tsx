@@ -20,7 +20,7 @@ import logo from "@/assets/logo.jpg";
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
   const location = useLocation();
 
