@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchProducts, fetchLatestProducts } from "@/lib/shopify";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import heroBanner from "@/assets/hero-banner.jpg";
+import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -18,35 +19,43 @@ import { toast } from "sonner";
 const Index = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
-  const [heroConfig, setHeroConfig] = useState({
-    headlineAr: "Tumāninah Veritas Store",
-    headlineEn: "Tumāninah Veritas Store",
-    subheadlineAr: "One Stop Store - Quality products, trusted service, modern lifestyle.",
-    subheadlineEn: "One Stop Store - Quality products, trusted service, modern lifestyle.",
-    imageUrl: heroBanner,
-    overlayOpacity: 45,
-    ctaTextAr: "Shop Now",
-    ctaLink: "/shop",
-  });
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([
+    {
+      headlineAr: "Tumāninah Veritas Store",
+      headlineEn: "Tumāninah Veritas Store",
+      subheadlineAr: "One Stop Store - Quality products, trusted service, modern lifestyle.",
+      subheadlineEn: "One Stop Store - Quality products, trusted service, modern lifestyle.",
+      imageUrl: heroBanner,
+      overlayOpacity: 45,
+      ctaTextAr: "Shop Now",
+      ctaTextEn: "Shop Now",
+      ctaLink: "/shop",
+      badgeText: "",
+    },
+  ]);
 
   useEffect(() => {
     supabase
       .from("hero_banner_configs")
-      .select("headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,overlay_opacity,cta_text_ar,cta_text_en,cta_link")
+      .select("headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,overlay_opacity,cta_text_ar,cta_text_en,cta_link,badge_text")
       .eq("is_active", true)
-      .maybeSingle()
+      .order("created_at", { ascending: true })
       .then(({ data }) => {
-        if (!data) return;
-        setHeroConfig({
-          headlineAr: data.headline_ar,
-          headlineEn: data.headline_en ?? data.headline_ar,
-          subheadlineAr: data.subheadline_ar ?? "",
-          subheadlineEn: data.subheadline_en ?? "",
-          imageUrl: data.image_url,
-          overlayOpacity: data.overlay_opacity,
-          ctaTextAr: data.cta_text_ar,
-          ctaLink: data.cta_link,
-        });
+        if (!data || data.length === 0) return;
+        setHeroSlides(
+          data.map((row) => ({
+            headlineAr: row.headline_ar,
+            headlineEn: row.headline_en ?? row.headline_ar,
+            subheadlineAr: row.subheadline_ar ?? "",
+            subheadlineEn: row.subheadline_en ?? "",
+            imageUrl: row.image_url,
+            overlayOpacity: row.overlay_opacity,
+            ctaTextAr: row.cta_text_ar,
+            ctaTextEn: row.cta_text_en ?? "",
+            ctaLink: row.cta_link,
+            badgeText: row.badge_text ?? "",
+          })),
+        );
       });
   }, []);
 
@@ -110,38 +119,8 @@ const Index = () => {
       />
       
       <div className="min-h-screen bg-background">
-        {/* Hero Section */}
-        <section className="relative h-[600px] flex items-center justify-center overflow-hidden group">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-105"
-            style={{ backgroundImage: `url(${heroConfig.imageUrl})` }}
-          />
-
-          {/* Gradient overlay - Light theme: dark shadow, Dark theme: light transparent */}
-          <div
-            className="absolute inset-0 bg-black/50 transition-opacity duration-500 group-hover:opacity-90"
-            style={{ opacity: heroConfig.overlayOpacity / 100 }}
-          />
-
-          <div className="relative z-10 container mx-auto px-4 text-center">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-foreground animate-fade-in drop-shadow-lg">
-              {heroConfig.headlineAr}
-            </h1>
-            <p className="text-xl md:text-2xl text-foreground mb-8 max-w-2xl mx-auto animate-fade-in">
-              {heroConfig.subheadlineAr}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
-              <Button size="lg" asChild variant="ghost">
-                <Link to={heroConfig.ctaLink}>
-                  {heroConfig.ctaTextAr} <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="ghost" asChild>
-                <Link to="/about">About Our Philosophy</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
+        {/* Hero Section - animated carousel of active banners */}
+        <HeroCarousel slides={heroSlides} />
 
         {/* Latest Arrivals */}
         <section className="py-20 bg-secondary/30">

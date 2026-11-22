@@ -117,15 +117,6 @@ export const HeroBannerStudio = () => {
         is_active: config.isActive,
       };
 
-      // Only one banner may be active (unique partial index).
-      if (config.isActive) {
-        await supabase
-          .from("hero_banner_configs")
-          .update({ is_active: false })
-          .eq("is_active", true)
-          .neq("id", rowId ?? "00000000-0000-0000-0000-000000000000");
-      }
-
       const { error } = rowId
         ? await supabase.from("hero_banner_configs").update(payload).eq("id", rowId)
         : await supabase.from("hero_banner_configs").insert(payload);
@@ -186,16 +177,45 @@ export const HeroBannerStudio = () => {
             </div>
           </div>
           <div className="flex items-center justify-between rounded-md border p-3">
-            <Label htmlFor="hero-active">نشر البانر على الصفحة الرئيسية</Label>
+            <Label htmlFor="hero-active">عرض في سلايدر الصفحة الرئيسية</Label>
             <Switch
               id="hero-active"
               checked={config.isActive}
               onCheckedChange={(checked) => setConfig({ ...config, isActive: checked })}
             />
           </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? "جاري الحفظ..." : "حفظ ونشر التعديلات"}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSave} disabled={saving} className="flex-1">
+              {saving ? "جاري الحفظ..." : rowId ? "حفظ الشريحة" : "إضافة شريحة"}
+            </Button>
+            {rowId && (
+              <Button
+                variant="outline"
+                disabled={saving}
+                onClick={async () => {
+                  setSaving(true);
+                  const { error } = await supabase.from("hero_banner_configs").insert({
+                    headline_ar: config.headlineAr,
+                    headline_en: config.headlineEn || null,
+                    subheadline_ar: config.subheadlineAr || null,
+                    subheadline_en: config.subheadlineEn || null,
+                    image_url: config.imageUrl,
+                    overlay_opacity: Math.min(Math.max(Math.round(config.overlayOpacity), 0), 90),
+                    cta_text_ar: config.ctaTextAr,
+                    cta_text_en: config.ctaTextEn || null,
+                    cta_link: config.ctaLink,
+                    badge_text: config.badgeText || null,
+                    is_active: config.isActive,
+                  });
+                  setSaving(false);
+                  if (error) toast.error(`Duplicate failed: ${error.message}`);
+                  else toast.success("New slide added to the carousel.");
+                }}
+              >
+                نسخ كشريحة جديدة
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
