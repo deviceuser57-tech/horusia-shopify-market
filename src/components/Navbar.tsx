@@ -69,6 +69,7 @@ export const Navbar = () => {
     { href: "/admin/bi", label: "BI & Risk" },
     { href: "/admin/approvals", label: "AI Approvals" },
     { href: "/admin/connectors", label: "Affiliate & Suppliers" },
+    { href: "/admin/products", label: "Products" },
   ];
 
   return (

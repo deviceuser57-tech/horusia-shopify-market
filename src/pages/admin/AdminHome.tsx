@@ -9,6 +9,7 @@ const links = [
   { title: "Trend Intelligence", description: "Product opportunities and test channels", to: "/admin/trends" },
   { title: "AI Approvals", description: "Review and approve agent proposals", to: "/admin/approvals" },
   { title: "Affiliate & Suppliers", description: "Manage external links and supplier records", to: "/admin/connectors" },
+  { title: "Products", description: "Add, edit and publish store products", to: "/admin/products" },
   { title: "BI & Risk", description: "Operations, commissions and sync health", to: "/admin/bi" },
 ];
 
@@ -24,7 +25,7 @@ export default function AdminHome() {
           </div>
           <AiImageStudioModal />
         </div>
-        <div className="mb-10 grid gap-4 md:grid-cols-4">
+        <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {links.map((link) => (
             <Link key={link.to} to={link.to}>
               <Card className="h-full transition-colors hover:border-primary"><CardHeader><CardTitle>{link.title}</CardTitle></CardHeader><CardContent className="text-sm text-muted-foreground">{link.description}</CardContent></Card>
