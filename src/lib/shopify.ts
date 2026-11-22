@@ -1,6 +1,9 @@
-import { toast } from "sonner";
-
 // Shopify API Configuration
+// Shopify integration is opt-in: set VITE_SHOPIFY_ENABLED=true to enable
+// any Storefront API calls. While disabled (or when the shop is
+// unavailable, e.g. billing lapsed), all fetchers return empty results
+// silently so the local store_products catalog keeps working.
+const SHOPIFY_ENABLED = import.meta.env.VITE_SHOPIFY_ENABLED === "true";
 const SHOPIFY_API_VERSION = '2025-07';
 const SHOPIFY_STORE_PERMANENT_DOMAIN = 'eagles-veritas-shop-vgyv4.myshopify.com';
 const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
@@ -151,15 +154,8 @@ export async function storefrontApiRequest(query: string, variables: any = {}) {
     }),
   });
 
-  if (response.status === 402) {
-    toast.error("Shopify: Payment required", {
-      description: "Shopify API access requires an active Shopify billing plan. Visit https://admin.shopify.com to upgrade.",
-    });
-    return;
-  }
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  if (response.status === 402 || !response.ok) {
+    throw new Error(`Shopify API unavailable (status ${response.status})`);
   }
 
   const data = await response.json();
@@ -227,17 +223,27 @@ const PRODUCTS_QUERY_WITH_SORT = `
 `;
 
 export async function fetchProducts(first: number = 20): Promise<ShopifyProduct[]> {
-  const data = await storefrontApiRequest(STOREFRONT_QUERY, { first });
-  return data.data.products.edges;
+  if (!SHOPIFY_ENABLED) return [];
+  try {
+    const data = await storefrontApiRequest(STOREFRONT_QUERY, { first });
+    return data?.data?.products?.edges ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchLatestProducts(first: number = 8): Promise<ShopifyProduct[]> {
-  const data = await storefrontApiRequest(PRODUCTS_QUERY_WITH_SORT, { 
-    first, 
-    sortKey: 'CREATED_AT',
-    reverse: true 
-  });
-  return data.data.products.edges;
+  if (!SHOPIFY_ENABLED) return [];
+  try {
+    const data = await storefrontApiRequest(PRODUCTS_QUERY_WITH_SORT, {
+      first,
+      sortKey: 'CREATED_AT',
+      reverse: true
+    });
+    return data?.data?.products?.edges ?? [];
+  } catch {
+    return [];
+  }
 }
 
 // Fetch All Collections
@@ -262,8 +268,13 @@ const COLLECTIONS_QUERY = `
 `;
 
 export async function fetchCollections(first: number = 50): Promise<ShopifyCollection[]> {
-  const data = await storefrontApiRequest(COLLECTIONS_QUERY, { first });
-  return data.data.collections.edges.map((edge: any) => edge.node);
+  if (!SHOPIFY_ENABLED) return [];
+  try {
+    const data = await storefrontApiRequest(COLLECTIONS_QUERY, { first });
+    return (data?.data?.collections?.edges ?? []).map((edge: { node: ShopifyCollection }) => edge.node);
+  } catch {
+    return [];
+  }
 }
 
 // Fetch Collection by Handle
@@ -335,16 +346,21 @@ export async function fetchCollectionByHandle(handle: string, first: number = 50
   collection: ShopifyCollection;
   products: ShopifyProduct[];
 } | null> {
-  const data = await storefrontApiRequest(COLLECTION_QUERY, { handle, first });
-  
-  if (!data.data.collectionByHandle) {
+  if (!SHOPIFY_ENABLED) return null;
+  try {
+    const data = await storefrontApiRequest(COLLECTION_QUERY, { handle, first });
+
+    if (!data?.data?.collectionByHandle) {
+      return null;
+    }
+
+    return {
+      collection: data.data.collectionByHandle,
+      products: data.data.collectionByHandle.products?.edges ?? [],
+    };
+  } catch {
     return null;
   }
-  
-  return {
-    collection: data.data.collectionByHandle,
-    products: data.data.collectionByHandle.products.edges,
-  };
 }
 
 // Fetch Menu by Handle
@@ -366,8 +382,13 @@ const MENU_QUERY = `
 `;
 
 export async function fetchMenu(handle: string): Promise<ShopifyMenu | null> {
-  const data = await storefrontApiRequest(MENU_QUERY, { handle });
-  return data.data.menu;
+  if (!SHOPIFY_ENABLED) return null;
+  try {
+    const data = await storefrontApiRequest(MENU_QUERY, { handle });
+    return data?.data?.menu ?? null;
+  } catch {
+    return null;
+  }
 }
 
 // Cart Create Mutation
@@ -432,6 +453,9 @@ export interface CartItem {
 
 // Create Checkout
 export async function createStorefrontCheckout(items: CartItem[]): Promise<string> {
+  if (!SHOPIFY_ENABLED) {
+    throw new Error("Shopify checkout is disabled.");
+  }
   try {
     const lines = items.map(item => ({
       quantity: item.quantity,
