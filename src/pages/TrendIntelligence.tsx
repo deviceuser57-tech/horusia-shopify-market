@@ -4,11 +4,13 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BarChart3,
+  CheckCircle2,
   CircleHelp,
   Lightbulb,
   Pencil,
   Plus,
   Search,
+  Sparkles,
   Trash2,
   TrendingUp,
 } from "lucide-react";
@@ -41,6 +43,21 @@ const STORAGE_KEY = "tvs-trend-intelligence-v1";
 type Workspace = {
   products: OpportunityProduct[];
   isSampleData: boolean;
+};
+
+type AiTrendItem = {
+  title_ar: string;
+  title_en: string;
+  description: string;
+  category: string;
+  suggested_price: number;
+  supplier_cost: number;
+  business_model: string;
+  trend_score: number;
+  suggested_channel: string;
+  image_url: string;
+  tags: string[];
+  affiliate_url: string | null;
 };
 
 type ProductForm = {
@@ -175,6 +192,10 @@ const TrendIntelligence = () => {
   const [workspace, setWorkspace] = useState<Workspace>(readWorkspace);
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [aiTrends, setAiTrends] = useState<AiTrendItem[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [publishingKey, setPublishingKey] = useState<string | null>(null);
+  const [publishedKeys, setPublishedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     try {
@@ -196,6 +217,65 @@ const TrendIntelligence = () => {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
+  };
+
+  const fetchAiTrends = async () => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-trend-generator", {
+        body: { businessModel: "DROPSHIPPING", count: 6 },
+      });
+      if (error) throw error;
+      const products = (data?.products ?? []) as AiTrendItem[];
+      if (products.length === 0) {
+        toast.error("The AI trend engine returned no suggestions.");
+        return;
+      }
+      setAiTrends(products);
+      toast.success(`${products.length} AI product opportunities loaded.`);
+    } catch (err) {
+      console.error("AI trend fetch failed:", err);
+      toast.error("Could not load AI trends. Check that the AI gateway secrets are configured.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const publishAiTrend = async (item: AiTrendItem, index: number) => {
+    const key = `${item.title_en}-${index}`;
+    setPublishingKey(key);
+    try {
+      // AFFILIATE rows require a real affiliate_url per the store_products check constraint.
+      const isAffiliate = item.business_model === "AFFILIATE" && Boolean(item.affiliate_url);
+      const { error } = await supabase.from("store_products").insert({
+        business_model: isAffiliate ? "AFFILIATE" : "DROPSHIPPING",
+        title: item.title_en || item.title_ar,
+        title_ar: item.title_ar,
+        title_en: item.title_en,
+        description: item.description,
+        category: item.category,
+        image_url: item.image_url || null,
+        price: item.suggested_price,
+        supplier_cost: item.supplier_cost,
+        currency: "USD",
+        affiliate_url: isAffiliate ? item.affiliate_url : null,
+        status: "ACTIVE",
+        tags: item.tags,
+        metadata: {
+          trend_score: item.trend_score,
+          suggested_channel: item.suggested_channel,
+          published_via: "AI_TREND_ENGINE",
+        },
+      });
+      if (error) throw error;
+      setPublishedKeys((current) => new Set(current).add(key));
+      toast.success(`"${item.title_ar}" published to the storefront.`);
+    } catch (err) {
+      console.error("Publish failed:", err);
+      toast.error(`Publish failed: ${(err as { message?: string })?.message ?? "unknown error"}`);
+    } finally {
+      setPublishingKey(null);
+    }
   };
 
 const enrichAndPublish = async (opportunity: RankedOpportunity) => {
@@ -369,6 +449,94 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
             profit figures exclude advertising, shipping, payment, and fulfillment costs.
           </p>
         </div>
+
+        <section className="mb-10" aria-labelledby="ai-trends-title">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 id="ai-trends-title" className="flex items-center gap-2 text-xl font-semibold">
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+                AI product opportunities
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                AI-suggested winning products for this store. Review economics, then publish straight to the storefront.
+              </p>
+            </div>
+            <Button onClick={() => void fetchAiTrends()} disabled={aiLoading} size="sm">
+              <Sparkles aria-hidden="true" />
+              {aiLoading ? "Scanning trends..." : aiTrends.length > 0 ? "Refresh AI trends" : "Discover AI trends"}
+            </Button>
+          </div>
+
+          {aiTrends.length === 0 ? (
+            <div className="flex min-h-40 flex-col items-center justify-center rounded-md border border-dashed border-border px-6 py-10 text-center">
+              <Sparkles className="mb-3 h-8 w-8 text-muted-foreground" aria-hidden="true" />
+              <p className="text-sm text-muted-foreground">
+                No AI suggestions yet. Click "Discover AI trends" to generate product opportunities.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {aiTrends.map((item, index) => {
+                const key = `${item.title_en}-${index}`;
+                const margin = item.suggested_price > 0
+                  ? Math.round(((item.suggested_price - item.supplier_cost) / item.suggested_price) * 100)
+                  : 0;
+                const published = publishedKeys.has(key);
+                return (
+                  <Card key={key} className="flex flex-col justify-between overflow-hidden">
+                    <div>
+                      {item.image_url && (
+                        <img src={item.image_url} alt={item.title_en} className="h-40 w-full object-cover" loading="lazy" />
+                      )}
+                      <CardHeader className="pb-2">
+                        <div className="mb-2 flex items-center gap-2">
+                          <Badge variant="secondary">{item.business_model}</Badge>
+                          <Badge variant="outline">Score {item.trend_score}</Badge>
+                          <Badge variant="outline">{item.suggested_channel}</Badge>
+                        </div>
+                        <CardTitle className="text-base leading-snug">{item.title_ar}</CardTitle>
+                        <CardDescription className="text-xs">{item.title_en}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
+                        <div className="grid grid-cols-3 gap-2 rounded-md bg-muted/40 p-2.5 text-center text-xs">
+                          <div>
+                            <span className="block text-muted-foreground">Sell</span>
+                            <span className="font-semibold tabular-nums">${item.suggested_price.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="block text-muted-foreground">Cost</span>
+                            <span className="font-semibold tabular-nums">${item.supplier_cost.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="block text-muted-foreground">Margin</span>
+                            <span className="font-semibold tabular-nums text-emerald-600">+{margin}%</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </div>
+                    <div className="border-t border-border p-3">
+                      <Button
+                        className="w-full"
+                        size="sm"
+                        disabled={published || publishingKey === key}
+                        onClick={() => void publishAiTrend(item, index)}
+                      >
+                        {published ? (
+                          <><CheckCircle2 aria-hidden="true" /> Published to storefront</>
+                        ) : publishingKey === key ? (
+                          "Publishing..."
+                        ) : (
+                          "Approve & publish to shop"
+                        )}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         <div className="grid gap-6 xl:grid-cols-[350px_minmax(0,1fr)]">
           <Card className="h-fit rounded-md border-border shadow-none">

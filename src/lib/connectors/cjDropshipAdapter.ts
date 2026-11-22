@@ -1,37 +1,51 @@
+import { supabase } from "@/integrations/supabase/client";
 import type { UnifiedStoreConnector, ExternalProduct, StoreProduct } from "./types";
 
 export class CJDropshipAdapter implements UnifiedStoreConnector {
   platformName = "kzamizaa" as const;
 
-  async syncCatalog(): Promise<ExternalProduct[]> {
-    return [];
+  async syncCatalog(keyword = "decor"): Promise<ExternalProduct[]> {
+    const { data, error } = await supabase.functions.invoke("cj-connector", {
+      body: { action: "SEARCH_PRODUCTS", keyword },
+    });
+
+    if (error || !data) return [];
+
+    // CJ returns { code, data: { list: [...] } }; tolerate alternate shapes.
+    const list = data?.data?.list ?? data?.data ?? [];
+    if (!Array.isArray(list)) return [];
+
+    return list.map((item: Record<string, unknown>) => ({
+      externalId: String(item.pid ?? item.productId ?? item.id ?? ""),
+      title: String(item.productNameEn ?? item.productName ?? item.name ?? ""),
+      description: item.description ? String(item.description) : undefined,
+      price: Number(item.sellPrice ?? item.price ?? 0) || undefined,
+      currency: "USD",
+      available: true,
+      raw: item,
+    }));
   }
 
-  async pushProduct(_product: StoreProduct): Promise<{ externalId: string }> {
-    throw new Error("CJ order submission is disabled until real server credentials and a verified official API contract are configured.");
-  }
+  async checkSupplierAvailability(supplierSku: string) {
+    if (!supplierSku) return { status: "UNKNOWN" as const };
 
-  async checkSupplierAvailability(supplierSku: string): Promise<{
-    status: "AVAILABLE" | "UNAVAILABLE" | "OUT_OF_STOCK" | "UNKNOWN";
-    externalPrice?: number;
-    currency?: string;
-  }> {
-    try {
-      const response = await fetch(`https://developers.cjdropshipping.com/api2.0/v1/product/stock?sku=${supplierSku}`, {
-        headers: { "CJ-Access-Token": import.meta.env.VITE_CJ_API_TOKEN || "" }
-      });
-      const data = await response.json();
-      
-      if (data.code === 200 && data.data?.inventory > 0) {
-        return {
-          status: "AVAILABLE",
-          externalPrice: Number(data.data.costPrice),
-          currency: "USD"
-        };
-      }
-      return { status: "OUT_OF_STOCK" };
-    } catch {
-      return { status: "UNKNOWN" };
+    const { data, error } = await supabase.functions.invoke("cj-connector", {
+      body: { action: "CHECK_STOCK", sku: supplierSku },
+    });
+
+    if (error || !data || data.code !== 200) {
+      return { status: "UNKNOWN" as const };
     }
+
+    const inventory = Number(data.data?.inventory ?? 0);
+    return {
+      status: inventory > 0 ? ("AVAILABLE" as const) : ("OUT_OF_STOCK" as const),
+      externalPrice: Number(data.data?.costPrice ?? 0) || undefined,
+      currency: "USD",
+    };
+  }
+
+  async pushProduct(_product: StoreProduct) {
+    throw new Error("Products are sourced from CJ into the store, not pushed back to CJ.");
   }
 }

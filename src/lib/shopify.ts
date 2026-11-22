@@ -136,7 +136,10 @@ const STOREFRONT_QUERY = `
 
 // Storefront API Request Helper
 export async function storefrontApiRequest(query: string, variables: any = {}) {
-  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
+  // Use Vite proxy in dev to avoid CORS issues
+  const endpoint = import.meta.env.DEV ? '/api/shopify' : SHOPIFY_STOREFRONT_URL;
+  
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
