@@ -1,1 +1,2 @@
 - Keep opportunity-ranking calculations in a pure `src/lib` module, separate from page rendering and store connectors; AI insights must not directly change products, prices, or campaigns without server-verified roles, explicit approval, and an audit record.
+- Keep remote MCP definitions in `src/lib/mcp/` behind the Classic Vite plugin, and keep browser-local WebMCP registrations in the page that owns their visible data so both access paths remain separate and scoped.
