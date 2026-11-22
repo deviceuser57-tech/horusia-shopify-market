@@ -9,53 +9,53 @@
 
 @layer base {
   :root {
-    /* Light Theme - Bright & Professional */
+    /* Light Theme - Minimalist Luxury */
     --background: 0 0% 100%;
-    --foreground: 215 35% 10%;
+    --foreground: 210 10% 15%;
 
-    --card: 210 20% 98%;
-    --card-foreground: 215 35% 10%;
+    --card: 0 0% 98%;
+    --card-foreground: 210 10% 15%;
 
-    --popover: 210 20% 98%;
-    --popover-foreground: 215 35% 10%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 210 10% 15%;
 
-    /* Primary - Bold Navy Blue */
-    --primary: 215 85% 18%;
+    /* Primary - Sophisticated Matte Charcoal */
+    --primary: 210 10% 15%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 215 85% 25%;
+    --primary-hover: 210 10% 25%;
 
-    /* Secondary - Cool Silver Gray */
-    --secondary: 210 18% 94%;
-    --secondary-foreground: 215 35% 15%;
+    /* Secondary - Soft Neutral Gray */
+    --secondary: 210 10% 92%;
+    --secondary-foreground: 210 10% 20%;
 
     /* Muted tones */
-    --muted: 210 15% 92%;
-    --muted-foreground: 215 20% 38%;
+    --muted: 210 10% 94%;
+    --muted-foreground: 210 10% 45%;
 
-    /* Accent - Shimmering Silver */
-    --accent: 210 10% 75%;
-    --accent-foreground: 215 35% 10%;
-    --accent-hover: 210 10% 65%;
+    /* Accent - Muted Sage (Modern Luxury Accent) */
+    --accent: 150 15% 90%;
+    --accent-foreground: 210 10% 15%;
+    --accent-hover: 150 15% 80%;
 
-    /* Gold/Highlight - Premium Silver-Blue */
-    --gold: 210 15% 78%;
-    --gold-foreground: 215 85% 18%;
-    --gold-hover: 210 15% 68%;
+    /* Gold/Highlight - Neutral Gold/Bronze */
+    --gold: 35 25% 75%;
+    --gold-foreground: 0 0% 100%;
+    --gold-hover: 35 25% 65%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 60% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 15% 88%;
-    --input: 210 15% 88%;
-    --ring: 215 85% 18%;
+    --border: 210 10% 85%;
+    --input: 210 10% 90%;
+    --ring: 210 10% 15%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Professional shadows */
-    --shadow-soft: 0 2px 30px -8px hsl(215 35% 15% / 0.15);
-    --shadow-medium: 0 4px 40px -10px hsl(215 35% 15% / 0.22);
-    --shadow-blue: 0 8px 35px -8px hsl(215 85% 18% / 0.35);
-    --shadow-gold: 0 4px 25px -6px hsl(210 15% 78% / 0.45);
+    /* Professional subtle shadows */
+    --shadow-soft: 0 2px 15px -5px rgba(0,0,0,0.05);
+    --shadow-medium: 0 4px 25px -10px rgba(0,0,0,0.1);
+    --shadow-blue: 0 8px 35px -10px rgba(0,0,0,0.08);
+    --shadow-gold: 0 4px 20px -5px rgba(180, 150, 100, 0.15);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -68,51 +68,51 @@
   }
 
   .dark {
-    /* Dark Theme - Deep Navy & Luminous Silver */
-    --background: 215 40% 12%;
-    --foreground: 210 15% 95%;
+    /* Dark Theme - Refined Minimalist Dark */
+    --background: 210 10% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 215 35% 16%;
-    --card-foreground: 210 15% 95%;
+    --card: 210 10% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 215 35% 16%;
-    --popover-foreground: 210 15% 95%;
+    --popover: 210 10% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Primary - Bright Silver in dark mode */
-    --primary: 210 15% 85%;
-    --primary-foreground: 215 50% 10%;
-    --primary-hover: 210 15% 78%;
+    /* Primary - Soft White for contrast */
+    --primary: 0 0% 95%;
+    --primary-foreground: 210 10% 8%;
+    --primary-hover: 0 0% 85%;
 
-    /* Secondary - Rich Navy accent */
-    --secondary: 215 45% 20%;
-    --secondary-foreground: 210 15% 90%;
+    /* Secondary - Deep Charcoal */
+    --secondary: 210 10% 15%;
+    --secondary-foreground: 0 0% 90%;
 
     /* Muted tones */
-    --muted: 215 30% 22%;
-    --muted-foreground: 210 10% 70%;
+    --muted: 210 10% 18%;
+    --muted-foreground: 210 10% 60%;
 
-    /* Accent - Bright Silver highlight */
-    --accent: 210 15% 82%;
-    --accent-foreground: 215 40% 12%;
-    --accent-hover: 210 15% 75%;
+    /* Accent - Muted Sage */
+    --accent: 150 15% 20%;
+    --accent-foreground: 0 0% 95%;
+    --accent-hover: 150 15% 25%;
 
-    /* Gold - Metallic silver-blue glow */
-    --gold: 210 15% 80%;
-    --gold-foreground: 215 40% 12%;
-    --gold-hover: 210 15% 72%;
+    /* Gold - Subtle Metallic Gold */
+    --gold: 35 25% 45%;
+    --gold-foreground: 0 0% 95%;
+    --gold-hover: 35 25% 35%;
 
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 50% 50%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 215 30% 25%;
-    --input: 215 30% 25%;
-    --ring: 210 15% 85%;
+    --border: 210 10% 20%;
+    --input: 210 10% 20%;
+    --ring: 0 0% 95%;
 
-    /* Dark mode shadows with navy glow */
-    --shadow-soft: 0 2px 30px -8px hsl(215 85% 18% / 0.25);
-    --shadow-medium: 0 4px 40px -10px hsl(215 85% 18% / 0.35);
-    --shadow-blue: 0 8px 35px -8px hsl(210 15% 85% / 0.20);
-    --shadow-gold: 0 4px 25px -6px hsl(210 15% 80% / 0.30);
+    /* Dark mode shadows - subtle */
+    --shadow-soft: 0 2px 20px -5px rgba(0,0,0,0.3);
+    --shadow-medium: 0 4px 30px -10px rgba(0,0,0,0.4);
+    --shadow-blue: 0 8px 35px -10px rgba(0,0,0,0.3);
+    --shadow-gold: 0 4px 20px -5px rgba(180, 150, 100, 0.1);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -132,7 +132,7 @@
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
-    font-family: 'Poppins', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   /* Enhanced scrollbar styling */

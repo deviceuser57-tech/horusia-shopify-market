@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'system-ui', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -75,9 +75,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        'gold': '0 4px 14px 0 rgba(212, 175, 55, 0.39)',
-        'gold-lg': '0 10px 40px 0 rgba(212, 175, 55, 0.5)',
-        'egyptian': '0 8px 32px 0 rgba(197, 160, 40, 0.37)',
+        'soft': '0 2px 15px -5px rgba(0,0,0,0.05)',
+        'medium': '0 4px 25px -10px rgba(0,0,0,0.1)',
+        'large': '0 10px 40px -15px rgba(0,0,0,0.15)',
       },
       keyframes: {
         "accordion-down": {
@@ -150,7 +150,7 @@ export default {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-egyptian': 'linear-gradient(135deg, #d4af37 0%, #c5a028 50%, #d4af37 100%)',
+        'gradient-modern': 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.03) 100%)',
       },
     },
   },
