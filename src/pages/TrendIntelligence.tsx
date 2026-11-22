@@ -225,7 +225,20 @@ const TrendIntelligence = () => {
       const { data, error } = await supabase.functions.invoke("ai-trend-generator", {
         body: { businessModel: "DROPSHIPPING", count: 6 },
       });
-      if (error) throw error;
+      if (error) {
+        // Surface the function's real error body (401/403/503/502) instead of a generic message.
+        let detail = error.message;
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") {
+          try {
+            const bodyJson = (await ctx.json()) as { error?: string; status?: number };
+            if (bodyJson?.error) detail = `${bodyJson.error}${bodyJson.status ? ` (provider ${bodyJson.status})` : ""}`;
+          } catch {
+            // keep default message
+          }
+        }
+        throw new Error(detail);
+      }
       const products = (data?.products ?? []) as AiTrendItem[];
       if (products.length === 0) {
         toast.error("The AI trend engine returned no suggestions.");
@@ -235,7 +248,7 @@ const TrendIntelligence = () => {
       toast.success(`${products.length} AI product opportunities loaded.`);
     } catch (err) {
       console.error("AI trend fetch failed:", err);
-      toast.error("Could not load AI trends. Check that the AI provider secrets (GROK_API_KEY) are configured and the function is deployed.");
+      toast.error(err instanceof Error ? err.message : "Could not load AI trends.");
     } finally {
       setAiLoading(false);
     }
