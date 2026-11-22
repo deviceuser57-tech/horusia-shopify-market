@@ -235,7 +235,7 @@ const TrendIntelligence = () => {
       toast.success(`${products.length} AI product opportunities loaded.`);
     } catch (err) {
       console.error("AI trend fetch failed:", err);
-      toast.error("Could not load AI trends. Check that the AI gateway secrets are configured.");
+      toast.error("Could not load AI trends. Check that the AI provider secrets (GROK_API_KEY) are configured and the function is deployed.");
     } finally {
       setAiLoading(false);
     }

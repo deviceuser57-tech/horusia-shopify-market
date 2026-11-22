@@ -47,10 +47,16 @@ Deno.serve(async (request) => {
     }
   }
 
-  const gatewayUrl = Deno.env.get("AI_GATEWAY_URL");
-  const gatewayKey = Deno.env.get("AI_GATEWAY_API_KEY");
+  // Provider resolution: prefer Grok (xAI) when its key is configured,
+  // otherwise fall back to the generic AI gateway.
+  const grokKey = Deno.env.get("GROK_API_KEY") ?? Deno.env.get("XAI_API_KEY");
+  const gatewayUrl = grokKey
+    ? "https://api.x.ai/v1/chat/completions"
+    : Deno.env.get("AI_GATEWAY_URL");
+  const gatewayKey = grokKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
+  const model = grokKey ? "grok-3-mini" : "google/gemini-2.5-flash";
   if (!gatewayUrl || !gatewayKey) {
-    return json({ error: "AI gateway is not configured." }, 503);
+    return json({ error: "AI provider is not configured." }, 503);
   }
 
   let category = "all";
@@ -88,7 +94,7 @@ Return ONLY a valid JSON array, no markdown, no extra text. Each element must ha
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model,
       messages: [
         {
           role: "system",
