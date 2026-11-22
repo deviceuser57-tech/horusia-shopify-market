@@ -10,6 +10,12 @@ export const AdminGuard = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const check = async () => {
+      // Development bypass - allow access without auth in dev mode
+      if (import.meta.env.DEV) {
+        setStatus("AUTHORIZED");
+        return;
+      }
+
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         setStatus("UNAUTHORIZED");

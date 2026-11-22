@@ -199,35 +199,40 @@ const TrendIntelligence = () => {
   };
 
 const enrichAndPublish = async (opportunity: RankedOpportunity) => {
-    try {
-      toast.info("جاري تحليل المنتج وتوليد المحتوى الإعلاني عبر AI Gateway...");
-      
-      // 1. توليد وصف عربي/إنجليزي وهوية تسويقية عبر الوظيفة السحابية
-      const aiData = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
+  try {
+    toast.info("Enriching product and generating ad copy via AI Gateway...");
+    
+    // 1. Generate Arabic/English copy and tags
+    const aiData = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
 
-      // 2. إدراج المنتج كمنتج أفلييت/دروب شيبنج في قاعدة البيانات
-      const { error } = await supabase.from("affiliate_products").insert({
-        title: aiData.titleAr || opportunity.product.name,
-        description: aiData.descriptionAr,
-        category: opportunity.product.category,
-        price: opportunity.product.sellingPrice,
-        supplier_price: opportunity.product.unitCost,
-        status: "ACTIVE",
-        tags: aiData.suggestedTags,
-        ad_copy_hook: aiData.adCopy?.hook,
-        metadata: {
-          score: opportunity.score,
-          channel: opportunity.recommendedChannel,
-          english_title: aiData.titleEn
-        }
-      });
-
-      if (error) throw error;
-      toast.success(`تم إثراء ونشر "${opportunity.product.name}" بنجاح إلى المعرض!`);
-    } catch (err: any) {
-      toast.error(err.message || "حدث خطأ أثناء النشر");
-    }
-  };
+    // 2. Insert into the store_products table
+    const { error } = await supabase.from("store_products").insert({
+      business_model: "DROPSHIPPING",
+      title: aiData.titleAr || opportunity.product.name,
+      title_ar: aiData.titleAr,
+      title_en: aiData.titleEn || opportunity.product.name,
+      description: aiData.descriptionAr,
+      category: opportunity.product.category,
+      price: opportunity.product.sellingPrice,
+      supplier_cost: opportunity.product.unitCost,
+      currency: "USD",
+      status: "ACTIVE",
+      tags: aiData.suggestedTags,
+      ad_copy: aiData.adCopy,
+      metadata: {
+        score: opportunity.score,
+        channel: opportunity.recommendedChannel,
+        original_trend_growth: opportunity.product.trendGrowthPercent,
+      }
+    });
+    
+    if (error) throw error;
+    toast.success(`"${opportunity.product.name}" published successfully to the store gallery!`);
+  } catch (err: any) {
+    console.error("Publishing error:", err);
+    toast.error("Failed to publish product: " + (err.message || "Unknown error"));
+  }
+};
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
