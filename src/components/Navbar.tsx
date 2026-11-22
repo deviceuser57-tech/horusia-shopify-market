@@ -75,7 +75,7 @@ export const Navbar = () => {
               className="h-16 w-16 md:h-20 md:w-20 object-contain rounded-lg"
             />
             <div className="hidden md:flex flex-col">
-              <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-foreground leading-tight">
+              <span className="text-2xl md:text-3xl font-serif font-bold text-foreground leading-tight">
                 Tumāninah Veritas
               </span>
               <span className="text-sm md:text-base text-foreground/80">One Stop Store</span>
