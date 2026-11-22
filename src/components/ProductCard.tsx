@@ -61,42 +61,35 @@ export const ProductCard = ({ product, onCompare }: ProductCardProps) => {
   };
 
   return (
-    <div className="group bg-gradient-to-br from-card to-card/80 rounded-xl border border-border overflow-hidden hover:shadow-[var(--shadow-medium)] hover:border-accent/50 transition-all duration-300 hover:-translate-y-1">
+    <div className="group bg-card rounded-lg border border-border overflow-hidden hover:shadow-medium hover:border-accent transition-all duration-300">
       <Link to={`/product/${node.handle}`}>
-        <div className="aspect-square bg-secondary/30 overflow-hidden relative">
+        <div className="aspect-square bg-secondary/20 overflow-hidden relative">
           {image ? (
             <img
               src={image.url}
               alt={image.altText || node.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary/40 to-muted/40">
-              <ShoppingCart className="h-16 w-16 text-muted-foreground/40" />
+            <div className="w-full h-full flex items-center justify-center bg-secondary/20">
+              <ShoppingCart className="h-12 w-12 text-muted-foreground/30" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
       </Link>
       
-      <div className="p-5 space-y-3">
-        <span className="inline-flex rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+      <div className="p-4 space-y-3">
+        <span className="inline-flex rounded-md bg-secondary/50 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold text-secondary-foreground">
           {classification.sourceLabel}
         </span>
         <Link to={`/product/${node.handle}`}>
-          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+          <h3 className="font-medium text-foreground hover:text-accent-hover transition-colors line-clamp-1">
             {node.title}
           </h3>
         </Link>
         
-        {node.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-            {node.description}
-          </p>
-        )}
-        
         <div className="flex items-center justify-between pt-2">
-          <span className="text-xl font-bold text-primary">
+          <span className="text-lg font-semibold text-foreground">
             {price.currencyCode} {parseFloat(price.amount).toFixed(2)}
           </span>
           {classification.businessModel === "AFFILIATE" ? (
@@ -104,42 +97,24 @@ export const ProductCard = ({ product, onCompare }: ProductCardProps) => {
               <Button
                 size="sm"
                 variant="outline"
+                className="h-8 border-border hover:bg-secondary"
                 onClick={handleAffiliateClick}
                 disabled={!classification.affiliateUrl}
               >
-                <ExternalLink className="h-4 w-4 mr-1.5" />
-                Visit merchant
+                <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                Visit
               </Button>
-              {onCompare && (
-                <Button size="sm" variant="ghost" onClick={() => onCompare({
-                  id: node.id,
-                  title: node.title,
-                  price: Number(price.amount),
-                  image: image?.url ?? "/placeholder.svg",
-                  category: node.productType ?? "General",
-                  affiliateUrl: classification.affiliateUrl ?? undefined,
-                })}>Compare</Button>
-              )}
             </>
           ) : (
             <>
               <Button
                 size="sm"
-                className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-primary-foreground shadow-[var(--shadow-blue)] hover:shadow-[var(--shadow-medium)] transition-all duration-300"
+                className="h-8 bg-foreground text-background hover:bg-accent-hover hover:text-foreground transition-all duration-300"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="h-4 w-4 mr-1.5" />
+                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                 Add
               </Button>
-              {onCompare && (
-                <Button size="sm" variant="ghost" onClick={() => onCompare({
-                  id: node.id,
-                  title: node.title,
-                  price: Number(price.amount),
-                  image: image?.url ?? "/placeholder.svg",
-                  category: node.productType ?? "General",
-                })}>Compare</Button>
-              )}
             </>
           )}
         </div>
