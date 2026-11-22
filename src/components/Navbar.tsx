@@ -61,7 +61,14 @@ export const Navbar = () => {
     { href: "/services", label: "Services" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
-    { href: "/admin/trends", label: "Trends" },
+  ];
+
+  const adminLinks = [
+    { href: "/admin", label: "Admin Home" },
+    { href: "/admin/trends", label: "Trend Intelligence" },
+    { href: "/admin/bi", label: "BI & Risk" },
+    { href: "/admin/approvals", label: "AI Approvals" },
+    { href: "/admin/connectors", label: "Affiliate & Suppliers" },
   ];
 
   return (
@@ -116,6 +123,24 @@ export const Navbar = () => {
                     <Link to={`/collections/${collection.handle}`} className="hover:bg-secondary/50">
                       {collection.title}
                     </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="text-base font-medium hover:bg-secondary/50 transition-colors px-4 py-2 rounded-lg bg-secondary/30 text-foreground"
+                >
+                  Admin
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-card/95 backdrop-blur text-foreground">
+                {adminLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href} className="hover:bg-secondary/50">{link.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -207,6 +232,21 @@ export const Navbar = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {collection.title}
+                </Link>
+              ))}
+            </div>
+            <div className="space-y-1">
+              <div className="px-4 py-2 text-sm font-semibold text-foreground/70 bg-secondary/30 rounded-lg">
+                Admin
+              </div>
+              {adminLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="block px-4 py-3 text-foreground hover:bg-secondary/80 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
                 </Link>
               ))}
             </div>
