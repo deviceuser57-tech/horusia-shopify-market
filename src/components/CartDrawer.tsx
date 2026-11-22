@@ -10,20 +10,28 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useCartStore } from "@/stores/cartStore";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { 
-    items, 
-    isLoading, 
-    updateQuantity, 
-    removeItem, 
-    createCheckout 
+  const {
+    items,
+    localItems,
+    isLoading,
+    updateQuantity,
+    removeItem,
+    updateLocalQuantity,
+    removeLocalItem,
+    clearLocalItems,
+    createCheckout,
+    checkoutLocal,
   } = useCartStore();
-  
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0) +
+    localItems.reduce((sum, item) => sum + item.quantity, 0);
+  const shopifyTotal = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+  const localTotal = localItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleCheckout = async () => {
     try {
@@ -37,6 +45,19 @@ export const CartDrawer = () => {
       if (import.meta.env.DEV) {
         console.error('Checkout failed:', error);
       }
+    }
+  };
+
+  const handleLocalCheckout = async () => {
+    try {
+      const checkoutUrl = await checkoutLocal('PAYMOB');
+      if (checkoutUrl) {
+        window.open(checkoutUrl, '_blank');
+        clearLocalItems();
+        setIsOpen(false);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Local checkout failed.');
     }
   };
 
@@ -67,7 +88,7 @@ export const CartDrawer = () => {
         </SheetHeader>
         
         <div className="flex flex-col flex-1 pt-6 min-h-0">
-          {items.length === 0 ? (
+          {items.length === 0 && localItems.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -134,33 +155,101 @@ export const CartDrawer = () => {
                   ))}
                 </div>
               </div>
-              
-              <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total</span>
-                  <span className="text-xl font-bold text-primary">
-                    {items[0]?.price.currencyCode || 'USD'} {totalPrice.toFixed(2)}
-                  </span>
+
+              {localItems.length > 0 && (
+                <div className="flex-shrink-0 border-t pt-4">
+                  <h4 className="mb-3 text-sm font-semibold">Store products</h4>
+                  <div className="space-y-3">
+                    {localItems.map((item) => (
+                      <div key={item.productId} className="flex gap-3 rounded-lg border p-2">
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.title} className="h-12 w-12 rounded-md object-cover" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{item.title}</p>
+                          <p className="text-sm font-semibold text-primary">
+                            {item.currency} {item.price.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <Button variant="ghost" size="icon" className="h-6 w-6 hover:text-destructive" onClick={() => removeLocalItem(item.productId)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateLocalQuantity(item.productId, item.quantity - 1)}>
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="w-6 text-center text-sm">{item.quantity}</span>
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateLocalQuantity(item.productId, item.quantity + 1)}>
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                <Button 
-                  onClick={handleCheckout}
-                  className="w-full bg-gold hover:bg-gold/90 text-gold-foreground shadow-[var(--shadow-gold)]" 
-                  size="lg"
-                  disabled={items.length === 0 || isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Checkout...
-                    </>
-                  ) : (
-                    <>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Checkout with Shopify
-                    </>
-                  )}
-                </Button>
+              )}
+
+              <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
+                {items.length > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">Shopify total</span>
+                    <span className="text-xl font-bold text-primary">
+                      {items[0]?.price.currencyCode || 'USD'} {shopifyTotal.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                {localItems.length > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">Store items total</span>
+                    <span className="text-xl font-bold text-primary">
+                      {localItems[0]?.currency || 'USD'} {localTotal.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
+                {items.length > 0 && (
+                  <Button
+                    onClick={handleCheckout}
+                    className="w-full bg-gold hover:bg-gold/90 text-gold-foreground shadow-[var(--shadow-gold)]"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating Checkout...
+                      </>
+                    ) : (
+                      <>
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Checkout Shopify items
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {localItems.length > 0 && (
+                  <Button
+                    onClick={handleLocalCheckout}
+                    className="w-full"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating Checkout...
+                      </>
+                    ) : (
+                      <>
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Checkout store items
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </>
           )}

@@ -42,6 +42,24 @@ Deno.serve(async (request) => {
     return json({ error: "Authentication required." }, 401);
   }
 
+  // Server-verified admin role check before spending supplier API quota.
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (serviceRoleKey) {
+    const admin = createClient(supabaseUrl, serviceRoleKey);
+    const { data: roles } = await admin
+      .from("user_roles")
+      .select("roles(name)")
+      .eq("user_id", userData.user.id);
+    const allowed = new Set(["OWNER", "STORE_MANAGER", "MARKETING_SPECIALIST"]);
+    const isAdmin = (roles ?? []).some((row) => {
+      const role = row.roles as unknown as { name?: string } | null;
+      return Boolean(role?.name && allowed.has(role.name));
+    });
+    if (!isAdmin) {
+      return json({ error: "Admin role required." }, 403);
+    }
+  }
+
   const cjEmail = Deno.env.get("CJ_ACCOUNT_EMAIL") ?? "";
   const cjApiKey = Deno.env.get("CJ_API_KEY") ?? "";
   if (!cjEmail || !cjApiKey) {

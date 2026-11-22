@@ -19,6 +19,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import TrendIntelligence from "./pages/TrendIntelligence";
+import OrderSuccess from "./pages/OrderSuccess";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AdminBI from "./pages/AdminBI";
 import { AdminGuard } from "@/components/AdminGuard";
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/product/:handle" element={<ProductDetail />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/refund" element={<Refund />} />
             <Route path="/privacy" element={<Privacy />} />

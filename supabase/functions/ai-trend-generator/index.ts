@@ -30,6 +30,23 @@ Deno.serve(async (request) => {
     return json({ error: "Authentication required." }, 401);
   }
 
+  // Server-verified admin role check (OWNER / STORE_MANAGER / MARKETING_SPECIALIST).
+  if (serviceRoleKey) {
+    const admin = createClient(supabaseUrl, serviceRoleKey);
+    const { data: roles } = await admin
+      .from("user_roles")
+      .select("roles(name)")
+      .eq("user_id", userData.user.id);
+    const allowed = new Set(["OWNER", "STORE_MANAGER", "MARKETING_SPECIALIST"]);
+    const isAdmin = (roles ?? []).some((row) => {
+      const role = row.roles as unknown as { name?: string } | null;
+      return Boolean(role?.name && allowed.has(role.name));
+    });
+    if (!isAdmin) {
+      return json({ error: "Admin role required." }, 403);
+    }
+  }
+
   const gatewayUrl = Deno.env.get("AI_GATEWAY_URL");
   const gatewayKey = Deno.env.get("AI_GATEWAY_API_KEY");
   if (!gatewayUrl || !gatewayKey) {

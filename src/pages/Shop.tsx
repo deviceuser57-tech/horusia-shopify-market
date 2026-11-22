@@ -18,6 +18,9 @@ import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductComparisonModal, CompareItem } from "@/components/ProductComparisonModal";
+import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
+import { ShoppingCart } from "lucide-react";
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -28,6 +31,7 @@ const Shop = () => {
   const [filterType, setFilterType] = useState<string>("all");
   const [compareItems, setCompareItems] = useState<CompareItem[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
+  const addLocalItem = useCartStore((state) => state.addLocalItem);
   const [localProducts, setLocalProducts] = useState<Array<{
     id: string;
     title: string;
@@ -284,7 +288,22 @@ const Shop = () => {
                       {item.affiliateUrl ? (
                         <Button size="sm" className="flex-1" asChild><a href={item.affiliateUrl} target="_blank" rel="noopener noreferrer">Visit merchant</a></Button>
                       ) : (
-                        <Button size="sm" className="flex-1" disabled>External supplier checkout</Button>
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => {
+                            addLocalItem({
+                              productId: product.id,
+                              title: item.title,
+                              price: item.price,
+                              currency: product.currency || "USD",
+                              imageUrl: item.image,
+                            });
+                            toast.success(`"${item.title}" added to cart.`);
+                          }}
+                        >
+                          <ShoppingCart className="mr-1 h-3.5 w-3.5" /> Add to cart
+                        </Button>
                       )}
                       <Button
                         size="sm"
