@@ -308,9 +308,9 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
     
     if (error) throw error;
     toast.success(`"${opportunity.product.name}" published successfully to the store gallery!`);
-  } catch (err: any) {
+  } catch (err) {
     console.error("Publishing error:", err);
-    toast.error("Failed to publish product: " + (err.message || "Unknown error"));
+    toast.error("Failed to publish product: " + ((err as { message?: string })?.message || "Unknown error"));
   }
 };
 
