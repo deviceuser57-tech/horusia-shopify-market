@@ -96,6 +96,11 @@ export const HeroBannerStudio = () => {
   }, []);
 
   const handleSave = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      toast.error("Sign in with an admin account (OWNER role) to publish the hero banner.");
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
