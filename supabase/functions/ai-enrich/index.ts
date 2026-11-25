@@ -47,15 +47,24 @@ Deno.serve(async (request) => {
     }
   }
 
-  // Provider resolution: prefer Grok (xAI) when its key is configured,
-  // otherwise fall back to the generic AI gateway.
-  const grokKey = Deno.env.get("GROK_API_KEY") ?? Deno.env.get("XAI_API_KEY");
-  const gatewayUrl = grokKey
-    ? "https://api.x.ai/v1/chat/completions"
-    : Deno.env.get("AI_GATEWAY_URL");
-  const gatewayKey = grokKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
-  const model = grokKey ? "grok-3-mini" : "google/gemini-2.5-flash";
-  if (!gatewayUrl || !gatewayKey) {
+  // Provider resolution: prefer Grok (xAI), then the Lovable AI gateway,
+  // then a generic AI gateway.
+  const xaiKey = Deno.env.get("XAI_API_KEY") ?? Deno.env.get("GROK_API_KEY");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+
+  let gatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+  let gatewayKey = lovableKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
+  let model = "google/gemini-2.5-flash";
+  const gatewayUrlOverride = xaiKey ? undefined : Deno.env.get("AI_GATEWAY_URL");
+
+  if (xaiKey) {
+    gatewayUrl = "https://api.x.ai/v1/chat/completions";
+    gatewayKey = xaiKey;
+    model = "grok-2-latest";
+  } else if (gatewayUrlOverride) {
+    gatewayUrl = gatewayUrlOverride;
+  }
+  if (!gatewayKey) {
     return new Response(JSON.stringify({ error: "AI provider is not configured." }), {
       status: 503,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

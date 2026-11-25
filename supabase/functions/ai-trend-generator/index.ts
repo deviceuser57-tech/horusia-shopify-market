@@ -48,14 +48,25 @@ Deno.serve(async (request) => {
   }
 
   // Provider resolution: prefer Grok (xAI) when its key is configured,
-  // otherwise fall back to the generic AI gateway.
-  const grokKey = Deno.env.get("GROK_API_KEY") ?? Deno.env.get("XAI_API_KEY");
-  const gatewayUrl = grokKey
-    ? "https://api.x.ai/v1/chat/completions"
-    : Deno.env.get("AI_GATEWAY_URL");
-  const gatewayKey = grokKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
-  const model = grokKey ? "grok-3-mini" : "google/gemini-2.5-flash";
-  if (!gatewayUrl || !gatewayKey) {
+  // then the Lovable AI gateway, then a generic AI gateway.
+  const xaiKey = Deno.env.get("XAI_API_KEY") ?? Deno.env.get("GROK_API_KEY");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+
+  let gatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+  let gatewayKey = lovableKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
+  let model = "google/gemini-2.5-flash";
+  let gatewayUrlOverride = Deno.env.get("AI_GATEWAY_URL");
+
+  if (xaiKey) {
+    gatewayUrl = "https://api.x.ai/v1/chat/completions";
+    gatewayKey = xaiKey;
+    model = "grok-2-latest";
+    gatewayUrlOverride = undefined;
+  }
+  if (gatewayUrlOverride) {
+    gatewayUrl = gatewayUrlOverride;
+  }
+  if (!gatewayKey) {
     return json({ error: "AI provider is not configured." }, 503);
   }
 
@@ -73,7 +84,7 @@ Deno.serve(async (request) => {
 
   const prompt = `You are a smart e-commerce trend analyst for Tumāninah Veritas Store, a luxury Egyptian-heritage storefront (heritage decor, handcrafted gifts, premium accessories, fast-moving dropship/affiliate products).
 Suggest ${count} winning trending products that fit this store identity in the category scope: ${category}.
-Return ONLY a valid JSON array, no markdown, no extra text. Each element must have:
+Return a single JSON object with a "products" array (no markdown, no extra text). Each element must have:
 - title_ar: Arabic product name
 - title_en: English product name
 - description: convincing bilingual marketing description
@@ -108,17 +119,25 @@ Return ONLY a valid JSON array, no markdown, no extra text. Each element must ha
   });
 
   if (!aiResponse.ok) {
-    return json({ error: "AI provider request failed.", status: aiResponse.status }, 502);
+    const errText = await aiResponse.text();
+    console.error("AI provider error:", aiResponse.status, errText);
+    return json({ error: "AI provider request failed.", status: aiResponse.status, details: errText.slice(0, 500) }, 502);
   }
 
   const aiJson = await aiResponse.json();
-  const content = aiJson.choices?.[0]?.message?.content ?? "[]";
+  const content = aiJson.choices?.[0]?.message?.content ?? "{}";
   const cleanJson = content.replace(/```json|```/g, "").trim();
 
   let products: unknown[] = [];
   try {
     const parsed = JSON.parse(cleanJson);
-    products = Array.isArray(parsed) ? parsed : Array.isArray(parsed.products) ? parsed.products : [];
+    products = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed.products)
+        ? parsed.products
+        : Array.isArray(parsed.items)
+          ? parsed.items
+          : [];
   } catch {
     return json({ error: "AI returned an unparseable trend list." }, 502);
   }

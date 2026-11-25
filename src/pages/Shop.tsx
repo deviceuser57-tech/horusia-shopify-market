@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
+import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,12 +47,48 @@ const Shop = () => {
     business_model: string;
   }>>([]);
 
+  const [shopHeroSlides, setShopHeroSlides] = useState<HeroSlide[]>([]);
+
   useEffect(() => {
     supabase
       .from("store_products")
       .select("id,title,description,category,image_url,price,currency,affiliate_url,business_model")
       .eq("status", "ACTIVE")
       .then(({ data }) => setLocalProducts(data ?? []));
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("hero_banner_configs")
+      .select("id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,sort_order")
+      .eq("is_active", true)
+      .in("placement", ["shop", "both"])
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (!data || data.length === 0) return;
+        setShopHeroSlides(
+          data.map((row) => ({
+            id: row.id,
+            headlineAr: row.headline_ar,
+            headlineEn: row.headline_en ?? row.headline_ar,
+            subheadlineAr: row.subheadline_ar ?? "",
+            subheadlineEn: row.subheadline_en ?? "",
+            imageUrl: row.image_url,
+            videoUrl: row.video_url ?? undefined,
+            overlayOpacity: row.overlay_opacity,
+            overlayColor: (row.overlay_color as HeroSlide["overlayColor"]) ?? "black",
+            textAlign: (row.text_align as HeroSlide["textAlign"]) ?? "center",
+            heightPreset: (row.height_preset as HeroSlide["heightPreset"]) ?? "compact",
+            ctaTextAr: row.cta_text_ar,
+            ctaTextEn: row.cta_text_en ?? "",
+            ctaLink: row.cta_link,
+            secondaryCtaTextAr: row.secondary_cta_text_ar ?? undefined,
+            secondaryCtaLink: row.secondary_cta_link ?? undefined,
+            badgeText: row.badge_text ?? "",
+          })),
+        );
+      });
   }, []);
   
   const { data: products = [], isLoading } = useQuery({
@@ -177,7 +214,9 @@ const Shop = () => {
         ]}
       />
       <Navbar />
-      
+
+      {shopHeroSlides.length > 0 && <HeroCarousel slides={shopHeroSlides} intervalMs={5000} />}
+
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="mb-12 text-center">
           <div className="inline-flex items-center justify-center p-4 bg-gradient-to-br from-primary/15 to-accent/20 rounded-3xl mb-6 shadow-[var(--shadow-soft)]">
