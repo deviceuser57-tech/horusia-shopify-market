@@ -293,32 +293,39 @@ const TrendIntelligence = () => {
 
 const enrichAndPublish = async (opportunity: RankedOpportunity) => {
   try {
-    toast.info("Enriching product and generating ad copy via AI Gateway...");
-    
-    // 1. Generate Arabic/English copy and tags
-    const aiData = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
+    // Try AI enrichment first; if the edge function is unavailable or
+    // unconfigured, fall back to publishing with the base product data
+    // so the product still reaches the storefront.
+    let aiData: Awaited<ReturnType<typeof enrichProductWithAI>> | null = null;
+    try {
+      toast.info("Enriching product and generating ad copy via AI Gateway...");
+      aiData = await enrichProductWithAI(opportunity.product.name, opportunity.product.category);
+    } catch (aiErr) {
+      console.warn("AI enrichment unavailable, publishing without it:", aiErr);
+      toast.info("AI enrichment unavailable — publishing with base product data.");
+    }
 
-    // 2. Insert into the store_products table
     const { error } = await supabase.from("store_products").insert({
       business_model: "DROPSHIPPING",
-      title: aiData.titleAr || opportunity.product.name,
-      title_ar: aiData.titleAr,
-      title_en: aiData.titleEn || opportunity.product.name,
-      description: aiData.descriptionAr,
+      title: aiData?.titleAr || opportunity.product.name,
+      title_ar: aiData?.titleAr || opportunity.product.name,
+      title_en: aiData?.titleEn || opportunity.product.name,
+      description: aiData?.descriptionAr || `Trending product: ${opportunity.product.name}`,
       category: opportunity.product.category,
       price: opportunity.product.sellingPrice,
       supplier_cost: opportunity.product.unitCost,
       currency: "USD",
       status: "ACTIVE",
-      tags: aiData.suggestedTags,
-      ad_copy: aiData.adCopy,
+      tags: aiData?.suggestedTags ?? [],
+      ad_copy: aiData?.adCopy ?? null,
       metadata: {
         score: opportunity.score,
         channel: opportunity.recommendedChannel,
         original_trend_growth: opportunity.product.trendGrowthPercent,
+        published_via: aiData ? "AI_ENRICHED" : "MANUAL_FALLBACK",
       }
     });
-    
+
     if (error) throw error;
     toast.success(`"${opportunity.product.name}" published successfully to the store gallery!`);
   } catch (err) {
