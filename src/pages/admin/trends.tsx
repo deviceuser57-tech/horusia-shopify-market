@@ -1,6 +1,6 @@
 import React from "react";
 import { AdminGuard } from "@/components/AdminGuard";
-import { TrendIntelligence } from "../TrendIntelligence";
+import TrendIntelligence from "../TrendIntelligence";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 

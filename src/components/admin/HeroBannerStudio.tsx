@@ -66,34 +66,64 @@ const rowToConfig = (row: BannerRow): HeroBannerConfig => ({
   isActive: row.is_active,
 });
 
+const SELECT_FIELDS =
+  "id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,overlay_opacity,cta_text_ar,cta_text_en,cta_link,badge_text,is_active";
+
 export const HeroBannerStudio = () => {
   const [config, setConfig] = useState<HeroBannerConfig>(defaults);
   const [rowId, setRowId] = useState<string | null>(null);
+  const [slides, setSlides] = useState<BannerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-    supabase
+  const loadSlides = async (keepId?: string | null) => {
+    const { data, error } = await supabase
       .from("hero_banner_configs")
-      .select("id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,overlay_opacity,cta_text_ar,cta_text_en,cta_link,badge_text,is_active")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (!active) return;
-        if (error) {
-          toast.error("Could not load hero banner configuration.");
-        } else if (data) {
-          setRowId(data.id);
-          setConfig(rowToConfig(data as BannerRow));
-        }
-        setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+      .select(SELECT_FIELDS)
+      .order("created_at", { ascending: false });
+    if (error) {
+      toast.error("Could not load hero banner configuration.");
+      setLoading(false);
+      return;
+    }
+    const rows = (data ?? []) as BannerRow[];
+    setSlides(rows);
+    const target = rows.find((r) => r.id === (keepId ?? rowId)) ?? rows[0];
+    if (target) {
+      setRowId(target.id);
+      setConfig(rowToConfig(target));
+    } else {
+      setRowId(null);
+      setConfig(defaults);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void loadSlides();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const selectSlide = (row: BannerRow) => {
+    setRowId(row.id);
+    setConfig(rowToConfig(row));
+  };
+
+  const startNewSlide = () => {
+    setRowId(null);
+    setConfig({ ...defaults, headlineAr: "", headlineEn: "", imageUrl: "" });
+  };
+
+  const deleteSlide = async (id: string) => {
+    if (!window.confirm("Delete this slide?")) return;
+    const { error } = await supabase.from("hero_banner_configs").delete().eq("id", id);
+    if (error) {
+      toast.error(`Delete failed: ${error.message}`);
+      return;
+    }
+    toast.success("Slide deleted.");
+    await loadSlides(rowId === id ? null : rowId);
+  };
 
   const handleSave = async () => {
     const { data: sessionData } = await supabase.auth.getSession();

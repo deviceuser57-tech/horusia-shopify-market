@@ -10,6 +10,43 @@ Deno.serve(async (request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+  // Require an authenticated user; AI enrichment is an admin operation.
+  const authHeader = request.headers.get("Authorization") ?? "";
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: userData, error: userError } = await userClient.auth.getUser();
+  if (userError || !userData.user) {
+    return new Response(JSON.stringify({ error: "Authentication required to use AI enrichment." }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Server-verified admin role check (OWNER / STORE_MANAGER / MARKETING_SPECIALIST).
+  if (serviceRoleKey) {
+    const admin = createClient(supabaseUrl, serviceRoleKey);
+    const { data: roles } = await admin
+      .from("user_roles")
+      .select("roles(name)")
+      .eq("user_id", userData.user.id);
+    const allowed = new Set(["OWNER", "STORE_MANAGER", "MARKETING_SPECIALIST"]);
+    const isAdmin = (roles ?? []).some((row) => {
+      const role = row.roles as unknown as { name?: string } | null;
+      return Boolean(role?.name && allowed.has(role.name));
+    });
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: "Admin role required to use AI enrichment." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   // Provider resolution: prefer Grok (xAI) when its key is configured,
   // otherwise fall back to the generic AI gateway.
   const grokKey = Deno.env.get("GROK_API_KEY") ?? Deno.env.get("XAI_API_KEY");
@@ -78,8 +115,6 @@ Deno.serve(async (request) => {
     });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (supabaseUrl && serviceRoleKey) {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     await supabase.from("agent_action_proposals").insert({

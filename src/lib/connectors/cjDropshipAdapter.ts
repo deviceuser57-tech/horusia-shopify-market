@@ -26,7 +26,11 @@ export class CJDropshipAdapter implements UnifiedStoreConnector {
     }));
   }
 
-  async checkSupplierAvailability(supplierSku: string) {
+  async checkSupplierAvailability(supplierSku: string): Promise<{
+    status: "AVAILABLE" | "UNAVAILABLE" | "OUT_OF_STOCK" | "UNKNOWN";
+    externalPrice?: number;
+    currency?: string;
+  }> {
     if (!supplierSku) return { status: "UNKNOWN" as const };
 
     const { data, error } = await supabase.functions.invoke("cj-connector", {
@@ -45,7 +49,7 @@ export class CJDropshipAdapter implements UnifiedStoreConnector {
     };
   }
 
-  async pushProduct(_product: StoreProduct) {
+  async pushProduct(_product: StoreProduct): Promise<{ externalId: string }> {
     throw new Error("Products are sourced from CJ into the store, not pushed back to CJ.");
   }
 }
