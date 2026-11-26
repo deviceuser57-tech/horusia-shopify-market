@@ -12,10 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { ProductSocialAdModal } from "@/components/admin/ProductSocialAdModal";
 
 type ProductRow = {
   id: string;
@@ -58,6 +59,7 @@ const statusVariant = (status: string) =>
 
 export default function ProductsManager() {
   const [products, setProducts] = useState<ProductRow[]>([]);
+  const [adsProduct, setAdsProduct] = useState<ProductRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -269,6 +271,10 @@ export default function ProductsManager() {
                         {product.business_model} · {product.category ?? "uncategorized"} · {product.currency} {Number(product.price ?? 0).toFixed(2)}
                       </p>
                     </div>
+                    <Button variant="ghost" size="sm" className="gap-1 text-xs" onClick={() => setAdsProduct(product)}>
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                      Ads
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => startEdit(product)} aria-label="Edit product">
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -283,6 +289,19 @@ export default function ProductsManager() {
         </Card>
       </div>
     </div>
+    {adsProduct && (
+      <ProductSocialAdModal
+        product={{
+          id: adsProduct.id,
+          title: adsProduct.title_ar || adsProduct.title,
+          price: Number(adsProduct.price ?? 0),
+          description: adsProduct.description,
+          category: adsProduct.category,
+        }}
+        open
+        onClose={() => setAdsProduct(null)}
+      />
+    )}
     </AdminPageShell>
   );
 }

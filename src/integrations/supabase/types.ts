@@ -1180,25 +1180,46 @@ export type Database = {
       }
       suppliers: {
         Row: {
+          account_identifier: string | null
+          api_endpoint: string | null
+          api_key: string | null
+          api_secret: string | null
           connector_type: string
           created_at: string
           id: string
+          last_ping_at: string | null
           name: string
+          settings: Json
           status: string
+          sync_status: string
         }
         Insert: {
+          account_identifier?: string | null
+          api_endpoint?: string | null
+          api_key?: string | null
+          api_secret?: string | null
           connector_type: string
           created_at?: string
           id?: string
+          last_ping_at?: string | null
           name: string
+          settings?: Json
           status?: string
+          sync_status?: string
         }
         Update: {
+          account_identifier?: string | null
+          api_endpoint?: string | null
+          api_key?: string | null
+          api_secret?: string | null
           connector_type?: string
           created_at?: string
           id?: string
+          last_ping_at?: string | null
           name?: string
+          settings?: Json
           status?: string
+          sync_status?: string
         }
         Relationships: []
       }
