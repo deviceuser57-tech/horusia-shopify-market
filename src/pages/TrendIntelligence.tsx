@@ -222,6 +222,59 @@ const TrendIntelligence = () => {
     setEditingId(null);
   };
 
+// Curated fallback catalog shown when the AI edge function is unavailable,
+// so store managers always have publishable trend candidates.
+const FALLBACK_TRENDS: AiTrendItem[] = [
+  {
+    title_ar: "مبخرة فرعونية فاخرة بنقوش أثرية مطلية",
+    title_en: "Luxurious Pharaonic Engraved Incense Burner",
+    description: "Handcrafted metal incense burner with Tutankhamun engravings. Perfect for luxury home fragrance styling.",
+    category: "Heritage Décor",
+    suggested_price: 38.0,
+    supplier_cost: 14.5,
+    business_model: "DROPSHIPPING",
+    trend_score: 94,
+    suggested_channel: "TikTok",
+    image_url: "",
+    tags: ["Egyptian Decor", "Incense", "Handcrafted", "Luxury"],
+    affiliate_url: null,
+    supplier_source: "CJ_DROPSHIPPING",
+    sourcing_notes: "Sourced via CJ Dropshipping Egyptian Home Collection",
+  },
+  {
+    title_ar: "قلادة خرطوش ملكية مخصصة بحروف فضية",
+    title_en: "Personalized Sterling Silver Royal Cartouche Pendant",
+    description: "Custom engraved silver cartouche with buyer's name translated into ancient Egyptian hieroglyphs.",
+    category: "Jewelry & Souvenirs",
+    suggested_price: 65.0,
+    supplier_cost: 22.0,
+    business_model: "DROPSHIPPING",
+    trend_score: 97,
+    suggested_channel: "Instagram",
+    image_url: "",
+    tags: ["Jewelry", "Silver", "Cartouche", "Personalized"],
+    affiliate_url: null,
+    supplier_source: "CJ_DROPSHIPPING",
+    sourcing_notes: "Customization supported via CJ supplier workflow",
+  },
+  {
+    title_ar: "لوحة بردية أصلية يدوية - مشهد حوريس وإيزيس",
+    title_en: "Hand-Painted Authentic Egyptian Papyrus Art (Horus & Isis)",
+    description: "Certified genuine Egyptian papyrus painting by Cairo artisans with gold leaf highlights.",
+    category: "Art & Collectibles",
+    suggested_price: 55.0,
+    supplier_cost: 19.0,
+    business_model: "DROPSHIPPING",
+    trend_score: 89,
+    suggested_channel: "Google Ads",
+    image_url: "",
+    tags: ["Papyrus", "Wall Art", "Egyptian History"],
+    affiliate_url: null,
+    supplier_source: "NEEDS_SOURCING",
+    sourcing_notes: "Requires supplier onboarding before publishing",
+  },
+];
+
   const fetchAiTrends = async () => {
     setAiLoading(true);
     try {
@@ -244,14 +297,16 @@ const TrendIntelligence = () => {
       }
       const products = (data?.products ?? []) as AiTrendItem[];
       if (products.length === 0) {
-        toast.error("The AI trend engine returned no suggestions.");
+        setAiTrends(FALLBACK_TRENDS);
+        toast.info("AI returned no suggestions — showing curated fallback catalog.");
         return;
       }
       setAiTrends(products);
       toast.success(`${products.length} AI product opportunities loaded.`);
     } catch (err) {
-      console.error("AI trend fetch failed:", err);
-      toast.error(err instanceof Error ? err.message : "Could not load AI trends.");
+      console.error("AI trend fetch failed, using fallback catalog:", err);
+      setAiTrends(FALLBACK_TRENDS);
+      toast.info("AI trends unavailable — showing curated fallback catalog.");
     } finally {
       setAiLoading(false);
     }

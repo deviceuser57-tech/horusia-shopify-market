@@ -25,6 +25,21 @@ export interface HeroSlide {
   hasAnimation?: boolean;
   headlineColor?: string;
   bodyColor?: string;
+  style?: HeroSlideStyle;
+}
+
+export interface HeroSlideStyle {
+  headlineFont?: string;
+  bodyFont?: string;
+  badgeBg?: string;
+  badgeText?: string;
+  ctaBg?: string;
+  ctaText?: string;
+  secondaryCtaBg?: string;
+  secondaryCtaText?: string;
+  textPanel?: "none" | "glass" | "solid";
+  panelColor?: string;
+  panelOpacity?: number;
 }
 
 const HEIGHT_CLASSES: Record<NonNullable<HeroSlide["heightPreset"]>, string> = {
@@ -129,22 +144,47 @@ export const HeroCarousel = ({
       />
 
       {/* Slide content */}
-      <div className={`relative z-10 container mx-auto flex flex-col px-6 ${ALIGN_CLASSES[current.textAlign ?? "center"]}`}>
+      <div
+        className={`relative z-10 container mx-auto flex flex-col px-6 ${ALIGN_CLASSES[current.textAlign ?? "center"]} ${
+          current.style?.textPanel === "glass"
+            ? "rounded-2xl border border-white/15 bg-white/10 p-6 backdrop-blur-md"
+            : current.style?.textPanel === "solid"
+              ? "rounded-2xl p-6"
+              : ""
+        }`}
+        style={
+          current.style?.textPanel === "solid"
+            ? { backgroundColor: current.style.panelColor ?? "rgba(11,25,44,0.85)" }
+            : undefined
+        }
+      >
         {current.badgeText && (
-          <span className="mb-4 inline-block animate-fade-in rounded-full bg-amber-500/90 px-4 py-1.5 text-xs font-bold text-navy-950 shadow-md">
+          <span
+            className="mb-4 inline-block animate-fade-in rounded-full px-4 py-1.5 text-xs font-bold shadow-md"
+            style={{
+              backgroundColor: current.style?.badgeBg ?? "rgba(245,158,11,0.9)",
+              color: current.style?.badgeText ?? "#0f172a",
+            }}
+          >
             {current.badgeText}
           </span>
         )}
         <h1
           className="mb-4 max-w-4xl animate-fade-in text-3xl font-extrabold leading-tight tracking-tight drop-shadow-md sm:text-5xl lg:text-6xl"
-          style={{ color: current.headlineColor ?? "#ffffff" }}
+          style={{
+            color: current.headlineColor ?? "#ffffff",
+            fontFamily: current.style?.headlineFont || undefined,
+          }}
         >
           {current.headlineAr}
         </h1>
         {current.subheadlineAr && (
           <p
             className="mb-6 max-w-2xl animate-fade-in text-base drop-shadow sm:text-lg lg:text-xl"
-            style={{ color: current.bodyColor ?? "#e5e7eb" }}
+            style={{
+              color: current.bodyColor ?? "#e5e7eb",
+              fontFamily: current.style?.bodyFont || undefined,
+            }}
           >
             {current.subheadlineAr}
           </p>
@@ -152,7 +192,11 @@ export const HeroCarousel = ({
         <div className="mt-2 flex animate-fade-in flex-wrap gap-3">
           <Button
             size="lg"
-            className="bg-amber-500 px-6 font-bold text-navy-950 shadow-lg hover:bg-amber-400"
+            className="px-6 font-bold shadow-lg"
+            style={{
+              backgroundColor: current.style?.ctaBg ?? "#f59e0b",
+              color: current.style?.ctaText ?? "#0f172a",
+            }}
             asChild
           >
             <Link to={current.ctaLink}>
@@ -163,7 +207,11 @@ export const HeroCarousel = ({
             <Button
               size="lg"
               variant="outline"
-              className="border-white/40 text-white backdrop-blur hover:bg-white/10"
+              className="border-white/40 backdrop-blur hover:bg-white/10"
+              style={{
+                color: current.style?.secondaryCtaText ?? "#ffffff",
+                borderColor: current.style?.secondaryCtaBg ?? "rgba(255,255,255,0.4)",
+              }}
               asChild
             >
               <Link to={current.secondaryCtaLink}>{current.secondaryCtaTextAr}</Link>

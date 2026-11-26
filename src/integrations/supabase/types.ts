@@ -505,6 +505,7 @@ export type Database = {
           secondary_cta_link: string | null
           secondary_cta_text_ar: string | null
           sort_order: number
+          style: Json
           subheadline_ar: string | null
           subheadline_en: string | null
           text_align: string
@@ -533,6 +534,7 @@ export type Database = {
           secondary_cta_link?: string | null
           secondary_cta_text_ar?: string | null
           sort_order?: number
+          style?: Json
           subheadline_ar?: string | null
           subheadline_en?: string | null
           text_align?: string
@@ -561,6 +563,7 @@ export type Database = {
           secondary_cta_link?: string | null
           secondary_cta_text_ar?: string | null
           sort_order?: number
+          style?: Json
           subheadline_ar?: string | null
           subheadline_en?: string | null
           text_align?: string

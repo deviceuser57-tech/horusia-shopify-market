@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
+import { HeroCarousel, type HeroSlide, type HeroSlideStyle } from "@/components/HeroCarousel";
 
 export interface HeroBannerConfig {
   headlineAr: string;
@@ -33,6 +33,7 @@ export interface HeroBannerConfig {
   headlineColor: string;
   bodyColor: string;
   hasAnimation: boolean;
+  style: HeroSlideStyle;
   sortOrder: number;
   isActive: boolean;
 }
@@ -59,6 +60,7 @@ const defaults: HeroBannerConfig = {
   headlineColor: "#ffffff",
   bodyColor: "#e5e7eb",
   hasAnimation: true,
+  style: {},
   sortOrder: 0,
   isActive: true,
 };
@@ -86,6 +88,7 @@ type BannerRow = {
   headline_color: string | null;
   body_color: string | null;
   has_animation: boolean | null;
+  style: Record<string, unknown> | null;
   sort_order: number | null;
   is_active: boolean;
 };
@@ -112,12 +115,13 @@ const rowToConfig = (row: BannerRow): HeroBannerConfig => ({
   headlineColor: row.headline_color ?? "#ffffff",
   bodyColor: row.body_color ?? "#e5e7eb",
   hasAnimation: row.has_animation ?? true,
+  style: (row.style as HeroSlideStyle) ?? {},
   sortOrder: row.sort_order ?? 0,
   isActive: row.is_active,
 });
 
 const SELECT_FIELDS =
-  "id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,product_overlay_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,headline_color,body_color,has_animation,sort_order,is_active";
+  "id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,product_overlay_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,headline_color,body_color,has_animation,style,sort_order,is_active";
 
 const buildPayload = (config: HeroBannerConfig) => ({
   headline_ar: config.headlineAr,
@@ -141,6 +145,7 @@ const buildPayload = (config: HeroBannerConfig) => ({
   headline_color: config.headlineColor,
   body_color: config.bodyColor,
   has_animation: config.hasAnimation,
+  style: config.style,
   sort_order: config.sortOrder,
   is_active: config.isActive,
 });
@@ -408,6 +413,64 @@ export const HeroBannerStudio = () => {
             <div>
               <Label>Sort order</Label>
               <Input type="number" value={config.sortOrder} onChange={(e) => setConfig({ ...config, sortOrder: Number(e.target.value) || 0 })} />
+            </div>
+          </div>
+          <div className="rounded-md border p-3 space-y-3">
+            <p className="text-sm font-semibold">Advanced style overrides</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Headline font</Label>
+                <Select value={config.style.headlineFont ?? "default"} onValueChange={(v) => setConfig({ ...config, style: { ...config.style, headlineFont: v === "default" ? undefined : v } })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default (Poppins)</SelectItem>
+                    <SelectItem value="Georgia, serif">Serif (Georgia)</SelectItem>
+                    <SelectItem value="'Courier New', monospace">Mono</SelectItem>
+                    <SelectItem value="'Trebuchet MS', sans-serif">Trebuchet</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Body font</Label>
+                <Select value={config.style.bodyFont ?? "default"} onValueChange={(v) => setConfig({ ...config, style: { ...config.style, bodyFont: v === "default" ? undefined : v } })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default (Poppins)</SelectItem>
+                    <SelectItem value="Georgia, serif">Serif (Georgia)</SelectItem>
+                    <SelectItem value="'Courier New', monospace">Mono</SelectItem>
+                    <SelectItem value="'Trebuchet MS', sans-serif">Trebuchet</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Text panel</Label>
+                <Select value={config.style.textPanel ?? "none"} onValueChange={(v) => setConfig({ ...config, style: { ...config.style, textPanel: v as HeroSlideStyle["textPanel"] } })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="glass">Glass</SelectItem>
+                    <SelectItem value="solid">Solid navy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Badge bg / text</Label>
+                <div className="flex gap-2">
+                  <input type="color" value={config.style.badgeBg ?? "#f59e0b"} onChange={(e) => setConfig({ ...config, style: { ...config.style, badgeBg: e.target.value } })} className="h-10 w-12 cursor-pointer rounded border" title="Badge background" />
+                  <input type="color" value={config.style.badgeText ?? "#0f172a"} onChange={(e) => setConfig({ ...config, style: { ...config.style, badgeText: e.target.value } })} className="h-10 w-12 cursor-pointer rounded border" title="Badge text" />
+                </div>
+              </div>
+              <div>
+                <Label>CTA bg / text</Label>
+                <div className="flex gap-2">
+                  <input type="color" value={config.style.ctaBg ?? "#f59e0b"} onChange={(e) => setConfig({ ...config, style: { ...config.style, ctaBg: e.target.value } })} className="h-10 w-12 cursor-pointer rounded border" title="Button background" />
+                  <input type="color" value={config.style.ctaText ?? "#0f172a"} onChange={(e) => setConfig({ ...config, style: { ...config.style, ctaText: e.target.value } })} className="h-10 w-12 cursor-pointer rounded border" title="Button text" />
+                </div>
+              </div>
+              <div>
+                <Label>Panel color (solid)</Label>
+                <Input value={config.style.panelColor ?? ""} placeholder="#0B192C or rgba(...)" onChange={(e) => setConfig({ ...config, style: { ...config.style, panelColor: e.target.value || undefined } })} className="font-mono text-xs" />
+              </div>
             </div>
           </div>
           <div className="flex items-center justify-between rounded-md border p-3">

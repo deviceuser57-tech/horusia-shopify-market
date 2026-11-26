@@ -37,7 +37,7 @@ const Index = () => {
   useEffect(() => {
     supabase
       .from("hero_banner_configs")
-      .select("id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,sort_order,product_overlay_url,has_animation,headline_color,body_color")
+      .select("id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,sort_order,product_overlay_url,has_animation,headline_color,body_color,style")
       .eq("is_active", true)
       .in("placement", ["home", "both"])
       .order("sort_order", { ascending: true })
@@ -67,6 +67,7 @@ const Index = () => {
             hasAnimation: row.has_animation ?? true,
             headlineColor: row.headline_color ?? undefined,
             bodyColor: row.body_color ?? undefined,
+            style: (row.style as HeroSlide["style"]) ?? undefined,
           })),
         );
       });
