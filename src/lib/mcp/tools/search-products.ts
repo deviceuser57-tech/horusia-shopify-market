@@ -5,7 +5,7 @@ import { supabaseForUser } from "../supabase";
 export default defineTool({
   name: "search_products",
   title: "Search Store Products",
-  description: "Search active products in Tumāninah Veritas Store by keyword or category.",
+  description: "Search active products in HORUSIA by keyword or category.",
   inputSchema: {
     query: z.string().optional().describe("Search term matching product titles or descriptions"),
     category: z.string().optional().describe("Filter by category name"),

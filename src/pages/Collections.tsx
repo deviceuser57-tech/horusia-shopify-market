@@ -73,7 +73,7 @@ export default function Collections() {
         <section className="py-20 bg-gradient-to-br from-background via-secondary/20 to-background">
           <div className="container mx-auto px-4">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gold via-[#E2C37C] to-gold bg-clip-text text-transparent">
                 Our Collections
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
@@ -152,7 +152,7 @@ export default function Collections() {
                         )}
                         {collection.handle === 'egyptian-heritage' && (
                           <div className="absolute top-4 right-4">
-                            <Badge className="bg-gradient-to-r from-gold to-accent text-white">
+                            <Badge className="bg-gradient-to-r from-gold to-[#E2C37C] text-white">
                               Premium
                             </Badge>
                           </div>

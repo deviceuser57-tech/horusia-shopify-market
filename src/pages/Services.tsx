@@ -53,7 +53,7 @@ const Services = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Bespoke Egyptian Heritage Services & Custom Crafts | Tumāninah Veritas</title>
+        <title>Bespoke Egyptian Heritage Services & Custom Crafts | HORUSIA</title>
         <meta name="description" content="Order custom Egyptian handmade pieces, heritage restoration, and personalized event styling services crafted by skilled artisans in Egypt." />
         <meta property="og:title" content="Custom Egyptian Artisan & Replication Services" />
         <meta property="og:description" content="Custom handmade replicas, pharaonic cartouche personalization, and home styling consultation." />
@@ -66,7 +66,7 @@ const Services = () => {
             "serviceType": "Handmade Heritage & Replication",
             "provider": {
               "@type": "Organization",
-              "name": "Tumāninah Veritas Store",
+              "name": "HORUSIA",
               "url": "https://eagles-veritas-shop.lovable.app"
             },
             "areaServed": "Global",

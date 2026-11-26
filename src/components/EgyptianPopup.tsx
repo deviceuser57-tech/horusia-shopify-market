@@ -51,7 +51,7 @@ export const EgyptianPopup = () => {
 
           {/* Content Section */}
           <div className="p-8 md:p-12 flex flex-col justify-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gold via-accent to-gold bg-clip-text text-transparent">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gold via-[#E2C37C] to-gold bg-clip-text text-transparent">
               Inspired by the Land of Eternity
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground mb-3">

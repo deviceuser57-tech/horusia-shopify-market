@@ -10,10 +10,10 @@ const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>About Us - Tumāninah Veritas Store | Our Philosophy</title>
-        <meta name="description" content="Learn about Tumāninah Veritas Store's philosophy of calmness and truth. Discover our values of quality, trust, and excellence in every product we offer." />
-        <meta property="og:title" content="About Us - Tumāninah Veritas Store" />
-        <meta property="og:description" content="Discover the story behind Tumāninah Veritas Store and our commitment to quality products and trusted service." />
+        <title>About Us - HORUSIA | Our Philosophy</title>
+        <meta name="description" content="Learn about HORUSIA's philosophy of calmness and truth. Discover our values of quality, trust, and excellence in every product we offer." />
+        <meta property="og:title" content="About Us - HORUSIA" />
+        <meta property="og:description" content="Discover the story behind HORUSIA and our commitment to quality products and trusted service." />
         <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/about" />
       </Helmet>
       <BreadcrumbSchema
@@ -29,10 +29,10 @@ const About = () => {
         <section className="bg-gradient-to-b from-secondary/30 to-background py-16 md:py-24">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
-              About Eagles One Store
+              About HORUSIA
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto italic">
-              Tumāninah Veritas - Calmness and Truth in Every Purchase
+              HORUSIA — Where Ancient Craft Meets Modern Luxury
             </p>
           </div>
         </section>
@@ -43,9 +43,10 @@ const About = () => {
             <h2 className="text-3xl font-bold text-primary mb-6">Our Story</h2>
             <div className="prose prose-lg">
               <p className="text-muted-foreground leading-relaxed mb-4">
-                Eagles One Store was born from a simple philosophy: that shopping should be an experience 
-                built on trust, quality, and authenticity. We believe in the power of calmness (Tumāninah) 
-                and truth (Veritas) to transform the way you discover and purchase products.
+                HORUSIA was born from a simple philosophy: that shopping should be an experience
+                built on trust, quality, and authenticity. Inspired by the eye of Horus — symbol of
+                protection, vision, and truth — we transform the way you discover and purchase
+                Egyptian-heritage products and modern essentials.
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 As your one-stop store, we curate a collection that reflects modern lifestyle needs while 

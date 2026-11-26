@@ -62,7 +62,7 @@ const CollectionDetail = () => {
               </Button>
 
               <div className="max-w-3xl mx-auto text-center">
-                <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gold via-accent to-gold bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gold via-[#E2C37C] to-gold bg-clip-text text-transparent">
                   Inspired by the Land of Eternity
                 </h1>
                 <p className="text-2xl md:text-3xl text-muted-foreground mb-4">
@@ -102,7 +102,7 @@ const CollectionDetail = () => {
               {/* About Section */}
               <div className="mt-16 max-w-3xl mx-auto">
                 <div className="bg-card/50 backdrop-blur rounded-xl p-8 border border-border/50">
-                  <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-gold to-accent bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-gold to-[#E2C37C] bg-clip-text text-transparent">
                     About This Collection
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">

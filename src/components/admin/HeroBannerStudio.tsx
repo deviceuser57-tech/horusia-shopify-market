@@ -40,7 +40,7 @@ export interface HeroBannerConfig {
 
 const defaults: HeroBannerConfig = {
   headlineAr: "طُمأنينة ڤيريتاس — فخامة التراث المصري",
-  headlineEn: "Tumāninah Veritas — Timeless Luxury",
+  headlineEn: "HORUSIA — Timeless Luxury",
   subheadlineAr: "قطع فنية وتصاميم يدوية نادرة تصلك أينما كنت",
   subheadlineEn: "Rare art pieces and handcrafted designs delivered anywhere",
   imageUrl: "https://images.unsplash.com/photo-1572953109213-3be62398eb95?auto=format&fit=crop&w=1600&q=80",

@@ -206,9 +206,9 @@ const Shop = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Buy Egyptian Heritage Collections & Décor | Tumāninah Veritas Store</title>
+        <title>Buy Egyptian Heritage Collections & Décor | HORUSIA</title>
         <meta name="description" content="Explore our curated catalog of handcrafted Egyptian statues, alabaster lamps, and heritage souvenirs. Verified supplier quality with fast delivery." />
-        <meta property="og:title" content="Buy Egyptian Collections & Pharaoh Statues | Tumāninah Veritas" />
+        <meta property="og:title" content="Buy Egyptian Collections & Pharaoh Statues | HORUSIA" />
         <meta property="og:description" content="Explore verified Egyptian collections, dropship treasures, and handcrafted home accessories." />
         <meta property="og:image" content="https://eagles-veritas-shop.lovable.app/share-preview.jpg" />
         <meta property="og:url" content="https://eagles-veritas-shop.lovable.app/shop" />

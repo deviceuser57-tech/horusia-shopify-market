@@ -24,7 +24,7 @@ const Terms = () => {
               <div>
                 <h2 className="text-2xl font-bold text-primary mb-4">Acceptance of Terms</h2>
                 <p className="leading-relaxed">
-                  By accessing and using Eagles One Store ("Tumāninah Veritas"), you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website or services.
+                  By accessing and using HORUSIA ("HORUSIA"), you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website or services.
                 </p>
               </div>
 
@@ -71,21 +71,21 @@ const Terms = () => {
               <div>
                 <h2 className="text-2xl font-bold text-primary mb-4">Intellectual Property</h2>
                 <p className="leading-relaxed">
-                  All content on our website, including text, graphics, logos, images, and software, is the property of Eagles One Store or its content suppliers and is protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.
+                  All content on our website, including text, graphics, logos, images, and software, is the property of HORUSIA or its content suppliers and is protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.
                 </p>
               </div>
 
               <div>
                 <h2 className="text-2xl font-bold text-primary mb-4">Limitation of Liability</h2>
                 <p className="leading-relaxed">
-                  To the fullest extent permitted by law, Eagles One Store shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of our services or products.
+                  To the fullest extent permitted by law, HORUSIA shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of our services or products.
                 </p>
               </div>
 
               <div>
                 <h2 className="text-2xl font-bold text-primary mb-4">Indemnification</h2>
                 <p className="leading-relaxed">
-                  You agree to indemnify and hold harmless Eagles One Store and its affiliates from any claims, damages, losses, liabilities, and expenses arising from your use of our services or violation of these terms.
+                  You agree to indemnify and hold harmless HORUSIA and its affiliates from any claims, damages, losses, liabilities, and expenses arising from your use of our services or violation of these terms.
                 </p>
               </div>
 

@@ -54,10 +54,10 @@ const Contact = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Contact Us - Tumāninah Veritas Store | Get in Touch</title>
-        <meta name="description" content="Contact Tumāninah Veritas Store for inquiries, support, or questions. Reach us via email at tumaninahveritasstore@gmail.com or WhatsApp." />
-        <meta property="og:title" content="Contact Us - Tumāninah Veritas Store" />
-        <meta property="og:description" content="Get in touch with Tumāninah Veritas Store. We're here to help with any questions or concerns." />
+        <title>Contact Us - HORUSIA | Get in Touch</title>
+        <meta name="description" content="Contact HORUSIA for inquiries, support, or questions. Reach us via email at tumaninahveritasstore@gmail.com or WhatsApp." />
+        <meta property="og:title" content="Contact Us - HORUSIA" />
+        <meta property="og:description" content="Get in touch with HORUSIA. We're here to help with any questions or concerns." />
         <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/contact" />
       </Helmet>
       <BreadcrumbSchema

@@ -108,7 +108,7 @@ export default function OAuthConsent() {
           </div>
           <CardTitle>Connect {details.client?.client_name ?? "External Agent"}</CardTitle>
           <CardDescription>
-            This application requests access to interact with Tumāninah Veritas Store on your behalf.
+            This application requests access to interact with HORUSIA on your behalf.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

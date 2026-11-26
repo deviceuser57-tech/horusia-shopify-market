@@ -96,9 +96,9 @@ const ProductDetail = () => {
       {firstVariant && (
         <>
           <Helmet>
-            <title>{node.title} - Tumāninah Veritas Store</title>
-            <meta name="description" content={node.description || `Buy ${node.title} at Tumāninah Veritas Store. Quality products with trusted service.`} />
-            <meta property="og:title" content={`${node.title} - Tumāninah Veritas Store`} />
+            <title>{node.title} - HORUSIA</title>
+            <meta name="description" content={node.description || `Buy ${node.title} at HORUSIA. Quality products with trusted service.`} />
+            <meta property="og:title" content={`${node.title} - HORUSIA`} />
             <meta property="og:description" content={node.description || `Shop ${node.title} online`} />
             <meta property="og:image" content={image?.url || ''} />
             <link rel="canonical" href={`https://eagles-veritas-shop.lovable.app/product/${handle}`} />

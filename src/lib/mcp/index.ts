@@ -7,10 +7,10 @@ const issuer = supabaseUrl ? `${supabaseUrl.replace(/\/$/, "")}/auth/v1` : "";
 
 export default defineMcp({
   name: "tumaninah-veritas-store",
-  title: "Tumāninah Veritas Store",
+  title: "HORUSIA",
   version: "1.0.0",
   instructions:
-    "Search products and browse categories in the Tumāninah Veritas Store catalog (zero-inventory: dropshipping and affiliate products).",
+    "Search products and browse categories in the HORUSIA catalog (zero-inventory: dropshipping and affiliate products).",
   auth: issuer
     ? auth.oauth.issuer({
         issuer,

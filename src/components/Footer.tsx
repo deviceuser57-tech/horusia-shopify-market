@@ -21,8 +21,8 @@ export const Footer = () => {
           {/* Brand */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-foreground">
-              <span className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-gold bg-clip-text leading-tight">
-                Tumāninah Veritas
+              <span className="text-xl font-bold bg-gradient-to-r from-gold via-[#E2C37C] to-gold bg-clip-text leading-tight">
+                HORUSIA
               </span>
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
@@ -208,7 +208,7 @@ export const Footer = () => {
         <div className="mt-8 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground text-center md:text-left">
-              © {new Date().getFullYear()} Tumāninah Veritas - One Stop Store. All rights reserved.
+              © {new Date().getFullYear()} HORUSIA - One Stop Store. All rights reserved.
             </p>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span>🇪🇬 Proudly featuring Egyptian Heritage</span>

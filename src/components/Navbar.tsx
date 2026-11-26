@@ -81,12 +81,12 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-4 flex-shrink-0 mr-auto">
             <img
               src={logo}
-              alt="Tumāninah Veritas Store"
+              alt="HORUSIA"
               className="h-16 w-16 md:h-20 md:w-20 object-contain rounded-lg"
             />
             <div className="hidden md:flex flex-col">
-              <span className="text-2xl md:text-3xl font-serif font-bold text-foreground leading-tight">
-                Tumāninah Veritas
+              <span className="text-2xl md:text-3xl font-serif font-bold bg-gradient-to-r from-gold via-[#E2C37C] to-gold bg-clip-text text-transparent leading-tight">
+                HORUSIA
               </span>
               <span className="text-sm md:text-base text-foreground/80">One Stop Store</span>
             </div>

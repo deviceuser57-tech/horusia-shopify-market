@@ -21,8 +21,8 @@ const Index = () => {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([
     {
-      headlineAr: "Tumāninah Veritas Store",
-      headlineEn: "Tumāninah Veritas Store",
+      headlineAr: "HORUSIA",
+      headlineEn: "HORUSIA",
       subheadlineAr: "One Stop Store - Quality products, trusted service, modern lifestyle.",
       subheadlineEn: "One Stop Store - Quality products, trusted service, modern lifestyle.",
       imageUrl: heroBanner,
@@ -109,9 +109,9 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Tumāninah Veritas Store | Buy Handcrafted Egyptian Heritage Gifts</title>
+        <title>HORUSIA | Buy Handcrafted Egyptian Heritage Gifts</title>
         <meta name="description" content="Shop authentic Egyptian heritage treasures, handmade replicas, and luxury pharaonic home decor with secure international shipping." />
-        <meta property="og:title" content="Tumāninah Veritas Store | Egyptian Heritage Artifacts" />
+        <meta property="og:title" content="HORUSIA | Egyptian Heritage Artifacts" />
         <meta property="og:description" content="Direct from Cairo artisans: handcrafted replicas, bespoke jewelry, and pharaonic styling." />
         <meta property="og:image" content="https://eagles-veritas-shop.lovable.app/share-preview.jpg" />
         <meta property="og:url" content="https://eagles-veritas-shop.lovable.app/" />
@@ -120,7 +120,7 @@ const Index = () => {
       <Navbar />
       <EgyptianPopup />
       <OrganizationSchema
-        name="Tumāninah Veritas Store"
+        name="HORUSIA"
         description="One Stop Store - Quality products, trusted service, modern lifestyle"
         url="https://eagles-veritas-shop.lovable.app"
         socialLinks={[
@@ -131,7 +131,7 @@ const Index = () => {
         contactEmail="contact@tumaninahveritas.com"
       />
       <WebSiteSchema
-        name="Tumāninah Veritas Store"
+        name="HORUSIA"
         url="https://eagles-veritas-shop.lovable.app"
         description="One Stop Store offering quality products with trusted service for a modern lifestyle"
       />
@@ -213,7 +213,7 @@ const Index = () => {
                 Our Philosophy
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
-                At Tumāninah Veritas Store, we believe in providing more than just products.
+                At HORUSIA, we believe in providing more than just products.
                 We offer a curated experience of quality, trust, and modern living.
               </p>
               <Button variant="outline" size="lg" asChild>

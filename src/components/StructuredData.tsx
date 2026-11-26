@@ -60,7 +60,7 @@ export const ProductSchema = ({
   currency,
   availability,
   url,
-  brand = "Tumāninah Veritas Store",
+  brand = "HORUSIA",
 }: ProductSchemaProps) => {
   const schema = {
     "@context": "https://schema.org",

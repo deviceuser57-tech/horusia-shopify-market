@@ -154,8 +154,8 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-primary mb-2">Eagles One Store</h1>
-            <p className="text-sm text-muted-foreground italic">Tumāninah Veritas</p>
+            <h1 className="text-3xl font-bold text-primary mb-2">HORUSIA</h1>
+            <p className="text-sm text-muted-foreground italic">HORUSIA</p>
           </Link>
         </div>
 

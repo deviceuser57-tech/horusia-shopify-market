@@ -97,8 +97,8 @@ export default function SocialAccountsManager() {
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Account name</Label><Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="e.g. Tumāninah Main" required /></div>
-            <div><Label>Handle / username</Label><Input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@tumaninahveritasstore" /></div>
+            <div><Label>Account name</Label><Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="e.g. HORUSIA Main" required /></div>
+            <div><Label>Handle / username</Label><Input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@horusia_store" /></div>
             <div className="md:col-span-2"><Label>Notes (optional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Ad account ID, business manager, etc." /></div>
             <Button type="submit" className="md:col-span-2" disabled={saving}>{saving ? "Saving..." : "Save account"}</Button>
           </form>
