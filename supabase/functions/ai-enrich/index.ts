@@ -47,22 +47,22 @@ Deno.serve(async (request) => {
     }
   }
 
-  // Provider resolution: prefer Grok (xAI), then the Lovable AI gateway,
-  // then a generic AI gateway.
-  const xaiKey = Deno.env.get("XAI_API_KEY") ?? Deno.env.get("GROK_API_KEY");
+  // Provider resolution: LOVABLE_API_KEY (Lovable AI gateway) is the
+  // primary managed provider. xAI/Grok and a generic gateway are kept
+  // only as emergency fallbacks when the primary key is absent.
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const xaiKey = Deno.env.get("XAI_API_KEY") ?? Deno.env.get("GROK_API_KEY");
 
   let gatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
   let gatewayKey = lovableKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
   let model = "google/gemini-2.5-flash";
-  const gatewayUrlOverride = xaiKey ? undefined : Deno.env.get("AI_GATEWAY_URL");
 
-  if (xaiKey) {
+  if (!lovableKey && xaiKey) {
     gatewayUrl = "https://api.x.ai/v1/chat/completions";
     gatewayKey = xaiKey;
     model = "grok-2-latest";
-  } else if (gatewayUrlOverride) {
-    gatewayUrl = gatewayUrlOverride;
+  } else if (!lovableKey && Deno.env.get("AI_GATEWAY_URL")) {
+    gatewayUrl = Deno.env.get("AI_GATEWAY_URL")!;
   }
   if (!gatewayKey) {
     return new Response(JSON.stringify({ error: "AI provider is not configured." }), {

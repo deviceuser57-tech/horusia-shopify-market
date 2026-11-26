@@ -12,18 +12,30 @@ interface SocialAdBundle {
   google: { headlines: string[]; descriptions: string[] };
 }
 
+type AdFormat = "video" | "image" | "carousel";
+
 export function ProductSocialAdModal({
   product,
   open,
   onClose,
 }: {
-  product: { id: string; title: string; price: number; description?: string | null; category?: string | null };
+  product: {
+    id: string;
+    title: string;
+    price: number;
+    description?: string | null;
+    category?: string | null;
+    imageUrl?: string | null;
+    imageUrls?: string[];
+  };
   open: boolean;
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [ads, setAds] = useState<SocialAdBundle | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [format, setFormat] = useState<AdFormat>("video");
+  const images = product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : [];
 
   const fallbackAds = (): SocialAdBundle => ({
     tiktok: {
@@ -59,6 +71,7 @@ export function ProductSocialAdModal({
           productId: product.id,
           rawName: product.title,
           category: product.category ?? "Heritage Décor",
+          adFormat: format,
         },
       });
       if (error || !data?.ads) throw error ?? new Error("No ads payload");
@@ -91,6 +104,32 @@ export function ProductSocialAdModal({
             Generate targeted multi-platform ad copy for <strong>{product.title}</strong>
           </DialogDescription>
         </DialogHeader>
+
+        {/* Product preview + format picker */}
+        <div className="flex gap-4 rounded-lg border bg-muted/30 p-3">
+          {images[0] ? (
+            <img src={images[0]} alt={product.title} className="h-20 w-20 shrink-0 rounded-md object-cover" />
+          ) : (
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">No image</div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{product.title}</p>
+            <p className="text-xs text-muted-foreground">
+              {product.category ?? "General"} · ${product.price.toFixed(2)}
+              {images.length > 1 ? ` · ${images.length} images` : ""}
+            </p>
+            {product.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{product.description}</p>}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Ad format:</span>
+          {([["video", "Video Reel (9:16)"], ["image", "Static Image (1:1)"], ["carousel", "Carousel (4:5)"]] as const).map(([v, label]) => (
+            <Button key={v} type="button" size="sm" variant={format === v ? "default" : "outline"} onClick={() => setFormat(v)}>
+              {label}
+            </Button>
+          ))}
+        </div>
 
         {!ads ? (
           <div className="space-y-4 py-8 text-center">
@@ -155,6 +194,18 @@ export function ProductSocialAdModal({
               </Button>
             </TabsContent>
           </Tabs>
+        )}
+
+        {ads && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+            <p className="mb-1 text-xs font-semibold uppercase text-amber-600">Production guide — {format === "video" ? "9:16 vertical video" : format === "image" ? "1:1 static image" : "4:5 carousel"}</p>
+            <ul className="list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
+              {format === "video" && <><li>Hook in first 3 seconds with product hero shot on clean background</li><li>Show 3 benefit close-ups, then price + CTA end card</li><li>Caption file: include hook + CTA + 3 hashtags</li></>}
+              {format === "image" && <><li>Use hero image with 20% text-safe zone for headline overlay</li><li>Export at 1080×1080px, sRGB, under 30MB</li><li>Add price badge graphic in corner</li></>}
+              {format === "carousel" && <><li>Slide 1: hero shot + headline — Slides 2-3: details/features — Slide 4: CTA + offer</li><li>Export 1080×1350px per slide, consistent brand frame</li><li>Write per-slide caption in notes</li></>}
+              <li>Always disclose #ad and keep claims evidence-safe</li>
+            </ul>
+          </div>
         )}
       </DialogContent>
     </Dialog>

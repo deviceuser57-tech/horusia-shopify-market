@@ -28,6 +28,7 @@ import AdminHome from "./pages/admin/AdminHome";
 import AgentApprovalCenter from "./pages/admin/AgentApprovalCenter";
 import ConnectorManager from "./pages/admin/ConnectorManager";
 import ProductsManager from "./pages/admin/ProductsManager";
+import SocialAccountsManager from "./pages/admin/SocialAccountsManager";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/admin/approvals" element={<AdminGuard><AgentApprovalCenter /></AdminGuard>} />
             <Route path="/admin/connectors" element={<AdminGuard><ConnectorManager /></AdminGuard>} />
             <Route path="/admin/products" element={<AdminGuard><ProductsManager /></AdminGuard>} />
+            <Route path="/admin/social" element={<AdminGuard><SocialAccountsManager /></AdminGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />
