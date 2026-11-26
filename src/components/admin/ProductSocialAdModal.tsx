@@ -71,6 +71,8 @@ export function ProductSocialAdModal({
           productId: product.id,
           rawName: product.title,
           category: product.category ?? "Heritage Décor",
+          price: product.price,
+          description: product.description ?? "",
           adFormat: format,
         },
       });

@@ -62,6 +62,7 @@ export default function ProductsManager() {
   const [adsProduct, setAdsProduct] = useState<ProductRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [drafting, setDrafting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
@@ -173,6 +174,36 @@ export default function ProductsManager() {
   const updateField = (field: keyof typeof emptyForm, value: string) =>
     setForm((current) => ({ ...current, [field]: value }));
 
+  const generateDraft = async () => {
+    if (!form.title.trim()) {
+      toast.error("Enter a product name first, then generate the AI draft.");
+      return;
+    }
+    setDrafting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-enrich", {
+        body: {
+          mode: "PRODUCT_DRAFT",
+          rawName: form.title.trim(),
+          category: form.category.trim() || undefined,
+        },
+      });
+      if (error) throw error;
+      setForm((current) => ({
+        ...current,
+        title_ar: (data?.titleAr as string) || current.title_ar,
+        title_en: (data?.titleEn as string) || current.title_en,
+        description: [data?.descriptionAr, data?.descriptionEn].filter(Boolean).join("\n\n") || current.description,
+        tags: Array.isArray(data?.suggestedTags) ? data.suggestedTags.join(", ") : current.tags,
+      }));
+      toast.success("AI draft applied — review before saving.");
+    } catch {
+      toast.info("AI draft unavailable — fill the fields manually.");
+    } finally {
+      setDrafting(false);
+    }
+  };
+
   return (
     <AdminPageShell>
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -193,6 +224,10 @@ export default function ProductsManager() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div><Label>Title</Label><Input value={form.title} onChange={(e) => updateField("title", e.target.value)} required /></div>
+              <Button type="button" variant="outline" size="sm" className="w-full gap-2" onClick={() => void generateDraft()} disabled={drafting || !form.title.trim()}>
+                {drafting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-amber-500" />}
+                {drafting ? "Generating draft..." : "Generate AI draft (AR/EN + tags)"}
+              </Button>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label>Title (AR)</Label><Input value={form.title_ar} onChange={(e) => updateField("title_ar", e.target.value)} /></div>
                 <div><Label>Title (EN)</Label><Input value={form.title_en} onChange={(e) => updateField("title_en", e.target.value)} /></div>
