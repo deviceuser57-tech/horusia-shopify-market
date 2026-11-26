@@ -63,6 +63,8 @@ export default function ProductsManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [drafting, setDrafting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [supplierUrl, setSupplierUrl] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
@@ -204,6 +206,40 @@ export default function ProductsManager() {
     }
   };
 
+  const importFromSupplierUrl = async () => {
+    const url = supplierUrl.trim();
+    if (!url) {
+      toast.error("Paste a supplier product URL first.");
+      return;
+    }
+    setImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-enrich", {
+        body: { mode: "EXTRACT_FROM_URL", url },
+      });
+      if (error) throw error;
+      setForm((current) => ({
+        ...current,
+        title: (data?.title_en as string) || current.title,
+        title_ar: (data?.title_ar as string) || current.title_ar,
+        title_en: (data?.title_en as string) || current.title_en,
+        description: [data?.description_ar, data?.description_en].filter(Boolean).join("\n\n") || current.description,
+        category: (data?.category as string) || current.category,
+        image_url: (data?.image_url as string) || current.image_url,
+        price: data?.suggested_price != null ? String(data.suggested_price) : current.price,
+        supplier_cost: data?.suggested_supplier_cost != null ? String(data.suggested_supplier_cost) : current.supplier_cost,
+        affiliate_url: (data?.affiliate_url as string) || current.affiliate_url,
+        business_model: data?.supplier_source === "AFFILIATE_NETWORK" ? "AFFILIATE" : current.business_model,
+        tags: Array.isArray(data?.tags) ? data.tags.join(", ") : current.tags,
+      }));
+      toast.success("Supplier product imported — review fields before saving.");
+    } catch {
+      toast.info("URL import unavailable — fill the fields manually.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <AdminPageShell>
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -269,6 +305,16 @@ export default function ProductsManager() {
                 <div><Label>Affiliate URL</Label><Input type="url" value={form.affiliate_url} onChange={(e) => updateField("affiliate_url", e.target.value)} required /></div>
               )}
               <div><Label>Supplier SKU</Label><Input value={form.supplier_sku} onChange={(e) => updateField("supplier_sku", e.target.value)} /></div>
+              <div>
+                <Label>Supplier product URL (AI import)</Label>
+                <div className="flex gap-2">
+                  <Input type="url" value={supplierUrl} onChange={(e) => setSupplierUrl(e.target.value)} placeholder="https://cjdropshipping.com/product/...?" />
+                  <Button type="button" variant="outline" size="sm" className="shrink-0 gap-1" onClick={() => void importFromSupplierUrl()} disabled={importing || !supplierUrl.trim()}>
+                    {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-amber-500" />}
+                    Import
+                  </Button>
+                </div>
+              </div>
               <div><Label>Tags (comma separated)</Label><Input value={form.tags} onChange={(e) => updateField("tags", e.target.value)} placeholder="heritage, gift, trending" /></div>
               <div className="flex gap-2 pt-2">
                 <Button type="submit" className="flex-1" disabled={saving}>

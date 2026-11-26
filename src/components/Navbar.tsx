@@ -71,6 +71,7 @@ export const Navbar = () => {
     { href: "/admin/connectors", label: "Affiliate & Suppliers" },
     { href: "/admin/products", label: "Products" },
     { href: "/admin/social", label: "Social Accounts" },
+    { href: "/admin/dropship", label: "Dropship Ops" },
   ];
 
   return (

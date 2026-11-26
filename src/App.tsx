@@ -29,6 +29,7 @@ import AgentApprovalCenter from "./pages/admin/AgentApprovalCenter";
 import ConnectorManager from "./pages/admin/ConnectorManager";
 import ProductsManager from "./pages/admin/ProductsManager";
 import SocialAccountsManager from "./pages/admin/SocialAccountsManager";
+import DropshipOpsPortal from "./pages/admin/DropshipOpsPortal";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/admin/connectors" element={<AdminGuard><ConnectorManager /></AdminGuard>} />
             <Route path="/admin/products" element={<AdminGuard><ProductsManager /></AdminGuard>} />
             <Route path="/admin/social" element={<AdminGuard><SocialAccountsManager /></AdminGuard>} />
+            <Route path="/admin/dropship" element={<AdminGuard><DropshipOpsPortal /></AdminGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />
