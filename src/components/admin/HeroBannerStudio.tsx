@@ -30,6 +30,8 @@ export interface HeroBannerConfig {
   secondaryCtaTextAr: string;
   secondaryCtaLink: string;
   badgeText: string;
+  headlineColor: string;
+  bodyColor: string;
   hasAnimation: boolean;
   sortOrder: number;
   isActive: boolean;
@@ -54,6 +56,8 @@ const defaults: HeroBannerConfig = {
   secondaryCtaTextAr: "",
   secondaryCtaLink: "",
   badgeText: "مجموعة حصرية 2026",
+  headlineColor: "#ffffff",
+  bodyColor: "#e5e7eb",
   hasAnimation: true,
   sortOrder: 0,
   isActive: true,
@@ -79,6 +83,8 @@ type BannerRow = {
   secondary_cta_text_ar: string | null;
   secondary_cta_link: string | null;
   badge_text: string | null;
+  headline_color: string | null;
+  body_color: string | null;
   has_animation: boolean | null;
   sort_order: number | null;
   is_active: boolean;
@@ -103,13 +109,15 @@ const rowToConfig = (row: BannerRow): HeroBannerConfig => ({
   secondaryCtaTextAr: row.secondary_cta_text_ar ?? "",
   secondaryCtaLink: row.secondary_cta_link ?? "",
   badgeText: row.badge_text ?? "",
+  headlineColor: row.headline_color ?? "#ffffff",
+  bodyColor: row.body_color ?? "#e5e7eb",
   hasAnimation: row.has_animation ?? true,
   sortOrder: row.sort_order ?? 0,
   isActive: row.is_active,
 });
 
 const SELECT_FIELDS =
-  "id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,product_overlay_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,has_animation,sort_order,is_active";
+  "id,headline_ar,headline_en,subheadline_ar,subheadline_en,image_url,video_url,product_overlay_url,overlay_opacity,overlay_color,placement,height_preset,text_align,cta_text_ar,cta_text_en,cta_link,secondary_cta_text_ar,secondary_cta_link,badge_text,headline_color,body_color,has_animation,sort_order,is_active";
 
 const buildPayload = (config: HeroBannerConfig) => ({
   headline_ar: config.headlineAr,
@@ -130,6 +138,8 @@ const buildPayload = (config: HeroBannerConfig) => ({
   secondary_cta_text_ar: config.secondaryCtaTextAr || null,
   secondary_cta_link: config.secondaryCtaLink || null,
   badge_text: config.badgeText || null,
+  headline_color: config.headlineColor,
+  body_color: config.bodyColor,
   has_animation: config.hasAnimation,
   sort_order: config.sortOrder,
   is_active: config.isActive,
@@ -149,6 +159,8 @@ const configToSlide = (config: HeroBannerConfig): HeroSlide => ({
   secondaryCtaTextAr: config.secondaryCtaTextAr || undefined,
   secondaryCtaLink: config.secondaryCtaLink || undefined,
   badgeText: config.badgeText,
+  headlineColor: config.headlineColor,
+  bodyColor: config.bodyColor,
   productOverlayUrl: config.productOverlayUrl || undefined,
   hasAnimation: config.hasAnimation,
 });
@@ -370,6 +382,22 @@ export const HeroBannerStudio = () => {
             <div>
               <Label>Secondary CTA link</Label>
               <Input value={config.secondaryCtaLink} onChange={(e) => setConfig({ ...config, secondaryCtaLink: e.target.value })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Headline color</Label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={config.headlineColor} onChange={(e) => setConfig({ ...config, headlineColor: e.target.value })} className="h-10 w-12 cursor-pointer rounded border" />
+                <Input value={config.headlineColor} onChange={(e) => setConfig({ ...config, headlineColor: e.target.value })} className="font-mono text-xs" />
+              </div>
+            </div>
+            <div>
+              <Label>Body text color</Label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={config.bodyColor} onChange={(e) => setConfig({ ...config, bodyColor: e.target.value })} className="h-10 w-12 cursor-pointer rounded border" />
+                <Input value={config.bodyColor} onChange={(e) => setConfig({ ...config, bodyColor: e.target.value })} className="font-mono text-xs" />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

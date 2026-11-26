@@ -23,6 +23,8 @@ export interface HeroSlide {
   badgeText?: string;
   productOverlayUrl?: string;
   hasAnimation?: boolean;
+  headlineColor?: string;
+  bodyColor?: string;
 }
 
 const HEIGHT_CLASSES: Record<NonNullable<HeroSlide["heightPreset"]>, string> = {
@@ -133,11 +135,17 @@ export const HeroCarousel = ({
             {current.badgeText}
           </span>
         )}
-        <h1 className="mb-4 max-w-4xl animate-fade-in text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow-md sm:text-5xl lg:text-6xl">
+        <h1
+          className="mb-4 max-w-4xl animate-fade-in text-3xl font-extrabold leading-tight tracking-tight drop-shadow-md sm:text-5xl lg:text-6xl"
+          style={{ color: current.headlineColor ?? "#ffffff" }}
+        >
           {current.headlineAr}
         </h1>
         {current.subheadlineAr && (
-          <p className="mb-6 max-w-2xl animate-fade-in text-base text-gray-200 drop-shadow sm:text-lg lg:text-xl">
+          <p
+            className="mb-6 max-w-2xl animate-fade-in text-base drop-shadow sm:text-lg lg:text-xl"
+            style={{ color: current.bodyColor ?? "#e5e7eb" }}
+          >
             {current.subheadlineAr}
           </p>
         )}
@@ -171,7 +179,7 @@ export const HeroCarousel = ({
             type="button"
             aria-label="Previous slide"
             onClick={() => setIndex((i) => (i - 1 + count) % count)}
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white opacity-0 backdrop-blur transition hover:bg-black/70 group-hover:opacity-100"
+            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white opacity-70 backdrop-blur transition hover:bg-black/70 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
@@ -179,7 +187,7 @@ export const HeroCarousel = ({
             type="button"
             aria-label="Next slide"
             onClick={() => setIndex((i) => (i + 1) % count)}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white opacity-0 backdrop-blur transition hover:bg-black/70 group-hover:opacity-100"
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white opacity-70 backdrop-blur transition hover:bg-black/70 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>

@@ -485,11 +485,13 @@ export type Database = {
       hero_banner_configs: {
         Row: {
           badge_text: string | null
+          body_color: string
           created_at: string
           cta_link: string
           cta_text_ar: string
           cta_text_en: string | null
           headline_ar: string
+          headline_color: string
           headline_en: string | null
           height_preset: string
           has_animation: boolean
@@ -511,11 +513,13 @@ export type Database = {
         }
         Insert: {
           badge_text?: string | null
+          body_color?: string
           created_at?: string
           cta_link: string
           cta_text_ar: string
           cta_text_en?: string | null
           headline_ar: string
+          headline_color?: string
           headline_en?: string | null
           height_preset?: string
           has_animation?: boolean
@@ -537,11 +541,13 @@ export type Database = {
         }
         Update: {
           badge_text?: string | null
+          body_color?: string
           created_at?: string
           cta_link?: string
           cta_text_ar?: string
           cta_text_en?: string | null
           headline_ar?: string
+          headline_color?: string
           headline_en?: string | null
           height_preset?: string
           has_animation?: boolean
