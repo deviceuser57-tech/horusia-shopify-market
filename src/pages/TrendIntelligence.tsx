@@ -58,6 +58,9 @@ type AiTrendItem = {
   image_url: string;
   tags: string[];
   affiliate_url: string | null;
+  supplier_source?: "CJ_DROPSHIPPING" | "AFFILIATE_NETWORK" | "NEEDS_SOURCING";
+  affiliate_network?: string | null;
+  sourcing_notes?: string;
 };
 
 type ProductForm = {
@@ -258,10 +261,18 @@ const TrendIntelligence = () => {
     const key = `${item.title_en}-${index}`;
     setPublishingKey(key);
     try {
-      // AFFILIATE rows require a real affiliate_url per the store_products check constraint.
-      const isAffiliate = item.business_model === "AFFILIATE" && Boolean(item.affiliate_url);
+      // Sourcing gate: affiliate products need a real affiliate_url (DB constraint),
+      // and unsourced ideas must not be published as ACTIVE.
+      if (item.business_model === "AFFILIATE" && !item.affiliate_url) {
+        toast.error("This affiliate product has no affiliate URL — set one before publishing.");
+        return;
+      }
+      if (item.supplier_source === "NEEDS_SOURCING") {
+        toast.error("This product needs a supplier before publishing. Add it via /admin/products or connectors first.");
+        return;
+      }
       const { error } = await supabase.from("store_products").insert({
-        business_model: isAffiliate ? "AFFILIATE" : "DROPSHIPPING",
+        business_model: item.business_model === "AFFILIATE" ? "AFFILIATE" : "DROPSHIPPING",
         title: item.title_en || item.title_ar,
         title_ar: item.title_ar,
         title_en: item.title_en,
@@ -271,12 +282,15 @@ const TrendIntelligence = () => {
         price: item.suggested_price,
         supplier_cost: item.supplier_cost,
         currency: "USD",
-        affiliate_url: isAffiliate ? item.affiliate_url : null,
+        affiliate_url: item.business_model === "AFFILIATE" ? item.affiliate_url : null,
+        supplier_source: item.supplier_source ?? "NEEDS_SOURCING",
+        affiliate_network: item.affiliate_network ?? null,
         status: "ACTIVE",
         tags: item.tags,
         metadata: {
           trend_score: item.trend_score,
           suggested_channel: item.suggested_channel,
+          sourcing_notes: item.sourcing_notes ?? "",
           published_via: "AI_TREND_ENGINE",
         },
       });
@@ -290,6 +304,42 @@ const TrendIntelligence = () => {
       setPublishingKey(null);
     }
   };
+
+const publishOpportunity = async (opportunity: RankedOpportunity, aiData: Awaited<ReturnType<typeof enrichProductWithAI>> | null) => {
+  const { error } = await supabase.from("store_products").insert({
+    business_model: "DROPSHIPPING",
+    title: aiData?.titleAr || opportunity.product.name,
+    title_ar: aiData?.titleAr || opportunity.product.name,
+    title_en: aiData?.titleEn || opportunity.product.name,
+    description: aiData?.descriptionAr || `Trending product: ${opportunity.product.name}`,
+    category: opportunity.product.category,
+    price: opportunity.product.sellingPrice,
+    supplier_cost: opportunity.product.unitCost,
+    currency: "USD",
+    status: "ACTIVE",
+    tags: aiData?.suggestedTags ?? [],
+    ad_copy: aiData?.adCopy ?? null,
+    metadata: {
+      score: opportunity.score,
+      channel: opportunity.recommendedChannel,
+      original_trend_growth: opportunity.product.trendGrowthPercent,
+      published_via: aiData ? "AI_ENRICHED" : "DIRECT_PUBLISH",
+    }
+  });
+
+  if (error) throw error;
+  toast.success(`"${opportunity.product.name}" published successfully to the store gallery!`);
+};
+
+// Direct publish: pushes the product to store_products as ACTIVE with no AI call.
+const publishDirect = async (opportunity: RankedOpportunity) => {
+  try {
+    await publishOpportunity(opportunity, null);
+  } catch (err) {
+    console.error("Direct publish error:", err);
+    toast.error("Failed to publish product: " + ((err as { message?: string })?.message || "Unknown error"));
+  }
+};
 
 const enrichAndPublish = async (opportunity: RankedOpportunity) => {
   try {
@@ -305,29 +355,7 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
       toast.info("AI enrichment unavailable — publishing with base product data.");
     }
 
-    const { error } = await supabase.from("store_products").insert({
-      business_model: "DROPSHIPPING",
-      title: aiData?.titleAr || opportunity.product.name,
-      title_ar: aiData?.titleAr || opportunity.product.name,
-      title_en: aiData?.titleEn || opportunity.product.name,
-      description: aiData?.descriptionAr || `Trending product: ${opportunity.product.name}`,
-      category: opportunity.product.category,
-      price: opportunity.product.sellingPrice,
-      supplier_cost: opportunity.product.unitCost,
-      currency: "USD",
-      status: "ACTIVE",
-      tags: aiData?.suggestedTags ?? [],
-      ad_copy: aiData?.adCopy ?? null,
-      metadata: {
-        score: opportunity.score,
-        channel: opportunity.recommendedChannel,
-        original_trend_growth: opportunity.product.trendGrowthPercent,
-        published_via: aiData ? "AI_ENRICHED" : "MANUAL_FALLBACK",
-      }
-    });
-
-    if (error) throw error;
-    toast.success(`"${opportunity.product.name}" published successfully to the store gallery!`);
+    await publishOpportunity(opportunity, aiData);
   } catch (err) {
     console.error("Publishing error:", err);
     toast.error("Failed to publish product: " + ((err as { message?: string })?.message || "Unknown error"));
@@ -718,6 +746,9 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
                                 <Button variant="outline" size="sm" onClick={() => void enrichAndPublish(opportunity)}>
                                   AI draft
                                 </Button>
+                                <Button variant="secondary" size="sm" onClick={() => void publishDirect(opportunity)}>
+                                  Publish
+                                </Button>
                                 <Button variant="ghost" size="icon" aria-label={`Edit ${opportunity.product.name}`} title="Edit product" onClick={() => startEditing(opportunity.product)}>
                                   <Pencil aria-hidden="true" />
                                 </Button>
@@ -746,6 +777,7 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
                         </div>
                         <div className="flex shrink-0 gap-1">
                           <Button variant="outline" size="sm" onClick={() => void enrichAndPublish(opportunity)}>AI draft</Button>
+                          <Button variant="secondary" size="sm" onClick={() => void publishDirect(opportunity)}>Publish</Button>
                           <Button variant="ghost" size="icon" aria-label={`Edit ${opportunity.product.name}`} onClick={() => startEditing(opportunity.product)}><Pencil aria-hidden="true" /></Button>
                           <Button variant="ghost" size="icon" aria-label={`Remove ${opportunity.product.name}`} onClick={() => removeProduct(opportunity.product.id)}><Trash2 aria-hidden="true" /></Button>
                         </div>

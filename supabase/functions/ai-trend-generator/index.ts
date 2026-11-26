@@ -96,7 +96,10 @@ Return a single JSON object with a "products" array (no markdown, no extra text)
 - suggested_channel: best marketing channel (TikTok, Instagram, Google Ads)
 - image_url: a plausible public image URL for the product
 - tags: array of marketing tags
-- affiliate_url: null unless the product clearly maps to a known affiliate program`;
+- affiliate_url: null unless the product clearly maps to a known affiliate program
+- supplier_source: "CJ_DROPSHIPPING" for standard catalog items, "AFFILIATE_NETWORK" for affiliate products, or "NEEDS_SOURCING" for new ideas requiring manual supplier onboarding
+- affiliate_network: suggested network (e.g. "Amazon Associates", "Noon", "AliExpress") or null
+- sourcing_notes: short instruction for the store manager if sourcing is needed`;
 
   const aiResponse = await fetch(gatewayUrl, {
     method: "POST",
@@ -163,6 +166,11 @@ Return a single JSON object with a "products" array (no markdown, no extra text)
         image_url: String(p.image_url ?? ""),
         tags: Array.isArray(p.tags) ? p.tags.map(String) : [],
         affiliate_url: typeof p.affiliate_url === "string" && p.affiliate_url ? p.affiliate_url : null,
+        supplier_source: ["CJ_DROPSHIPPING", "AFFILIATE_NETWORK", "NEEDS_SOURCING"].includes(String(p.supplier_source))
+          ? String(p.supplier_source)
+          : "NEEDS_SOURCING",
+        affiliate_network: typeof p.affiliate_network === "string" && p.affiliate_network ? p.affiliate_network : null,
+        sourcing_notes: String(p.sourcing_notes ?? ""),
       };
     })
     .filter(Boolean);

@@ -945,6 +945,8 @@ export type Database = {
           status: string
           supplier_cost: number | null
           supplier_sku: string | null
+          affiliate_network: string | null
+          supplier_source: string | null
           tags: Json
           title: string
           title_ar: string | null
@@ -966,6 +968,8 @@ export type Database = {
           status?: string
           supplier_cost?: number | null
           supplier_sku?: string | null
+          affiliate_network?: string | null
+          supplier_source?: string | null
           tags?: Json
           title: string
           title_ar?: string | null
@@ -987,6 +991,8 @@ export type Database = {
           status?: string
           supplier_cost?: number | null
           supplier_sku?: string | null
+          affiliate_network?: string | null
+          supplier_source?: string | null
           tags?: Json
           title?: string
           title_ar?: string | null
