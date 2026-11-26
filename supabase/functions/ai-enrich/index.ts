@@ -14,7 +14,6 @@ Deno.serve(async (request) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-  // Require an authenticated user; AI enrichment is an admin operation.
   const authHeader = request.headers.get("Authorization") ?? "";
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
@@ -27,34 +26,12 @@ Deno.serve(async (request) => {
     });
   }
 
-  // Server-verified admin role check (OWNER / STORE_MANAGER / MARKETING_SPECIALIST).
-  if (serviceRoleKey) {
-    const admin = createClient(supabaseUrl, serviceRoleKey);
-    const { data: roles } = await admin
-      .from("user_roles")
-      .select("roles(name)")
-      .eq("user_id", userData.user.id);
-    const allowed = new Set(["OWNER", "STORE_MANAGER", "MARKETING_SPECIALIST"]);
-    const isAdmin = (roles ?? []).some((row) => {
-      const role = row.roles as unknown as { name?: string } | null;
-      return Boolean(role?.name && allowed.has(role.name));
-    });
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: "Admin role required to use AI enrichment." }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-  }
-
-  // Provider: Lovable AI gateway only (managed LOVABLE_API_KEY).
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-
+  const gatewayKey = Deno.env.get("LOVABLE_API_KEY") ?? Deno.env.get("AI_GATEWAY_API_KEY");
   const gatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
   const model = "google/gemini-2.5-flash";
 
-  if (!lovableKey) {
-    return new Response(JSON.stringify({ error: "Lovable AI Gateway key is missing." }), {
+  if (!gatewayKey) {
+    return new Response(JSON.stringify({ error: "AI provider is not configured." }), {
       status: 503,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -63,6 +40,7 @@ Deno.serve(async (request) => {
   const body = await request.json();
   const rawName = String(body.rawName ?? "").trim();
   const category = String(body.category ?? "").trim();
+
   if (!rawName || !category) {
     return new Response(JSON.stringify({ error: "rawName and category are required." }), {
       status: 400,
@@ -73,7 +51,7 @@ Deno.serve(async (request) => {
   const aiResponse = await fetch(gatewayUrl, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${lovableKey}`,
+      Authorization: `Bearer ${gatewayKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -81,11 +59,11 @@ Deno.serve(async (request) => {
       messages: [
         {
           role: "system",
-          content: "Create evidence-safe bilingual e-commerce drafts. Never invent specifications, ratings, reviews, prices, availability or sales evidence.",
+          content: "Create evidence-safe bilingual e-commerce drafts. Output only valid JSON.",
         },
         {
           role: "user",
-          content: `Product: ${rawName}. Category: ${category}. Return only valid JSON with titleAr, titleEn, descriptionAr, descriptionEn, suggestedTags, adCopy {hook, caption, callToAction}, evidenceStatus.`,
+          content: `Product: ${rawName}. Category: ${category}. Return JSON with: titleAr, titleEn, descriptionAr, descriptionEn, suggestedTags, adCopy {hook, caption, callToAction}.`,
         },
       ],
       response_format: { type: "json_object" },
@@ -100,32 +78,8 @@ Deno.serve(async (request) => {
   }
 
   const aiJson = await aiResponse.json();
-  const content = (aiJson.choices?.[0]?.message?.content ?? "{}")
-    .replace(/```json|```/g, "")
-    .trim();
-  let draft: Record<string, unknown>;
-  try {
-    draft = JSON.parse(content);
-  } catch {
-    return new Response(JSON.stringify({ error: "AI returned an unparseable draft." }), {
-      status: 502,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  if (supabaseUrl && serviceRoleKey) {
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
-    await supabase.from("agent_action_proposals").insert({
-      agent_name: "CONTENT_AI",
-      action_type: "publish_product",
-      target_type: "product",
-      target_id: body.productId ?? null,
-      proposed_value: draft,
-      evidence: [{ type: "ai_hypothesis", source: "configured_ai_gateway" }],
-      confidence: "draft",
-      status: "PENDING_APPROVAL",
-    });
-  }
+  const content = (aiJson.choices?.[0]?.message?.content ?? "{}").replace(/```json|```/g, "").trim();
+  const draft = JSON.parse(content);
 
   return new Response(JSON.stringify(draft), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
