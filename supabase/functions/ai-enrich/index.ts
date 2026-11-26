@@ -47,25 +47,14 @@ Deno.serve(async (request) => {
     }
   }
 
-  // Provider resolution: LOVABLE_API_KEY (Lovable AI gateway) is the
-  // primary managed provider. xAI/Grok and a generic gateway are kept
-  // only as emergency fallbacks when the primary key is absent.
+  // Provider: Lovable AI gateway only (managed LOVABLE_API_KEY).
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-  const xaiKey = Deno.env.get("XAI_API_KEY") ?? Deno.env.get("GROK_API_KEY");
 
-  let gatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-  let gatewayKey = lovableKey ?? Deno.env.get("AI_GATEWAY_API_KEY");
-  let model = "google/gemini-2.5-flash";
+  const gatewayUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+  const model = "google/gemini-2.5-flash";
 
-  if (!lovableKey && xaiKey) {
-    gatewayUrl = "https://api.x.ai/v1/chat/completions";
-    gatewayKey = xaiKey;
-    model = "grok-2-latest";
-  } else if (!lovableKey && Deno.env.get("AI_GATEWAY_URL")) {
-    gatewayUrl = Deno.env.get("AI_GATEWAY_URL")!;
-  }
-  if (!gatewayKey) {
-    return new Response(JSON.stringify({ error: "AI provider is not configured." }), {
+  if (!lovableKey) {
+    return new Response(JSON.stringify({ error: "Lovable AI Gateway key is missing." }), {
       status: 503,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -84,7 +73,7 @@ Deno.serve(async (request) => {
   const aiResponse = await fetch(gatewayUrl, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${gatewayKey}`,
+      "Authorization": `Bearer ${lovableKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
