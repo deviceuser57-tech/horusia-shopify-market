@@ -491,13 +491,23 @@ export type Database = {
           cta_text_en: string | null
           headline_ar: string
           headline_en: string | null
+          height_preset: string
+          has_animation: boolean
           id: string
           image_url: string
           is_active: boolean
+          overlay_color: string
           overlay_opacity: number
+          placement: string
+          product_overlay_url: string | null
+          secondary_cta_link: string | null
+          secondary_cta_text_ar: string | null
+          sort_order: number
           subheadline_ar: string | null
           subheadline_en: string | null
+          text_align: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           badge_text?: string | null
@@ -507,13 +517,23 @@ export type Database = {
           cta_text_en?: string | null
           headline_ar: string
           headline_en?: string | null
+          height_preset?: string
+          has_animation?: boolean
           id?: string
           image_url: string
           is_active?: boolean
+          overlay_color?: string
           overlay_opacity: number
+          placement?: string
+          product_overlay_url?: string | null
+          secondary_cta_link?: string | null
+          secondary_cta_text_ar?: string | null
+          sort_order?: number
           subheadline_ar?: string | null
           subheadline_en?: string | null
+          text_align?: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           badge_text?: string | null
@@ -523,13 +543,23 @@ export type Database = {
           cta_text_en?: string | null
           headline_ar?: string
           headline_en?: string | null
+          height_preset?: string
+          has_animation?: boolean
           id?: string
           image_url?: string
           is_active?: boolean
+          overlay_color?: string
           overlay_opacity?: number
+          placement?: string
+          product_overlay_url?: string | null
+          secondary_cta_link?: string | null
+          secondary_cta_text_ar?: string | null
+          sort_order?: number
           subheadline_ar?: string | null
           subheadline_en?: string | null
+          text_align?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }

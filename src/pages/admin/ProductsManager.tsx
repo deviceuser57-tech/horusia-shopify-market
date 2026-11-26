@@ -15,6 +15,7 @@ import {
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
 type ProductRow = {
   id: string;
@@ -171,6 +172,7 @@ export default function ProductsManager() {
     setForm((current) => ({ ...current, [field]: value }));
 
   return (
+    <AdminPageShell>
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <h1 className="mb-6 text-3xl font-bold">Store Products</h1>
       <p className="mb-8 text-muted-foreground">
@@ -281,5 +283,6 @@ export default function ProductsManager() {
         </Card>
       </div>
     </div>
+    </AdminPageShell>
   );
 }

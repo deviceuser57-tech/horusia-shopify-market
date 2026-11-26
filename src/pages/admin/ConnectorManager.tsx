@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
 export default function ConnectorManager() {
   const [affiliateName, setAffiliateName] = useState("");
@@ -41,6 +42,7 @@ export default function ConnectorManager() {
   };
 
   return (
+    <AdminPageShell>
     <div className="container mx-auto py-8">
       <h1 className="mb-6 text-3xl font-bold">Affiliate & Supplier Manager</h1>
       <Tabs defaultValue="affiliate">
@@ -65,5 +67,6 @@ export default function ConnectorManager() {
         </TabsContent>
       </Tabs>
     </div>
+    </AdminPageShell>
   );
 }

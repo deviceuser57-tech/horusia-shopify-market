@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
 interface Proposal {
   id: string;
@@ -62,6 +63,7 @@ export default function AgentApprovalCenter() {
   };
 
   return (
+    <AdminPageShell>
     <div className="container mx-auto py-8">
       <h1 className="mb-6 text-3xl font-bold">AI Governance</h1>
       <div className="mb-5 max-w-xl"><Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Decision reason (required for rejection)" /></div>
@@ -84,5 +86,6 @@ export default function AgentApprovalCenter() {
         {proposals.length === 0 && <p className="text-muted-foreground">No pending proposals.</p>}
       </div>
     </div>
+    </AdminPageShell>
   );
 }
