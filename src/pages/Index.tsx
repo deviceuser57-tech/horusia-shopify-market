@@ -106,9 +106,13 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Tumāninah Veritas Store | One Stop Store - Quality Products</title>
-        <meta name="description" content="Tumāninah Veritas Store - Your one stop store for quality products, modern lifestyle, and trusted service. Shop with confidence." />
-        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app" />
+        <title>Tumāninah Veritas Store | Buy Handcrafted Egyptian Heritage Gifts</title>
+        <meta name="description" content="Shop authentic Egyptian heritage treasures, handmade replicas, and luxury pharaonic home decor with secure international shipping." />
+        <meta property="og:title" content="Tumāninah Veritas Store | Egyptian Heritage Artifacts" />
+        <meta property="og:description" content="Direct from Cairo artisans: handcrafted replicas, bespoke jewelry, and pharaonic styling." />
+        <meta property="og:image" content="https://eagles-veritas-shop.lovable.app/share-preview.jpg" />
+        <meta property="og:url" content="https://eagles-veritas-shop.lovable.app/" />
+        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/" />
       </Helmet>
       <Navbar />
       <EgyptianPopup />

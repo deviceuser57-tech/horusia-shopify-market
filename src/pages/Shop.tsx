@@ -203,10 +203,12 @@ const Shop = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Shop - Tumāninah Veritas Store | Quality Products</title>
-        <meta name="description" content="Browse quality products at Tumāninah Veritas Store. Shop modern lifestyle items with trusted service and authentic products for your everyday needs." />
-        <meta property="og:title" content="Shop - Tumāninah Veritas Store" />
-        <meta property="og:description" content="Discover quality products at Tumāninah Veritas Store. Modern lifestyle items with trusted service." />
+        <title>Buy Egyptian Heritage Collections & Décor | Tumāninah Veritas Store</title>
+        <meta name="description" content="Explore our curated catalog of handcrafted Egyptian statues, alabaster lamps, and heritage souvenirs. Verified supplier quality with fast delivery." />
+        <meta property="og:title" content="Buy Egyptian Collections & Pharaoh Statues | Tumāninah Veritas" />
+        <meta property="og:description" content="Explore verified Egyptian collections, dropship treasures, and handcrafted home accessories." />
+        <meta property="og:image" content="https://eagles-veritas-shop.lovable.app/share-preview.jpg" />
+        <meta property="og:url" content="https://eagles-veritas-shop.lovable.app/shop" />
         <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/shop" />
       </Helmet>
       <BreadcrumbSchema

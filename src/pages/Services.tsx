@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { Helmet } from "react-helmet";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,28 @@ const Services = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Bespoke Egyptian Heritage Services & Custom Crafts | Tumāninah Veritas</title>
+        <meta name="description" content="Order custom Egyptian handmade pieces, heritage restoration, and personalized event styling services crafted by skilled artisans in Egypt." />
+        <meta property="og:title" content="Custom Egyptian Artisan & Replication Services" />
+        <meta property="og:description" content="Custom handmade replicas, pharaonic cartouche personalization, and home styling consultation." />
+        <meta property="og:url" content="https://eagles-veritas-shop.lovable.app/services" />
+        <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/services" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "serviceType": "Handmade Heritage & Replication",
+            "provider": {
+              "@type": "Organization",
+              "name": "Tumāninah Veritas Store",
+              "url": "https://eagles-veritas-shop.lovable.app"
+            },
+            "areaServed": "Global",
+            "description": "Custom handcrafted Egyptian creations, replication services, and art consulting."
+          })}
+        </script>
+      </Helmet>
       <Navbar />
       
       <main className="flex-1">
