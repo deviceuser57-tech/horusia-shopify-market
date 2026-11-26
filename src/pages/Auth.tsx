@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Mail, Lock, User } from "lucide-react";
 import { z } from "zod";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 const signInSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
@@ -146,7 +148,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/20 to-background p-4">
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-secondary/20 to-background">
+      <Navbar />
+      <div className="flex flex-1 items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
@@ -289,6 +293,8 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import {
-  ArrowLeft,
   ArrowUpRight,
   BarChart3,
   CheckCircle2,
@@ -501,24 +500,8 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-background">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <Button asChild variant="ghost" size="icon" aria-label="Back to store">
-              <Link to="/"><ArrowLeft aria-hidden="true" /></Link>
-            </Button>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">Tumāninah Veritas</p>
-              <p className="text-xs text-muted-foreground">Store operations</p>
-            </div>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/shop">View storefront <ArrowUpRight aria-hidden="true" /></Link>
-          </Button>
-        </div>
-      </header>
-
+    <AdminPageShell>
+    <div className="bg-background text-foreground">
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
         <div className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div className="max-w-2xl">
@@ -870,6 +853,7 @@ const enrichAndPublish = async (opportunity: RankedOpportunity) => {
         </div>
       </main>
     </div>
+    </AdminPageShell>
   );
 };
 

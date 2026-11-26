@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Loader2 } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 export default function OAuthConsent() {
   const [params] = useSearchParams();
@@ -68,27 +70,37 @@ export default function OAuthConsent() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/20 p-4">
-        <Card className="w-full max-w-md border-destructive">
-          <CardHeader>
-            <CardTitle className="text-destructive">Authorization Error</CardTitle>
-            <CardDescription>{error}</CardDescription>
-          </CardHeader>
-        </Card>
+      <div className="flex min-h-screen flex-col bg-muted/20">
+        <Navbar />
+        <div className="flex flex-1 items-center justify-center p-4">
+          <Card className="w-full max-w-md border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Authorization Error</CardTitle>
+              <CardDescription>{error}</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   if (!details) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/20 p-4">
+    <div className="flex min-h-screen flex-col bg-muted/20">
+      <Navbar />
+      <div className="flex flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
@@ -123,6 +135,8 @@ export default function OAuthConsent() {
           </div>
         </CardContent>
       </Card>
+      </div>
+      <Footer />
     </div>
   );
 }
