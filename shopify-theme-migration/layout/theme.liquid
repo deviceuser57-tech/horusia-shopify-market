@@ -23,20 +23,6 @@
       window.Shopify.money_format = {{ shop.money_format | json }};
       window.Shopify.currency = window.Shopify.currency || {};
       window.Shopify.currency.active = {{ cart.currency.iso_code | json }};
-      if (typeof window.Shopify.formatMoney !== 'function') {
-        {% raw %}
-        window.Shopify.formatMoney = function(cents, format) {
-          var amount = Number(cents) / 100;
-          var value = amount.toFixed(2);
-          var valueNoDecimals = amount.toFixed(0);
-          var valueWithComma = value.replace('.', ',');
-          return String(format || window.Shopify.money_format)
-            .split('{{amount}}').join(value)
-            .split('{{amount_no_decimals}}').join(valueNoDecimals)
-            .split('{{amount_with_comma_separator}}').join(valueWithComma);
-        };
-        {% endraw %}
-      }
     </script>
     {{ 'base.css' | asset_url | stylesheet_tag }}
     <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
@@ -64,7 +50,11 @@
       "cart_quantity": {{ 'general.product.quantity' | t | json }},
       "carousel_pause": {{ 'general.carousel.pause' | t | json }},
       "carousel_play": {{ 'general.carousel.play' | t | json }},
-      "view_cart": {{ 'general.cart.view_cart' | t | json }}
+      "view_cart": {{ 'general.cart.view_cart' | t | json }},
+      "cart_js_url": {{ routes.cart_url | append: '.js' | json }},
+      "cart_add_url": {{ routes.cart_add_url | append: '.js' | json }},
+      "cart_update_url": {{ routes.cart_update_url | append: '.js' | json }},
+      "cart_page_url": {{ routes.cart_url | json }}
     }</script>
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   </body>

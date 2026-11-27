@@ -49,7 +49,19 @@
           </fieldset>
         {% endfor %}
       {% endif %}
-      <input type="hidden" name="id" value="{{ selected_variant.id }}" data-variant-id>
+      <input type="hidden" data-variant-id value="{{ selected_variant.id }}">
+      <noscript>
+        <div class="variant-native-selector">
+          <label for="VariantSelect-{{ section.id }}">{{ 'general.product.variant' | t }}</label>
+          <select id="VariantSelect-{{ section.id }}" name="id">
+            {% for variant in product.variants %}
+              <option value="{{ variant.id }}" {% unless variant.available %}disabled{% endunless %} {% if variant.id == selected_variant.id %}selected{% endif %}>
+                {{ variant.title }} — {{ variant.price | money }}{% unless variant.available %} ({{ 'general.product.sold_out' | t }}){% endunless %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </noscript>
       <label for="Quantity">{{ 'general.product.quantity' | t }}</label>
       <input id="Quantity" name="quantity" type="number" min="1" value="1" required>
       <button type="submit" class="button product-submit" {% unless selected_variant.available %}disabled{% endunless %}>

@@ -41,6 +41,17 @@
 7. **Design/config** — featured-collection falls back to `collections.all` when no collection is selected; hero slides fall back to the packaged `hero-banner.jpg` when no image is picked. Unselected logo/menu/policy settings still require Theme Editor configuration (see MIGRATION-GUIDE).
 8. **Packaging** — `HORUSIA-shopify-theme.zip` contains only uploadable theme folders at the ZIP root; `migration-docs/`, `media-package/`, and nested ZIPs are excluded. `HORUSIA-media-package.zip` and `HORUSIA-migration-docs.zip` are delivered separately.
 
+## Final corrective pass (second review)
+
+1. **No-option products** — `findVariant()` now returns the server-selected variant (or the single variant) when no option controls exist, so default-variant products keep working in both available and sold-out states.
+2. **Button labels** — the add-to-cart label now always comes from the translated `add_to_cart`/`sold_out` strings, never from the button's initial text; switching from a sold-out initial variant to an available one restores the correct label.
+3. **Money formatting** — the partial `window.Shopify.formatMoney` override was removed entirely. A scoped `moneyHtml()` formatter handles all Shopify placeholders (`amount`, `amount_no_decimals`, comma/space/apostrophe separators) with proper thousands grouping, preserves legitimate HTML inside `shop.money_format`, and escapes the numeric amount. Prices render via `innerHTML` so format markup displays correctly. Verified statically only — EGP/large-price rendering still needs storefront verification.
+4. **Locale-aware cart endpoints** — all cart requests (`/cart.js`, `/cart/add.js`, `/cart/update.js`) now use `routes.*` URLs emitted by Liquid, which carry the active locale.
+5. **No-JS variant fallback** — the hidden variant input no longer submits a stale id: it carries no `name`, and a `<noscript>` variant `<select name="id">` (with per-variant price and sold-out disabling) provides the real no-JavaScript selection path.
+6. **Add vs refresh failure** — if `/cart/add.js` succeeds but the cart refresh fails, the status shows the translated "added" message plus a link to the cart page instead of a misleading add-failure error.
+7. **Media synchronization** — `initProductMedia` exposes `section.horusiaSelectMedia(mediaId)` used by variant changes; the initially active thumbnail is the one matching `featured_media`, not blindly the first; thumbnail active state, main image, and selected variant stay in sync.
+8. **Deliverables** — `HORUSIA-shopify-theme.zip`, `HORUSIA-media-package.zip`, and `HORUSIA-migration-docs.zip` exist in `shopify-theme-migration/` and were rebuilt after this pass. `locales/ar.json` is valid UTF-8 JSON without BOM (verified by byte-level check).
+
 ## Remaining issues
 
 - Replace generic source-copy content with approved Shopify page content.

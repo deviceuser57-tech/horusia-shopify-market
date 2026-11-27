@@ -8,13 +8,41 @@
   var I18N = {};
   try { I18N = i18nNode ? JSON.parse(i18nNode.textContent) : {}; } catch (e) { I18N = {}; }
 
-  function money(cents, format) {
-    if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
-      return window.Shopify.formatMoney(cents, format || window.Shopify.money_format);
-    }
-    var amount = (Number(cents) / 100).toFixed(2);
-    var currency = window.Shopify && window.Shopify.currency && window.Shopify.currency.active;
-    return currency ? amount + ' ' + currency : amount;
+  // Scoped money formatter. Returns an HTML string: the shop's money_format may
+  // legitimately contain markup (e.g. <span class="money">), which is preserved,
+  // while the numeric amount itself is always escaped. Does not touch
+  // window.Shopify globals.
+  function groupThousands(intPart, separator) {
+    return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+  }
+
+  function moneyHtml(cents, format) {
+    var fmt = format || (window.Shopify && window.Shopify.money_format) || '{{amount}}';
+    var amount = Math.abs(Number(cents) / 100) || 0;
+    var fixed = amount.toFixed(2);
+    var parts = fixed.split('.');
+    var intPart = parts[0];
+    var decPart = parts[1];
+    var rounded = String(Math.round(amount));
+    var replacements = [
+      ['{{amount_no_decimals_with_comma_separator}}', groupThousands(intPart, ',')],
+      ['{{amount_no_decimals_with_space_separator}}', groupThousands(intPart, ' ')],
+      ['{{amount_no_decimals_with_apostrophe_separator}}', groupThousands(intPart, "'")],
+      ['{{amount_with_comma_separator}}', groupThousands(intPart, ',') + '.' + decPart],
+      ['{{amount_with_apostrophe_separator}}', groupThousands(intPart, "'") + '.' + decPart],
+      ['{{amount_with_space_separator}}', groupThousands(intPart, ' ') + '.' + decPart],
+      ['{{amount_no_decimals}}', rounded],
+      ['{{amount}}', fixed]
+    ];
+    var out = String(fmt);
+    replacements.forEach(function (pair) {
+      out = out.split(pair[0]).join(escapeHtml(pair[1]));
+    });
+    return out;
+  }
+
+  function setMoney(node, cents) {
+    if (node) node.innerHTML = moneyHtml(cents);
   }
 
   function escapeHtml(value) {
@@ -163,12 +191,12 @@
         + '<label class="cart-drawer-qty">' + escapeHtml(I18N.cart_quantity || 'Quantity')
         + ' <input type="number" min="0" value="' + escapeHtml(item.quantity) + '" data-cart-key="' + escapeHtml(item.key) + '" aria-label="' + escapeHtml(I18N.cart_quantity || 'Quantity') + '"></label>'
         + '<button type="button" class="cart-drawer-remove" data-cart-remove="' + escapeHtml(item.key) + '">' + escapeHtml(I18N.cart_remove || 'Remove') + '</button>'
-        + '<p class="cart-drawer-line-price">' + escapeHtml(money(item.final_line_price)) + '</p>'
+        + '<p class="cart-drawer-line-price">' + moneyHtml(item.final_line_price) + '</p>'
         + '</div></li>';
     });
     html += '</ul>'
       + '<p class="cart-drawer-subtotal">' + escapeHtml(I18N.cart_subtotal || 'Subtotal')
-      + ': <strong>' + escapeHtml(money(cart.total_price)) + '</strong></p>';
+      + ': <strong>' + moneyHtml(cart.total_price) + '</strong></p>';
     els.content.innerHTML = html;
   }
 
@@ -178,7 +206,7 @@
   }
 
   function refreshCart() {
-    return fetch('/cart.js', { headers: { Accept: 'application/json' } })
+    return fetch(I18N.cart_js_url || '/cart.js', { headers: { Accept: 'application/json' } })
       .then(function (r) {
         if (!r.ok) throw new Error('cart fetch failed');
         return r.json();
@@ -191,7 +219,7 @@
     var updates = {};
     updates[key] = quantity;
     showDrawerStatus('');
-    return fetch('/cart/update.js', {
+    return fetch(I18N.cart_update_url || '/cart/update.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ updates: updates })
@@ -298,10 +326,13 @@
     });
 
     var labels = {
-      add: submit ? submit.textContent : (I18N.add_to_cart || 'Add to cart'),
+      add: I18N.add_to_cart || 'Add to cart',
       soldOut: I18N.sold_out || 'Sold out',
       unavailable: I18N.combination_unavailable || 'This combination is not available.'
     };
+
+    var initialVariantId = variantInput ? variantInput.value : null;
+    var initialVariant = product.variants.find(function (v) { return String(v.id) === String(initialVariantId); });
 
     function selectedValues() {
       var values = [];
@@ -313,6 +344,11 @@
     }
 
     function findVariant(values) {
+      // Products without visible option controls have no selections to match;
+      // use the server-selected (or single) variant directly.
+      if (!optionNames.length) {
+        return initialVariant || product.variants[0] || null;
+      }
       if (values.some(function (v) { return v === null; })) return null;
       return product.variants.find(function (variant) {
         return variant.options && variant.options.every(function (opt, i) {
@@ -323,22 +359,31 @@
 
     function syncMedia(variant) {
       var mainImage = qs('[data-product-main-image]', section);
-      if (!mainImage || !variant || !variant.featured_media) return;
-      var media = (product.media || []).find(function (m) { return m.id === variant.featured_media.id; });
-      if (!media || !media.preview_image) return;
-      var src = media.preview_image.src;
-      if (!src) return;
-      mainImage.src = src;
+      if (!mainImage || !variant) return;
+      var mediaId = variant.featured_media && variant.featured_media.id;
+      if (!mediaId && product.featured_media) mediaId = product.featured_media.id;
+      if (!mediaId) return;
+      // Preferred path: delegate to the media module so thumbnail active state,
+      // main image, and variant stay in sync.
+      if (typeof section.horusiaSelectMedia === 'function' && section.horusiaSelectMedia(mediaId)) return;
+      var media = (product.media || []).find(function (m) { return m.id === mediaId; });
+      if (!media || !media.preview_image || !media.preview_image.src) return;
+      mainImage.src = media.preview_image.src;
       mainImage.removeAttribute('srcset');
       if (media.alt) mainImage.alt = media.alt;
+      qsa('[data-product-media]', section).forEach(function (thumb) {
+        var active = thumb.getAttribute('data-product-media') === String(mediaId);
+        thumb.classList.toggle('is-active', active);
+        thumb.setAttribute('aria-pressed', String(active));
+      });
     }
 
     function updateVariant() {
       var variant = findVariant(selectedValues());
       if (!variant) {
         if (variantInput) variantInput.value = '';
-        if (priceNode) priceNode.textContent = '';
-        if (compareNode) { compareNode.hidden = true; compareNode.textContent = ''; }
+        if (priceNode) priceNode.innerHTML = '';
+        if (compareNode) { compareNode.hidden = true; compareNode.innerHTML = ''; }
         if (submit) {
           submit.disabled = true;
           submit.textContent = labels.unavailable;
@@ -346,11 +391,11 @@
         return;
       }
       if (variantInput) variantInput.value = variant.id;
-      if (priceNode) priceNode.textContent = money(variant.price);
+      setMoney(priceNode, variant.price);
       if (compareNode) {
         var hasCompare = variant.compare_at_price && variant.compare_at_price > variant.price;
         compareNode.hidden = !hasCompare;
-        compareNode.textContent = hasCompare ? money(variant.compare_at_price) : '';
+        compareNode.innerHTML = hasCompare ? moneyHtml(variant.compare_at_price) : '';
       }
       if (submit) {
         submit.disabled = !variant.available;
@@ -363,10 +408,8 @@
       input.addEventListener('change', updateVariant);
     });
 
-    // Align the hidden variant id with the server-selected variant on load,
-    // then reconcile controls (covers ?variant= URLs and stale checked states).
-    var initialId = variantInput ? variantInput.value : null;
-    var initialVariant = product.variants.find(function (v) { return String(v.id) === String(initialId); });
+    // Align the checked radios with the server-selected variant on load
+    // (covers ?variant= URLs and stale checked states).
     if (initialVariant && initialVariant.options) {
       optionNames.forEach(function (name, index) {
         var wanted = initialVariant.options[index];
@@ -381,14 +424,17 @@
       event.preventDefault();
       var formData = new FormData(form);
       var quantity = Number(formData.get('quantity') || 1);
-      var id = Number(formData.get('id'));
+      var id = Number(variantInput ? variantInput.value : NaN);
       if (!id || quantity < 1 || !Number.isFinite(quantity)) {
         if (status) status.textContent = I18N.invalid_quantity || 'Please enter a valid quantity.';
         return;
       }
       if (submit) submit.disabled = true;
       if (status) status.textContent = '';
-      fetch('/cart/add.js', {
+      var added = false;
+      var cartJsUrl = I18N.cart_js_url || '/cart.js';
+      var cartPageUrl = I18N.cart_page_url || '/cart';
+      fetch(I18N.cart_add_url || '/cart/add.js', {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id, quantity: quantity })
@@ -398,8 +444,9 @@
           return response.json();
         })
         .then(function () {
+          added = true;
           if (status) status.textContent = I18N.added_to_cart || 'Added to cart.';
-          return fetch('/cart.js', { headers: { Accept: 'application/json' } });
+          return fetch(cartJsUrl, { headers: { Accept: 'application/json' } });
         })
         .then(function (r) {
           if (!r.ok) throw new Error('cart fetch failed');
@@ -410,7 +457,16 @@
           openDrawer();
         })
         .catch(function () {
-          if (status) status.textContent = I18N.add_error || 'Unable to add this item. Please try again.';
+          if (!status) return;
+          if (added) {
+            // The item was added; only the drawer refresh failed. Do not imply
+            // the add failed — offer a link to the cart page instead.
+            status.innerHTML = escapeHtml(I18N.added_to_cart || 'Added to cart.')
+              + ' <a href="' + escapeHtml(cartPageUrl) + '">'
+              + escapeHtml(I18N.view_cart || 'View cart') + '</a>';
+          } else {
+            status.textContent = I18N.add_error || 'Unable to add this item. Please try again.';
+          }
         })
         .then(function () {
           updateVariant();
@@ -429,7 +485,7 @@
         var updates = {};
         updates[input.getAttribute('data-cart-update')] = input.value;
         var status = qs('[data-cart-page-status]');
-        fetch('/cart/update.js', {
+        fetch(I18N.cart_update_url || '/cart/update.js', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({ updates: updates })
@@ -462,34 +518,59 @@
     section.dataset.mediaInit = '1';
 
     var thumbs = qsa('[data-product-media]', section);
-    if (thumbs.length) {
-      var selectMedia = function (button) {
-        var src = button.getAttribute('data-media-src');
-        var srcset = button.getAttribute('data-media-srcset');
-        var alt = button.getAttribute('data-media-alt');
-        if (src) {
-          mainImage.src = src;
-          if (srcset) {
-            mainImage.srcset = srcset;
-            mainImage.sizes = '(min-width: 990px) 50vw, 100vw';
-          }
-          if (alt) mainImage.alt = alt;
-        }
-        thumbs.forEach(function (thumb) {
-          var active = thumb === button;
-          thumb.classList.toggle('is-active', active);
-          thumb.setAttribute('aria-pressed', String(active));
-        });
-      };
-      thumbs.forEach(function (button, index) {
-        if (index === 0) {
-          button.classList.add('is-active');
-          button.setAttribute('aria-pressed', 'true');
+    var setActive = function (activeThumb) {
+      thumbs.forEach(function (thumb) {
+        var active = thumb === activeThumb;
+        thumb.classList.toggle('is-active', active);
+        thumb.setAttribute('aria-pressed', String(active));
+      });
+    };
+    var selectMedia = function (button) {
+      var src = button.getAttribute('data-media-src');
+      var srcset = button.getAttribute('data-media-srcset');
+      var alt = button.getAttribute('data-media-alt');
+      if (src) {
+        mainImage.src = src;
+        if (srcset) {
+          mainImage.srcset = srcset;
+          mainImage.sizes = '(min-width: 990px) 50vw, 100vw';
         } else {
-          button.setAttribute('aria-pressed', 'false');
+          mainImage.removeAttribute('srcset');
         }
+        if (alt) mainImage.alt = alt;
+      }
+      setActive(button);
+    };
+
+    // Shared entry point used by the variant logic so the active thumbnail,
+    // main image, and selected variant stay synchronized. Returns false when
+    // no thumbnail matches the requested media id.
+    section.horusiaSelectMedia = function (mediaId) {
+      var button = thumbs.filter(function (thumb) {
+        return thumb.getAttribute('data-product-media') === String(mediaId);
+      })[0];
+      if (!button) {
+        setActive(null);
+        return false;
+      }
+      selectMedia(button);
+      return true;
+    };
+
+    if (thumbs.length) {
+      thumbs.forEach(function (button) {
+        button.setAttribute('aria-pressed', 'false');
         button.addEventListener('click', function () { selectMedia(button); });
       });
+      // Activate the thumbnail that matches the media actually displayed
+      // (the product's featured media), not blindly the first one.
+      var jsonNode = qs('[data-product-json]', section);
+      var featuredId = null;
+      try {
+        var parsed = JSON.parse(jsonNode.textContent);
+        if (parsed.featured_media) featuredId = parsed.featured_media.id;
+      } catch (e) { /* ignore */ }
+      if (featuredId != null) section.horusiaSelectMedia(featuredId);
     }
 
     var zoomEnabled = section.getAttribute('data-zoom-enabled') === 'true';
@@ -512,8 +593,8 @@
     initCartPageUpdates(scope);
     var productSections = qsa('[data-product-section]', scope);
     if (scope.matches && scope.matches('[data-product-section]')) productSections.unshift(scope);
-    productSections.forEach(initProductForm);
     productSections.forEach(initProductMedia);
+    productSections.forEach(initProductForm);
     if (scope === document) {
       // Product form may live inside a section that also matches above; cover
       // forms rendered without the section marker.
