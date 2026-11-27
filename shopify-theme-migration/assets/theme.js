@@ -8,41 +8,71 @@
   var I18N = {};
   try { I18N = i18nNode ? JSON.parse(i18nNode.textContent) : {}; } catch (e) { I18N = {}; }
 
-  // Scoped money formatter. Returns an HTML string: the shop's money_format may
-  // legitimately contain markup (e.g. <span class="money">), which is preserved,
-  // while the numeric amount itself is always escaped. Does not touch
-  // window.Shopify globals.
+  // Scoped money formatter. It preserves trusted shop money-format markup,
+  // while replacing only generated numeric values. It does not modify
+  // window.Shopify.formatMoney or infer a currency.
   function groupThousands(intPart, separator) {
     return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
   }
 
   function moneyHtml(cents, format) {
-    var fmt = format || (window.Shopify && window.Shopify.money_format) || '{{amount}}';
-    var amount = Math.abs(Number(cents) / 100) || 0;
-    var fixed = amount.toFixed(2);
-    var parts = fixed.split('.');
-    var intPart = parts[0];
-    var decPart = parts[1];
-    var rounded = String(Math.round(amount));
+    var numeric = typeof cents === 'number' || (typeof cents === 'string' && cents.trim() !== '')
+      ? Number(cents)
+      : NaN;
+    if (!Number.isFinite(numeric) || !Number.isInteger(numeric)) {
+      throw new RangeError('Money values must be finite integer minor units.');
+    }
+
+    var negative = numeric < 0;
+    var absolute = Math.abs(numeric);
+    var whole = Math.floor(absolute / 100);
+    var remainder = absolute % 100;
+    var decimal = String(remainder).padStart(2, '0');
+    var fixed = groupThousands(String(whole), ',') + '.' + decimal;
+    var roundedWhole = String(whole + (remainder >= 50 ? 1 : 0));
+
+    var fmt = format || (window.Shopify && window.Shopify.money_format);
+    if (typeof fmt !== 'string' || fmt === '') {
+      throw new RangeError('A Shopify money format is required.');
+    }
+
     var replacements = [
-      ['{{amount_no_decimals_with_comma_separator}}', groupThousands(intPart, ',')],
-      ['{{amount_no_decimals_with_space_separator}}', groupThousands(intPart, ' ')],
-      ['{{amount_no_decimals_with_apostrophe_separator}}', groupThousands(intPart, "'")],
-      ['{{amount_with_comma_separator}}', groupThousands(intPart, ',') + '.' + decPart],
-      ['{{amount_with_apostrophe_separator}}', groupThousands(intPart, "'") + '.' + decPart],
-      ['{{amount_with_space_separator}}', groupThousands(intPart, ' ') + '.' + decPart],
-      ['{{amount_no_decimals}}', rounded],
+      ['{{amount_no_decimals_with_apostrophe_separator}}', groupThousands(roundedWhole, "'")],
+      ['{{amount_no_decimals_with_comma_separator}}', groupThousands(roundedWhole, '.')],
+      ['{{amount_no_decimals_with_space_separator}}', groupThousands(roundedWhole, ' ')],
+      ['{{amount_with_apostrophe_separator}}', groupThousands(String(whole), "'") + '.' + decimal],
+      ['{{amount_with_comma_separator}}', groupThousands(String(whole), '.') + ',' + decimal],
+      ['{{amount_with_period_and_space_separator}}', groupThousands(String(whole), ' ') + '.' + decimal],
+      ['{{amount_with_space_separator}}', groupThousands(String(whole), ' ') + ',' + decimal],
+      ['{{amount_no_decimals}}', groupThousands(roundedWhole, ',')],
       ['{{amount}}', fixed]
     ];
+
     var out = String(fmt);
     replacements.forEach(function (pair) {
-      out = out.split(pair[0]).join(escapeHtml(pair[1]));
+      out = out.split(pair[0]).join(pair[1]);
     });
+
+    var hadSign = out.indexOf('-') !== -1 || out.indexOf('\u2212') !== -1;
+    if (negative && !hadSign) out = '-' + out;
     return out;
   }
 
   function setMoney(node, cents) {
-    if (node) node.innerHTML = moneyHtml(cents);
+    if (!node) return;
+    try {
+      node.innerHTML = moneyHtml(cents);
+    } catch (error) {
+      node.textContent = '';
+    }
+  }
+
+  function safeMoneyHtml(cents) {
+    try {
+      return moneyHtml(cents);
+    } catch (error) {
+      return escapeHtml(String(cents));
+    }
   }
 
   function escapeHtml(value) {
@@ -114,8 +144,8 @@
           paused = !paused;
           pauseButton.setAttribute('aria-pressed', String(paused));
           pauseButton.textContent = paused
-            ? (I18N.carousel_play || 'Play carousel')
-            : (I18N.carousel_pause || 'Pause carousel');
+            ? (I18N.carousel_play || '')
+            : (I18N.carousel_pause || '');
           if (paused) clearInterval(timer); else start();
         });
       }
@@ -126,6 +156,28 @@
   /* ---------- Cart drawer ---------- */
 
   var drawerTrigger = null;
+  var cartMutationSequence = 0;
+  var cartReadSequence = 0;
+  var pendingCartMutations = 0;
+  var cartMutationQueue = Promise.resolve();
+
+  function setPendingCheckoutState() {
+    qsa('[data-cart-checkout]').forEach(function (control) {
+      control.disabled = pendingCartMutations > 0;
+    });
+  }
+
+  function enqueueCartMutation(operation) {
+    var mutationId = ++cartMutationSequence;
+    ++pendingCartMutations;
+    setPendingCheckoutState();
+    var task = cartMutationQueue.then(function () { return operation(mutationId); }, function () { return operation(mutationId); });
+    cartMutationQueue = task.catch(function () { return null; });
+    return task.finally(function () {
+      --pendingCartMutations;
+      setPendingCheckoutState();
+    });
+  }
 
   function drawerElements() {
     var drawer = qs('[data-cart-drawer]');
@@ -171,7 +223,7 @@
     if (els.checkout) els.checkout.style.display = cart && cart.item_count ? '' : 'none';
 
     if (!cart || !cart.item_count) {
-      els.content.innerHTML = '<p>' + escapeHtml(I18N.cart_empty || 'Your cart is empty') + '</p>';
+      els.content.innerHTML = '<p>' + escapeHtml(I18N.cart_empty || '') + '</p>';
       return;
     }
 
@@ -188,15 +240,15 @@
         + '<div class="cart-drawer-item-info">'
         + '<a href="' + escapeHtml(item.url) + '">' + escapeHtml(item.title) + '</a>'
         + variantTitle
-        + '<label class="cart-drawer-qty">' + escapeHtml(I18N.cart_quantity || 'Quantity')
-        + ' <input type="number" min="0" value="' + escapeHtml(item.quantity) + '" data-cart-key="' + escapeHtml(item.key) + '" aria-label="' + escapeHtml(I18N.cart_quantity || 'Quantity') + '"></label>'
-        + '<button type="button" class="cart-drawer-remove" data-cart-remove="' + escapeHtml(item.key) + '">' + escapeHtml(I18N.cart_remove || 'Remove') + '</button>'
-        + '<p class="cart-drawer-line-price">' + moneyHtml(item.final_line_price) + '</p>'
+        + '<label class="cart-drawer-qty">' + escapeHtml(I18N.cart_quantity || '')
+        + ' <input type="number" min="0" step="1" value="' + escapeHtml(item.quantity) + '" data-confirmed-quantity="' + escapeHtml(item.quantity) + '" data-cart-key="' + escapeHtml(item.key) + '" aria-label="' + escapeHtml(I18N.cart_quantity || '') + '"></label>'
+        + '<button type="button" class="cart-drawer-remove" data-cart-remove="' + escapeHtml(item.key) + '">' + escapeHtml(I18N.cart_remove || '') + '</button>'
+        + '<p class="cart-drawer-line-price">' + safeMoneyHtml(item.final_line_price) + '</p>'
         + '</div></li>';
     });
     html += '</ul>'
-      + '<p class="cart-drawer-subtotal">' + escapeHtml(I18N.cart_subtotal || 'Subtotal')
-      + ': <strong>' + moneyHtml(cart.total_price) + '</strong></p>';
+      + '<p class="cart-drawer-subtotal">' + escapeHtml(I18N.cart_subtotal || '')
+      + ': <strong>' + safeMoneyHtml(cart.total_price) + '</strong></p>';
     els.content.innerHTML = html;
   }
 
@@ -206,35 +258,48 @@
   }
 
   function refreshCart() {
+    var readId = ++cartReadSequence;
     return fetch(I18N.cart_js_url || '/cart.js', { headers: { Accept: 'application/json' } })
       .then(function (r) {
         if (!r.ok) throw new Error('cart fetch failed');
         return r.json();
       })
-      .then(renderCartDrawer)
+      .then(function (cart) {
+        if (readId === cartReadSequence && pendingCartMutations === 0) renderCartDrawer(cart);
+        return cart;
+      })
       .catch(function () { /* keep last rendered content */ });
   }
 
   function updateCartItem(key, quantity) {
+    if (!Number.isInteger(Number(quantity)) || Number(quantity) < 0 || String(quantity).trim() === '') {
+      showDrawerStatus(I18N.invalid_quantity || I18N.cart_update_error || '');
+      refreshCart();
+      return Promise.resolve();
+    }
     var updates = {};
-    updates[key] = quantity;
+    updates[key] = Number(quantity);
     showDrawerStatus('');
-    return fetch(I18N.cart_update_url || '/cart/update.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ updates: updates })
-    })
-      .then(function (r) {
-        if (!r.ok) throw new Error('cart update failed');
-        return r.json();
+    return enqueueCartMutation(function (mutationId) {
+      return fetch(I18N.cart_update_url || '/cart/update.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ updates: updates })
       })
-      .then(function (cart) {
-        renderCartDrawer(cart);
-        return cart;
-      })
-      .catch(function () {
-        showDrawerStatus(I18N.cart_update_error || 'Unable to update the cart. Please try again.');
-      });
+        .then(function (r) {
+          if (!r.ok) throw new Error('cart update failed');
+          return r.json();
+        })
+        .then(function (cart) {
+          ++cartReadSequence;
+          if (mutationId === cartMutationSequence) renderCartDrawer(cart);
+          return cart;
+        });
+    }).catch(function () {
+      ++cartReadSequence;
+      showDrawerStatus(I18N.cart_update_error || '');
+      return refreshCart();
+    });
   }
 
   function initCartDrawer() {
@@ -258,6 +323,14 @@
       button.addEventListener('click', function () { closeDrawer(); });
     });
 
+    qsa('[data-cart-checkout-form]', els.drawer).forEach(function (form) {
+      if (form.dataset.jsInit) return;
+      form.dataset.jsInit = '1';
+      form.addEventListener('submit', function (event) {
+        if (pendingCartMutations > 0) event.preventDefault();
+      });
+    });
+
     if (!els.drawer.dataset.jsInit) {
       els.drawer.dataset.jsInit = '1';
       els.drawer.addEventListener('click', function (event) {
@@ -271,7 +344,14 @@
       els.drawer.addEventListener('change', function (event) {
         var target = event.target;
         if (target instanceof Element && target.matches('input[data-cart-key]')) {
-          updateCartItem(target.getAttribute('data-cart-key'), target.value);
+          var rawQuantity = target.value;
+          var quantity = Number(rawQuantity);
+          if (!Number.isFinite(quantity) || !Number.isInteger(quantity) || quantity < 0 || rawQuantity.trim() === '') {
+            target.value = target.getAttribute('data-confirmed-quantity') || '0';
+            showDrawerStatus(I18N.invalid_quantity || I18N.cart_update_error || '');
+            return;
+          }
+          updateCartItem(target.getAttribute('data-cart-key'), quantity);
         }
       });
       els.drawer.addEventListener('keydown', function (event) {
@@ -326,9 +406,9 @@
     });
 
     var labels = {
-      add: I18N.add_to_cart || 'Add to cart',
-      soldOut: I18N.sold_out || 'Sold out',
-      unavailable: I18N.combination_unavailable || 'This combination is not available.'
+      add: I18N.add_to_cart || '',
+      soldOut: I18N.sold_out || '',
+      unavailable: I18N.combination_unavailable || ''
     };
 
     var initialVariantId = variantInput ? variantInput.value : null;
@@ -423,10 +503,13 @@
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       var formData = new FormData(form);
-      var quantity = Number(formData.get('quantity') || 1);
-      var id = Number(variantInput ? variantInput.value : NaN);
-      if (!id || quantity < 1 || !Number.isFinite(quantity)) {
-        if (status) status.textContent = I18N.invalid_quantity || 'Please enter a valid quantity.';
+      var quantityText = String(formData.get('quantity') || '').trim();
+      var quantity = Number(quantityText);
+      var idText = variantInput ? String(variantInput.value || '').trim() : '';
+      var id = Number(idText);
+      if (!idText || !Number.isInteger(id) || id < 1
+        || !quantityText || !Number.isFinite(quantity) || !Number.isInteger(quantity) || quantity < 1) {
+        if (status) status.textContent = I18N.invalid_quantity || '';
         return;
       }
       if (submit) submit.disabled = true;
@@ -434,43 +517,47 @@
       var added = false;
       var cartJsUrl = I18N.cart_js_url || '/cart.js';
       var cartPageUrl = I18N.cart_page_url || '/cart';
-      fetch(I18N.cart_add_url || '/cart/add.js', {
-        method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, quantity: quantity })
-      })
-        .then(function (response) {
+      enqueueCartMutation(function (mutationId) {
+        return fetch(I18N.cart_add_url || '/cart/add.js', {
+          method: 'POST',
+          headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, quantity: quantity })
+        })
+          .then(function (response) {
           if (!response.ok) throw new Error('Cart add failed');
           return response.json();
-        })
-        .then(function () {
-          added = true;
-          if (status) status.textContent = I18N.added_to_cart || 'Added to cart.';
-          return fetch(cartJsUrl, { headers: { Accept: 'application/json' } });
-        })
-        .then(function (r) {
-          if (!r.ok) throw new Error('cart fetch failed');
-          return r.json();
-        })
-        .then(function (cart) {
-          renderCartDrawer(cart);
-          openDrawer();
-        })
-        .catch(function () {
+          })
+          .then(function () {
+            added = true;
+            if (status) status.textContent = I18N.added_to_cart || '';
+            return fetch(cartJsUrl, { headers: { Accept: 'application/json' } });
+          })
+          .then(function (r) {
+            if (!r.ok) throw new Error('cart fetch failed');
+            return r.json();
+          })
+          .then(function (cart) {
+            ++cartReadSequence;
+            if (mutationId === cartMutationSequence) {
+              renderCartDrawer(cart);
+              openDrawer();
+            }
+            return cart;
+          });
+      }).catch(function () {
           if (!status) return;
           if (added) {
             // The item was added; only the drawer refresh failed. Do not imply
             // the add failed — offer a link to the cart page instead.
-            status.innerHTML = escapeHtml(I18N.added_to_cart || 'Added to cart.')
+            status.innerHTML = escapeHtml(I18N.added_to_cart || '')
               + ' <a href="' + escapeHtml(cartPageUrl) + '">'
-              + escapeHtml(I18N.view_cart || 'View cart') + '</a>';
+              + escapeHtml(I18N.view_cart || '') + '</a>';
           } else {
-            status.textContent = I18N.add_error || 'Unable to add this item. Please try again.';
+            status.textContent = I18N.add_error || '';
           }
-        })
-        .then(function () {
+      }).then(function () {
           updateVariant();
-        });
+      });
     });
   }
 
@@ -481,29 +568,53 @@
     qsa('[data-cart-update]', root).forEach(function (input) {
       if (input.dataset.jsInit) return;
       input.dataset.jsInit = '1';
+      // Let the shared pending-mutation guard disable the native checkout
+      // submit while a quantity change is unconfirmed.
+      var cartForm = input.closest('form');
+      var checkoutControl = cartForm && cartForm.querySelector('[name="checkout"]');
+      if (checkoutControl && !checkoutControl.dataset.jsInit) {
+        checkoutControl.dataset.jsInit = '1';
+        checkoutControl.setAttribute('data-cart-checkout', '');
+      }
       input.addEventListener('change', function () {
-        var updates = {};
-        updates[input.getAttribute('data-cart-update')] = input.value;
+        var rawQuantity = input.value;
+        var quantity = Number(rawQuantity);
         var status = qs('[data-cart-page-status]');
-        fetch(I18N.cart_update_url || '/cart/update.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ updates: updates })
-        })
-          .then(function (r) {
+        if (!status) {
+          status = document.createElement('p');
+          status.setAttribute('data-cart-page-status', '');
+          status.setAttribute('role', 'status');
+          status.setAttribute('aria-live', 'polite');
+          var form = input.closest('form');
+          if (form) form.appendChild(status);
+        }
+        if (!Number.isFinite(quantity) || !Number.isInteger(quantity) || quantity < 0 || rawQuantity.trim() === '') {
+          if (status) status.textContent = I18N.invalid_quantity || I18N.cart_update_error || '';
+          return;
+        }
+        var updates = {};
+        updates[input.getAttribute('data-cart-update')] = quantity;
+        enqueueCartMutation(function (mutationId) {
+          return fetch(I18N.cart_update_url || '/cart/update.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ updates: updates })
+          })
+            .then(function (r) {
             if (!r.ok) throw new Error('cart update failed');
             return r.json();
-          })
-          .then(function () {
+            })
+            .then(function (cart) {
+            ++cartReadSequence;
+            if (mutationId !== cartMutationSequence) return cart;
             window.location.reload();
-          })
-          .catch(function () {
-            if (status) {
-              status.textContent = I18N.cart_update_error || 'Unable to update the cart. Please try again.';
-            } else {
-              window.location.reload();
-            }
+            return cart;
           });
+        }).catch(function () {
+            if (status) {
+              status.textContent = I18N.cart_update_error || '';
+            }
+        });
       });
     });
   }

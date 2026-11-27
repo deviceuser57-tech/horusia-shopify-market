@@ -25,7 +25,9 @@
       {% endif %}
     </div>
     <p class="cart-drawer-status" data-cart-drawer-status role="status" aria-live="polite"></p>
-    <a class="button" href="{{ routes.checkout_url }}" data-cart-checkout>{{ 'general.cart.checkout' | t }}</a>
+    <form action="{{ routes.cart_url }}" method="post" data-cart-checkout-form>
+      <button type="submit" name="checkout" class="button" data-cart-checkout>{{ 'general.cart.checkout' | t }}</button>
+    </form>
     <a class="button cart-drawer-view-cart" href="{{ routes.cart_url }}">{{ 'general.cart.view_cart' | t }}</a>
   </div>
 </aside>

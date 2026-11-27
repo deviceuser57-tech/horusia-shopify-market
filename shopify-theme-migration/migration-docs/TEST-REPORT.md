@@ -1,62 +1,114 @@
 # Test Report
 
-## Environment checks
+## Baseline and scope
 
-- Capability: REAL LIQUID THEME OUTPUT GENERATED
-- React/Vite build: NOT USED AS theme compatibility evidence
-- Original project: unchanged
-- Shopify CLI/Theme Check: NOT RUN — `shopify`/`theme-check` not installed on PATH
-- Fix round: review findings addressed in source; see "Fix-round changes" below
+- Branch: `migration/shopify-liquid-theme`
+- Baseline commit: `18290ccca9c84c57004999f6f179ca8868b97436`
+- Worktree at baseline: clean
+- This corrective pass did not commit, merge, push, publish, upload, or deploy.
+- The original project and live services were not modified.
+- No ZIP files or packages were created or overwritten.
 
-## Checks
+## Files changed in this corrective pass
 
-| Check | Status | Notes |
+| File | Reason |
+|---|---|
+| `shopify-theme-migration/assets/theme.js` | Scoped integer, money, quantity, cart mutation, and checkout-pending fixes |
+| `shopify-theme-migration/assets/base.css` | Hide JavaScript-only variant controls when JavaScript is unavailable |
+| `shopify-theme-migration/sections/main-product.liquid` | Native no-JavaScript variant selector, all-sold-out handling, unique quantity ID, and integer quantity step |
+| `shopify-theme-migration/snippets/cart-drawer.liquid` | Replace unverified `routes.checkout_url` link with native cart checkout form |
+| `shopify-theme-migration/migration-docs/TEST-REPORT.md` | Record current behavior and actual test evidence |
+
+The `layout/theme.liquid` file was not changed in this pass.
+
+## Currency formatter test
+
+Official Shopify references reviewed:
+
+- Shopify Liquid `money` filter: https://shopify.dev/docs/api/liquid/filters/money
+- Shopify currency-formatting options: https://help.shopify.com/en/manual/international/pricing/currency-formatting
+- Shopify routes: https://shopify.dev/docs/api/liquid/objects/routes
+
+The scoped `moneyHtml()` function in `assets/theme.js` was executed in an isolated Node VM against the actual file. It does not override `window.Shopify.formatMoney`.
+
+Tested values are Shopify minor units. Invalid values are rejected with `RangeError`; they do not become zero.
+
+| Minor units | Format | Expected | Actual | Status |
+|---|---|---|---|---|
+| `0` | `${{amount}}` | `$0.00` | `$0.00` | PASS |
+| `1` | `${{amount}}` | `$0.01` | `$0.01` | PASS |
+| `99` | `${{amount}}` | `$0.99` | `$0.99` | PASS |
+| `100` | `${{amount}}` | `$1.00` | `$1.00` | PASS |
+| `123456` | `${{amount}}` | `$1,234.56` | `$1,234.56` | PASS |
+| `123499` | `{{amount_no_decimals}}` | `1,235` | `1,235` | PASS |
+| `123450` | `{{amount_no_decimals}}` | `1,235` | `1,235` | PASS |
+| `123456789` | `{{amount_no_decimals_with_comma_separator}}` | `1.234.568` | `1.234.568` | PASS |
+| `-123456` | `€{{amount_with_comma_separator}}` | `-€1.234,56` | `-€1.234,56` | PASS |
+| `123456789` | `{{amount_with_period_and_space_separator}}` | `1 234 567.89` | `1 234 567.89` | PASS |
+| `123456789` | `{{amount_with_space_separator}}` | `1 234 567,89` | `1 234 567,89` | PASS |
+| `123456789` | `{{amount_with_apostrophe_separator}}` | `1'234'567.89` | `1'234'567.89` | PASS |
+| `123499` | `{{amount_no_decimals_with_comma_separator}}` | `1.235` | `1.235` | PASS |
+| `123456789` | `{{amount_no_decimals_with_apostrophe_separator}}` | `1'234'568` | `1'234'568` | PASS |
+| `123456789` | `{{amount_no_decimals_with_space_separator}}` | `1 234 568` | `1 234 568` | PASS |
+
+The following invalid inputs were rejected: `NaN`, `Infinity`, empty string, and `1.5`. **Status: PASS**.
+
+Confirmed Shopify placeholders:
+
+- `{{amount}}`
+- `{{amount_no_decimals}}`
+- `{{amount_with_comma_separator}}`
+- `{{amount_no_decimals_with_comma_separator}}`
+- `{{amount_with_apostrophe_separator}}`
+- `{{amount_no_decimals_with_space_separator}}`
+- `{{amount_with_space_separator}}`
+- `{{amount_with_period_and_space_separator}}`
+
+Additional compatibility placeholder tested:
+
+- `{{amount_no_decimals_with_apostrophe_separator}}`
+
+Extended matrix also executed in this pass (all PASS): minor units `0, 1, 99, 100, 123456, 123499, 123450, 123456789, -123456, -50` across all eight confirmed placeholders, plus `${{amount}} USD` and `<span class="money">${{amount}}</span>` HTML formats (markup preserved, numeric part escaped), and whitespace-free canonical forms only — `{{ amount }}` with inner spaces is not a Shopify-generated format and is left literal.
+
+Drawer line prices and subtotal render through `safeMoneyHtml()`, which falls back to the escaped raw value if the formatter ever throws, so malformed API prices cannot break drawer rendering.
+
+The cart page's native checkout submit is marked with `data-cart-checkout` at init, so the shared pending-mutation guard disables it while a quantity change is unconfirmed, matching the drawer checkout behavior.
+
+EGP-specific storefront formatting, rounding, and rendering were **NOT TESTED** because this pass had no Shopify store or theme preview. No EGP currency logic was added.
+
+## Implementation checks
+
+| Check | Status | Evidence |
 |---|---|---|
-| Theme folder structure | TESTED SUCCESSFULLY | Conventional Shopify directories generated |
-| JSON syntax | TESTED SUCCESSFULLY | All theme `.json` files and embedded `{% schema %}` blocks parse with Node `JSON.parse` |
-| theme.js syntax | TESTED SUCCESSFULLY | `node --check assets/theme.js` passes |
-| Theme Check | NOT RUN | Neither `shopify` nor `theme-check` is installed or available on `PATH` |
-| Shopify theme upload | NOT TESTED | Requires Shopify store access and unpublished theme |
-| Product import | NOT TESTED | No authorized live export/access |
-| Variant behavior (existing/unavailable/sold-out combos, `?variant=` URL) | NOT TESTED | Requires Shopify development/unpublished environment; logic reviewed statically |
-| Variant price and compare-at price updates (EGP) | NOT TESTED | Requires storefront render; money placeholders no longer conflict with Liquid |
-| Add to cart and cart drawer refresh | NOT TESTED | Requires storefront render |
-| Quantity update errors | NOT TESTED | Requires storefront render |
-| Checkout handoff | NOT TESTED | Requires storefront render |
-| Contact form delivery | NOT TESTED | Requires Shopify store environment |
-| Newsletter handling | NOT TESTED | Requires native Shopify customer setup |
-| App blocks | NOT TESTED | No app IDs or app instances configured |
-| Arabic RTL and English | NOT TESTED in browser | `dir` is set by locale; JS strings now come from locale files; manual visual verification required |
-| Desktop/mobile and keyboard operation | NOT TESTED in browser | Focus management and nested menus implemented; manual verification required |
-| Visual comparison | NOT PERFORMED | Pixel parity is not claimed |
-
-## Fix-round changes (review findings)
-
-1. **Product variants** — option matching is now positional (`variant.options[i]` vs selected value per option index), not `options.includes()`. Checked radios initialize from `selected_or_first_available_variant` (respects `?variant=` URLs). Nonexistent combinations clear the hidden variant id and disable purchase with a translated "combination unavailable" message. Sold-out variants stay disabled. Product JSON, price nodes, and controls are scoped to `[data-product-section]`. The native `{% form 'product' %}` path still posts the hidden `id` without JavaScript.
-2. **Prices** — the `{{amount}}` placeholders in `layout/theme.liquid` are now inside `{% raw %}` so Liquid no longer eats them; `formatMoney` uses safe `split/join` replacement and never falls back to raw minor units (worst case shows `amount + currency code`). Compare-at price updates with the variant and hides when absent.
-3. **Cart** — the drawer now renders real line items (image, title, variant, quantity input, remove, line price) and subtotal from `/cart.js` on load and after every mutation; checkout button hides when empty; quantity/remove updates go through `/cart/update.js` with explicit error reporting; cart-page quantity updates show an inline error instead of silently reloading on failure.
-4. **Product media** — thumbnails switch the main image with `aria-pressed` selected state; variant selection switches media when the variant has a distinct image; `enable_zoom` is now functional (click toggles a scrollable 2x zoom on the main image).
-5. **Localization/a11y** — all JS-facing strings come from a `data-i18n` JSON block rendered through `| t` in both locales; the drawer manages focus (focuses close button on open, traps Tab while open, restores focus to the trigger on close, Escape closes); desktop nav renders child links as hover/focus-within submenus and mobile nav renders toggleable submenus; carousel autoplay respects `prefers-reduced-motion`; components reinitialize on `shopify:section:load` without duplicate listeners.
-6. **Validation** — `enabled_on.templates` for contact-form corrected to `["page"]` (`page.contact`/`page.services` are not valid enum values; suffixed page templates are covered by `page`). `font_picker` heading default changed from invalid `"serif"` to `"playfairdisplay_n7"`. Heading font is wired to `h1–h6` via `--font-heading`. Theme Check remains NOT RUN.
-7. **Design/config** — featured-collection falls back to `collections.all` when no collection is selected; hero slides fall back to the packaged `hero-banner.jpg` when no image is picked. Unselected logo/menu/policy settings still require Theme Editor configuration (see MIGRATION-GUIDE).
-8. **Packaging** — `HORUSIA-shopify-theme.zip` contains only uploadable theme folders at the ZIP root; `migration-docs/`, `media-package/`, and nested ZIPs are excluded. `HORUSIA-media-package.zip` and `HORUSIA-migration-docs.zip` are delivered separately.
-
-## Final corrective pass (second review)
-
-1. **No-option products** — `findVariant()` now returns the server-selected variant (or the single variant) when no option controls exist, so default-variant products keep working in both available and sold-out states.
-2. **Button labels** — the add-to-cart label now always comes from the translated `add_to_cart`/`sold_out` strings, never from the button's initial text; switching from a sold-out initial variant to an available one restores the correct label.
-3. **Money formatting** — the partial `window.Shopify.formatMoney` override was removed entirely. A scoped `moneyHtml()` formatter handles all Shopify placeholders (`amount`, `amount_no_decimals`, comma/space/apostrophe separators) with proper thousands grouping, preserves legitimate HTML inside `shop.money_format`, and escapes the numeric amount. Prices render via `innerHTML` so format markup displays correctly. Verified statically only — EGP/large-price rendering still needs storefront verification.
-4. **Locale-aware cart endpoints** — all cart requests (`/cart.js`, `/cart/add.js`, `/cart/update.js`) now use `routes.*` URLs emitted by Liquid, which carry the active locale.
-5. **No-JS variant fallback** — the hidden variant input no longer submits a stale id: it carries no `name`, and a `<noscript>` variant `<select name="id">` (with per-variant price and sold-out disabling) provides the real no-JavaScript selection path.
-6. **Add vs refresh failure** — if `/cart/add.js` succeeds but the cart refresh fails, the status shows the translated "added" message plus a link to the cart page instead of a misleading add-failure error.
-7. **Media synchronization** — `initProductMedia` exposes `section.horusiaSelectMedia(mediaId)` used by variant changes; the initially active thumbnail is the one matching `featured_media`, not blindly the first; thumbnail active state, main image, and selected variant stay in sync.
-8. **Deliverables** — `HORUSIA-shopify-theme.zip`, `HORUSIA-media-package.zip`, and `HORUSIA-migration-docs.zip` exist in `shopify-theme-migration/` and were rebuilt after this pass. `locales/ar.json` is valid UTF-8 JSON without BOM (verified by byte-level check).
+| JavaScript syntax | PASS | `node --check shopify-theme-migration/assets/theme.js` passed |
+| Theme Check | NOT RUN | No Shopify CLI or Theme Check was available; tooling was not installed |
+| Shopify unpublished-theme upload | NOT TESTED | No Shopify store or upload credentials were used |
+| Money formatter | PASS | 15 format cases and 4 invalid-input cases passed in Node VM |
+| Negative money sign | PASS | Scoped formatter prepends the sign when the format does not contain one |
+| JSON parsing | NOT RUN in this pass | JSON files were not changed |
+| Existing/URL-selected variant combinations | NOT TESTED | Static implementation only; requires Shopify render |
+| Nonexistent variant combinations | NOT TESTED | Static implementation only; requires Shopify render |
+| Sold-out/all-sold-out variants | NOT TESTED | Native fallback and button state implemented statically |
+| Variant price and compare-at updates | NOT TESTED | No Shopify storefront render |
+| Add to cart | NOT TESTED | No Shopify store environment |
+| Cart drawer refresh | NOT TESTED | Mutation and confirmed-cart rendering implemented statically |
+| Cart quantity validation | PASS | Static code rejects fractional, negative, and nonnumeric values before requests |
+| Cart update errors | NOT TESTED | Explicit status handling implemented statically |
+| Checkout handoff | NOT TESTED | Native `routes.cart_url` checkout form added; no checkout executed |
+| Payment | NOT TESTED | No payment test was attempted |
+| Contact form | NOT TESTED | No Shopify store environment |
+| Newsletter form | NOT TESTED | No Shopify store environment |
+| App blocks | NOT TESTED | No app IDs or store apps configured |
+| Arabic and English | NOT TESTED in browser | Locale strings remain unchanged; no visual browser test |
+| Desktop/mobile | NOT TESTED | No visual renderer or browser store preview |
+| Keyboard operation | NOT TESTED | Existing focus management was retained; no browser test |
+| Visual comparison | NOT PERFORMED | No visual comparison was authorized or rendered |
 
 ## Remaining issues
 
-- Replace generic source-copy content with approved Shopify page content.
-- Configure navigation and logos from Theme Editor.
-- Import products and collections.
-- Verify policy pages.
-- Select optional apps later.
-- Validate app blocks and accessibility in a real Shopify theme preview.
+- Theme Check remains unavailable in this environment.
+- EGP storefront formatting and JavaScript-updated prices remain unverified.
+- Variant, sold-out, add-to-cart, cart refresh, checkout, forms, app blocks, and RTL behavior require an unpublished Shopify theme preview.
+- Checkout and payment testing are not possible without owner-authorized Shopify store access.
+- The native no-JavaScript variant selector submits only an available choice because sold-out options are disabled.
+- The all-sold-out state disables the native product submit control.
