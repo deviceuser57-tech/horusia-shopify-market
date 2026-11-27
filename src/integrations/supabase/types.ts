@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.18"
   }
   public: {
     Tables: {
@@ -490,11 +490,11 @@ export type Database = {
           cta_link: string
           cta_text_ar: string
           cta_text_en: string | null
+          has_animation: boolean
           headline_ar: string
           headline_color: string
           headline_en: string | null
           height_preset: string
-          has_animation: boolean
           id: string
           image_url: string
           is_active: boolean
@@ -519,11 +519,11 @@ export type Database = {
           cta_link: string
           cta_text_ar: string
           cta_text_en?: string | null
+          has_animation?: boolean
           headline_ar: string
           headline_color?: string
           headline_en?: string | null
           height_preset?: string
-          has_animation?: boolean
           id?: string
           image_url: string
           is_active?: boolean
@@ -548,11 +548,11 @@ export type Database = {
           cta_link?: string
           cta_text_ar?: string
           cta_text_en?: string | null
+          has_animation?: boolean
           headline_ar?: string
           headline_color?: string
           headline_en?: string | null
           height_preset?: string
-          has_animation?: boolean
           id?: string
           image_url?: string
           is_active?: boolean
@@ -968,9 +968,43 @@ export type Database = {
           },
         ]
       }
+      social_accounts: {
+        Row: {
+          account_name: string
+          created_at: string
+          handle: string | null
+          id: string
+          notes: string | null
+          platform: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          handle?: string | null
+          id?: string
+          notes?: string | null
+          platform: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          handle?: string | null
+          id?: string
+          notes?: string | null
+          platform?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_products: {
         Row: {
           ad_copy: Json
+          affiliate_network: string | null
           affiliate_url: string | null
           business_model: Database["public"]["Enums"]["business_model_type"]
           category: string | null
@@ -984,7 +1018,6 @@ export type Database = {
           status: string
           supplier_cost: number | null
           supplier_sku: string | null
-          affiliate_network: string | null
           supplier_source: string | null
           tags: Json
           title: string
@@ -994,6 +1027,7 @@ export type Database = {
         }
         Insert: {
           ad_copy?: Json
+          affiliate_network?: string | null
           affiliate_url?: string | null
           business_model: Database["public"]["Enums"]["business_model_type"]
           category?: string | null
@@ -1007,7 +1041,6 @@ export type Database = {
           status?: string
           supplier_cost?: number | null
           supplier_sku?: string | null
-          affiliate_network?: string | null
           supplier_source?: string | null
           tags?: Json
           title: string
@@ -1017,6 +1050,7 @@ export type Database = {
         }
         Update: {
           ad_copy?: Json
+          affiliate_network?: string | null
           affiliate_url?: string | null
           business_model?: Database["public"]["Enums"]["business_model_type"]
           category?: string | null
@@ -1030,7 +1064,6 @@ export type Database = {
           status?: string
           supplier_cost?: number | null
           supplier_sku?: string | null
-          affiliate_network?: string | null
           supplier_source?: string | null
           tags?: Json
           title?: string
