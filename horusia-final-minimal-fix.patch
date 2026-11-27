@@ -1,0 +1,503 @@
+diff --git a/shopify-theme-migration/assets/theme.js b/shopify-theme-migration/assets/theme.js
+index c031784..7a91e69 100644
+--- a/shopify-theme-migration/assets/theme.js
++++ b/shopify-theme-migration/assets/theme.js
+@@ -19,7 +19,7 @@
+     var numeric = typeof cents === 'number' || (typeof cents === 'string' && cents.trim() !== '')
+       ? Number(cents)
+       : NaN;
+-    if (!Number.isFinite(numeric) || !Number.isInteger(numeric)) {
++    if (!Number.isSafeInteger(numeric)) {
+       throw new RangeError('Money values must be finite integer minor units.');
+     }
+ 
+@@ -36,6 +36,14 @@
+       throw new RangeError('A Shopify money format is required.');
+     }
+ 
++    function signed(value, token) {
++      if (!negative) return value;
++      var index = fmt.indexOf(token);
++      var prefix = index < 0 ? '' : fmt.slice(0, index);
++      var explicitlySigned = /(?:^|>)\s*[-\u2212]\s*$/.test(prefix);
++      return explicitlySigned ? value : '-' + value;
++    }
++
+     var replacements = [
+       ['{{amount_no_decimals_with_apostrophe_separator}}', groupThousands(roundedWhole, "'")],
+       ['{{amount_no_decimals_with_comma_separator}}', groupThousands(roundedWhole, '.')],
+@@ -49,32 +57,50 @@
+     ];
+ 
+     var out = String(fmt);
++    var didReplace = false;
+     replacements.forEach(function (pair) {
+-      out = out.split(pair[0]).join(pair[1]);
++      if (out.indexOf(pair[0]) === -1) return;
++      didReplace = true;
++      out = out.split(pair[0]).join(escapeHtml(signed(pair[1], pair[0])));
+     });
+ 
+-    var hadSign = out.indexOf('-') !== -1 || out.indexOf('\u2212') !== -1;
+-    if (negative && !hadSign) out = '-' + out;
++    if (!didReplace || /\{\{[^{}]*\}\}/.test(out)) {
++      throw new RangeError('The Shopify money format contains an unsupported placeholder.');
++    }
+     return out;
+   }
+ 
+   function setMoney(node, cents) {
+-    if (!node) return;
++    if (!node) return false;
+     try {
+       node.innerHTML = moneyHtml(cents);
++      return true;
+     } catch (error) {
+-      node.textContent = '';
++      return false;
+     }
+   }
+ 
+-  function safeMoneyHtml(cents) {
++  var confirmedMoneyHtml = Object.create(null);
++
++  function safeMoneyHtml(cents, cacheKey) {
+     try {
+-      return moneyHtml(cents);
++      var formatted = moneyHtml(cents);
++      if (cacheKey) confirmedMoneyHtml[cacheKey] = formatted;
++      return formatted;
+     } catch (error) {
+-      return escapeHtml(String(cents));
++      return cacheKey && Object.prototype.hasOwnProperty.call(confirmedMoneyHtml, cacheKey)
++        ? confirmedMoneyHtml[cacheKey]
++        : null;
+     }
+   }
+ 
++  function cartPriceHtml(cents, cacheKey) {
++    var formatted = safeMoneyHtml(cents, cacheKey);
++    if (formatted !== null) return formatted;
++    var cartUrl = I18N.cart_page_url || '#';
++    return '<a href="' + escapeHtml(cartUrl) + '">' + escapeHtml(I18N.view_cart || '') + '</a>';
++  }
++
+   function escapeHtml(value) {
+     return String(value == null ? '' : value)
+       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+@@ -159,11 +185,16 @@
+   var cartMutationSequence = 0;
+   var cartReadSequence = 0;
+   var pendingCartMutations = 0;
++  var cartStateUnconfirmed = false;
+   var cartMutationQueue = Promise.resolve();
+ 
++  function cartCheckoutBlocked() {
++    return pendingCartMutations > 0 || cartStateUnconfirmed;
++  }
++
+   function setPendingCheckoutState() {
+     qsa('[data-cart-checkout]').forEach(function (control) {
+-      control.disabled = pendingCartMutations > 0;
++      control.disabled = cartCheckoutBlocked();
+     });
+   }
+ 
+@@ -243,12 +274,12 @@
+         + '<label class="cart-drawer-qty">' + escapeHtml(I18N.cart_quantity || '')
+         + ' <input type="number" min="0" step="1" value="' + escapeHtml(item.quantity) + '" data-confirmed-quantity="' + escapeHtml(item.quantity) + '" data-cart-key="' + escapeHtml(item.key) + '" aria-label="' + escapeHtml(I18N.cart_quantity || '') + '"></label>'
+         + '<button type="button" class="cart-drawer-remove" data-cart-remove="' + escapeHtml(item.key) + '">' + escapeHtml(I18N.cart_remove || '') + '</button>'
+-        + '<p class="cart-drawer-line-price">' + safeMoneyHtml(item.final_line_price) + '</p>'
++        + '<p class="cart-drawer-line-price">' + cartPriceHtml(item.final_line_price, 'line:' + item.key) + '</p>'
+         + '</div></li>';
+     });
+     html += '</ul>'
+       + '<p class="cart-drawer-subtotal">' + escapeHtml(I18N.cart_subtotal || '')
+-      + ': <strong>' + safeMoneyHtml(cart.total_price) + '</strong></p>';
++      + ': <strong>' + cartPriceHtml(cart.total_price, 'cart:total') + '</strong></p>';
+     els.content.innerHTML = html;
+   }
+ 
+@@ -257,6 +288,54 @@
+     if (els && els.status) els.status.textContent = message || '';
+   }
+ 
++  function cartPageStatus() {
++    var status = qs('[data-cart-page-status]');
++    if (!status) return null;
++    return status;
++  }
++
++  function showCartPageUpdateError(withRecoveryLink) {
++    var status = cartPageStatus();
++    if (!status) return;
++    var message = escapeHtml(I18N.cart_update_error || '');
++    if (withRecoveryLink) {
++      var cartUrl = escapeHtml(I18N.cart_page_url || '#');
++      var viewCart = escapeHtml(I18N.view_cart || '');
++      status.innerHTML = message + ' <a href="' + cartUrl + '">' + viewCart + '</a>';
++    } else {
++      status.textContent = I18N.cart_update_error || '';
++    }
++  }
++
++  function reconcileCartPage(cart) {
++    if (!cart || !Array.isArray(cart.items)) return;
++    var lines = Object.create(null);
++    cart.items.forEach(function (item) { lines[item.key] = item.quantity; });
++    qsa('[data-cart-update]').forEach(function (input) {
++      var key = input.getAttribute('data-cart-update');
++      var quantity = Object.prototype.hasOwnProperty.call(lines, key) ? lines[key] : 0;
++      input.value = quantity;
++      input.setAttribute('data-confirmed-quantity', quantity);
++    });
++    var totalNode = qs('#CartForm .cart-summary p strong');
++    if (totalNode) setMoney(totalNode, cart.total_price);
++  }
++
++  function restoreConfirmedCartQuantities() {
++    qsa('[data-cart-key], [data-cart-update]').forEach(function (input) {
++      var confirmed = input.getAttribute('data-confirmed-quantity');
++      if (confirmed !== null) input.value = confirmed;
++    });
++  }
++
++  function requestCartSnapshot() {
++    return fetch(I18N.cart_js_url || '/cart.js', { headers: { Accept: 'application/json' } })
++      .then(function (response) {
++        if (!response.ok) throw new Error('cart reconciliation failed');
++        return response.json();
++      });
++  }
++
+   function refreshCart() {
+     var readId = ++cartReadSequence;
+     return fetch(I18N.cart_js_url || '/cart.js', { headers: { Accept: 'application/json' } })
+@@ -272,13 +351,15 @@
+   }
+ 
+   function updateCartItem(key, quantity) {
+-    if (!Number.isInteger(Number(quantity)) || Number(quantity) < 0 || String(quantity).trim() === '') {
++    var rawQuantity = String(quantity);
++    var numericQuantity = Number(rawQuantity);
++    if (!rawQuantity.trim() || !Number.isFinite(numericQuantity)
++      || !Number.isInteger(numericQuantity) || numericQuantity < 0) {
+       showDrawerStatus(I18N.invalid_quantity || I18N.cart_update_error || '');
+-      refreshCart();
+       return Promise.resolve();
+     }
+     var updates = {};
+-    updates[key] = Number(quantity);
++    updates[key] = numericQuantity;
+     showDrawerStatus('');
+     return enqueueCartMutation(function (mutationId) {
+       return fetch(I18N.cart_update_url || '/cart/update.js', {
+@@ -292,13 +373,29 @@
+         })
+         .then(function (cart) {
+           ++cartReadSequence;
++          cartStateUnconfirmed = false;
++          reconcileCartPage(cart);
+           if (mutationId === cartMutationSequence) renderCartDrawer(cart);
+           return cart;
++        })
++        .catch(function () {
++          return requestCartSnapshot().then(function (cart) {
++            ++cartReadSequence;
++            cartStateUnconfirmed = false;
++            reconcileCartPage(cart);
++            renderCartDrawer(cart);
++            showDrawerStatus(I18N.cart_update_error || '');
++            showCartPageUpdateError(false);
++            return cart;
++          }).catch(function () {
++            cartStateUnconfirmed = true;
++            setPendingCheckoutState();
++            restoreConfirmedCartQuantities();
++            showDrawerStatus(I18N.cart_update_error || '');
++            showCartPageUpdateError(true);
++            return null;
++          });
+         });
+-    }).catch(function () {
+-      ++cartReadSequence;
+-      showDrawerStatus(I18N.cart_update_error || '');
+-      return refreshCart();
+     });
+   }
+ 
+@@ -474,8 +571,18 @@
+       setMoney(priceNode, variant.price);
+       if (compareNode) {
+         var hasCompare = variant.compare_at_price && variant.compare_at_price > variant.price;
+-        compareNode.hidden = !hasCompare;
+-        compareNode.innerHTML = hasCompare ? moneyHtml(variant.compare_at_price) : '';
++        if (hasCompare) {
++          try {
++            compareNode.innerHTML = moneyHtml(variant.compare_at_price);
++            compareNode.hidden = false;
++          } catch (error) {
++            compareNode.innerHTML = '';
++            compareNode.hidden = true;
++          }
++        } else {
++          compareNode.innerHTML = '';
++          compareNode.hidden = true;
++        }
+       }
+       if (submit) {
+         submit.disabled = !variant.available;
+@@ -565,17 +672,24 @@
+ 
+   function initCartPageUpdates(scope) {
+     var root = scope && scope.matches && scope.matches('body') ? document : (scope || document);
++    var cartForm = root.matches && root.matches('#CartForm') ? root : qs('#CartForm', root);
++    if (cartForm) {
++      qsa('[name="checkout"]', cartForm).forEach(function (control) {
++        control.setAttribute('data-cart-checkout', '');
++      });
++      if (!cartForm.dataset.cartCheckoutGuardInit) {
++        cartForm.dataset.cartCheckoutGuardInit = '1';
++        cartForm.addEventListener('submit', function (event) {
++          if (cartCheckoutBlocked()) event.preventDefault();
++        });
++      }
++      setPendingCheckoutState();
++    }
++
+     qsa('[data-cart-update]', root).forEach(function (input) {
+       if (input.dataset.jsInit) return;
+       input.dataset.jsInit = '1';
+-      // Let the shared pending-mutation guard disable the native checkout
+-      // submit while a quantity change is unconfirmed.
+-      var cartForm = input.closest('form');
+-      var checkoutControl = cartForm && cartForm.querySelector('[name="checkout"]');
+-      if (checkoutControl && !checkoutControl.dataset.jsInit) {
+-        checkoutControl.dataset.jsInit = '1';
+-        checkoutControl.setAttribute('data-cart-checkout', '');
+-      }
++      input.setAttribute('data-confirmed-quantity', input.value);
+       input.addEventListener('change', function () {
+         var rawQuantity = input.value;
+         var quantity = Number(rawQuantity);
+@@ -589,6 +703,7 @@
+           if (form) form.appendChild(status);
+         }
+         if (!Number.isFinite(quantity) || !Number.isInteger(quantity) || quantity < 0 || rawQuantity.trim() === '') {
++          input.value = input.getAttribute('data-confirmed-quantity') || '';
+           if (status) status.textContent = I18N.invalid_quantity || I18N.cart_update_error || '';
+           return;
+         }
+@@ -606,14 +721,30 @@
+             })
+             .then(function (cart) {
+             ++cartReadSequence;
+-            if (mutationId !== cartMutationSequence) return cart;
+-            window.location.reload();
++            cartStateUnconfirmed = false;
++            reconcileCartPage(cart);
++            renderCartDrawer(cart);
++            if (mutationId === cartMutationSequence) window.location.reload();
+             return cart;
++          })
++          .catch(function () {
++            return requestCartSnapshot().then(function (cart) {
++              ++cartReadSequence;
++              cartStateUnconfirmed = false;
++              reconcileCartPage(cart);
++              renderCartDrawer(cart);
++              showCartPageUpdateError(false);
++              showDrawerStatus(I18N.cart_update_error || '');
++              return cart;
++            }).catch(function () {
++              cartStateUnconfirmed = true;
++              setPendingCheckoutState();
++              restoreConfirmedCartQuantities();
++              showCartPageUpdateError(true);
++              showDrawerStatus(I18N.cart_update_error || '');
++              return null;
++            });
+           });
+-        }).catch(function () {
+-            if (status) {
+-              status.textContent = I18N.cart_update_error || '';
+-            }
+         });
+       });
+     });
+diff --git a/shopify-theme-migration/migration-docs/TEST-REPORT.md b/shopify-theme-migration/migration-docs/TEST-REPORT.md
+index 68b7656..995a01e 100644
+--- a/shopify-theme-migration/migration-docs/TEST-REPORT.md
++++ b/shopify-theme-migration/migration-docs/TEST-REPORT.md
+@@ -1,40 +1,28 @@
+-# Test Report
++# Test Report — Final Minimal Fix Pass
+ 
+ ## Baseline and scope
+ 
+ - Branch: `migration/shopify-liquid-theme`
+-- Baseline commit: `18290ccca9c84c57004999f6f179ca8868b97436`
+-- Worktree at baseline: clean
+-- This corrective pass did not commit, merge, push, publish, upload, or deploy.
+-- The original project and live services were not modified.
+-- No ZIP files or packages were created or overwritten.
++- Baseline HEAD: `ab31cc41f837a57d0b4b7656806de4715b2d9425`
++- Baseline working tree: clean; no pre-existing modifications.
++- No other background agent or command process was active at the start of this pass.
++- No commit, push, upload, publish, deployment, ZIP rebuild, or live-store action occurred.
+ 
+-## Files changed in this corrective pass
++## Files changed
+ 
+ | File | Reason |
+ |---|---|
+-| `shopify-theme-migration/assets/theme.js` | Scoped integer, money, quantity, cart mutation, and checkout-pending fixes |
+-| `shopify-theme-migration/assets/base.css` | Hide JavaScript-only variant controls when JavaScript is unavailable |
+-| `shopify-theme-migration/sections/main-product.liquid` | Native no-JavaScript variant selector, all-sold-out handling, unique quantity ID, and integer quantity step |
+-| `shopify-theme-migration/snippets/cart-drawer.liquid` | Replace unverified `routes.checkout_url` link with native cart checkout form |
+-| `shopify-theme-migration/migration-docs/TEST-REPORT.md` | Record current behavior and actual test evidence |
++| `shopify-theme-migration/assets/theme.js` | Reject invalid money formats/values, avoid raw-price fallbacks, preserve last valid price output, handle explicit negative signs, guard checkout while cart state is pending/unknown, and reconcile failed cart updates. |
++| `shopify-theme-migration/migration-docs/TEST-REPORT.md` | Replace prior-round claims with this pass's baseline, current behavior, test results, and remaining limitations. |
+ 
+-The `layout/theme.liquid` file was not changed in this pass.
++No other source file was changed.
+ 
+-## Currency formatter test
++## Money formatting and error-path tests
+ 
+-Official Shopify references reviewed:
++The actual `moneyHtml`, `safeMoneyHtml`, and cart drawer rendering functions from `assets/theme.js` were exercised in an isolated Node VM. All output below is the function's actual HTML string, including escaped apostrophes where appropriate.
+ 
+-- Shopify Liquid `money` filter: https://shopify.dev/docs/api/liquid/filters/money
+-- Shopify currency-formatting options: https://help.shopify.com/en/manual/international/pricing/currency-formatting
+-- Shopify routes: https://shopify.dev/docs/api/liquid/objects/routes
+-
+-The scoped `moneyHtml()` function in `assets/theme.js` was executed in an isolated Node VM against the actual file. It does not override `window.Shopify.formatMoney`.
+-
+-Tested values are Shopify minor units. Invalid values are rejected with `RangeError`; they do not become zero.
+-
+-| Minor units | Format | Expected | Actual | Status |
+-|---|---|---|---|---|
++| Input minor units | Format | Expected output | Actual output | Result |
++|---:|---|---|---|---|
+ | `0` | `${{amount}}` | `$0.00` | `$0.00` | PASS |
+ | `1` | `${{amount}}` | `$0.01` | `$0.01` | PASS |
+ | `99` | `${{amount}}` | `$0.99` | `$0.99` | PASS |
+@@ -42,73 +30,60 @@ Tested values are Shopify minor units. Invalid values are rejected with `RangeEr
+ | `123456` | `${{amount}}` | `$1,234.56` | `$1,234.56` | PASS |
+ | `123499` | `{{amount_no_decimals}}` | `1,235` | `1,235` | PASS |
+ | `123450` | `{{amount_no_decimals}}` | `1,235` | `1,235` | PASS |
++| `123456789` | `{{amount}}` | `1,234,567.89` | `1,234,567.89` | PASS |
++| `123456789` | `{{amount_no_decimals}}` | `1,234,568` | `1,234,568` | PASS |
++| `123456789` | `{{amount_with_comma_separator}}` | `1.234.567,89` | `1.234.567,89` | PASS |
+ | `123456789` | `{{amount_no_decimals_with_comma_separator}}` | `1.234.568` | `1.234.568` | PASS |
+-| `-123456` | `€{{amount_with_comma_separator}}` | `-€1.234,56` | `-€1.234,56` | PASS |
+-| `123456789` | `{{amount_with_period_and_space_separator}}` | `1 234 567.89` | `1 234 567.89` | PASS |
+-| `123456789` | `{{amount_with_space_separator}}` | `1 234 567,89` | `1 234 567,89` | PASS |
+-| `123456789` | `{{amount_with_apostrophe_separator}}` | `1'234'567.89` | `1'234'567.89` | PASS |
+-| `123499` | `{{amount_no_decimals_with_comma_separator}}` | `1.235` | `1.235` | PASS |
+-| `123456789` | `{{amount_no_decimals_with_apostrophe_separator}}` | `1'234'568` | `1'234'568` | PASS |
++| `123456789` | `{{amount_with_apostrophe_separator}}` | `1&#39;234&#39;567.89` | `1&#39;234&#39;567.89` | PASS |
+ | `123456789` | `{{amount_no_decimals_with_space_separator}}` | `1 234 568` | `1 234 568` | PASS |
++| `123456789` | `{{amount_with_space_separator}}` | `1 234 567,89` | `1 234 567,89` | PASS |
++| `123456789` | `{{amount_with_period_and_space_separator}}` | `1 234 567.89` | `1 234 567.89` | PASS |
++| `123456789` | `{{amount_no_decimals_with_apostrophe_separator}}` | `1&#39;234&#39;568` | `1&#39;234&#39;568` | PASS |
++| `-123456` | `{{amount}}` | `-1,234.56` | `-1,234.56` | PASS |
++| `-123456` | `<span class="money-price">{{amount}}</span>` | `<span class="money-price">-1,234.56</span>` | `<span class="money-price">-1,234.56</span>` | PASS |
++| `123456` | `<span class="money-price">{{amount}}</span>` | `<span class="money-price">1,234.56</span>` | `<span class="money-price">1,234.56</span>` | PASS |
++| `-123456` | `-{{amount}}` | `-1,234.56` | `-1,234.56` | PASS |
+ 
+-The following invalid inputs were rejected: `NaN`, `Infinity`, empty string, and `1.5`. **Status: PASS**.
+-
+-Confirmed Shopify placeholders:
++Additional error-path results:
+ 
+-- `{{amount}}`
+-- `{{amount_no_decimals}}`
+-- `{{amount_with_comma_separator}}`
+-- `{{amount_no_decimals_with_comma_separator}}`
+-- `{{amount_with_apostrophe_separator}}`
+-- `{{amount_no_decimals_with_space_separator}}`
+-- `{{amount_with_space_separator}}`
+-- `{{amount_with_period_and_space_separator}}`
++| Input | Expected | Actual | Result |
++|---|---|---|---|
++| `NaN`, `Infinity`, empty string, `1.5`, and `nope` as amounts | Reject; do not output minor units or zero | All rejected; drawer used existing cart-page link when no previously confirmed price existed | PASS |
++| Missing Shopify money format | Reject formatting; no raw minor-unit fallback | Rejected; drawer used `/ar/cart` link | PASS |
++| `{{unknown}}` format | Reject malformed/unrecognized placeholder | Rejected; drawer used `/ar/cart` link | PASS |
++| Previously confirmed `$1.00`, then invalid amount/format for same cart key | Preserve prior formatted price | `$1.00` remained; raw value was not rendered | PASS |
++| Invalid amount passed to `setMoney()` after `$1.23` was confirmed | Keep previous output | `$1.23` remained | PASS |
++| `window.Shopify.formatMoney` sentinel | Leave Shopify global unchanged | Sentinel remained unchanged | PASS |
+ 
+-Additional compatibility placeholder tested:
++For negative values, the sign is applied to the numeric replacement. A single explicit leading `-` or `−` immediately before the amount placeholder (at the format start or after an HTML tag boundary) is retained instead of adding another sign. Other unrelated markup/text does not suppress the numeric sign.
+ 
+-- `{{amount_no_decimals_with_apostrophe_separator}}`
++No suitable translated “price unavailable” message exists in the current locale files. For an unformattable cart price with no prior formatted value, the theme omits the amount and shows the existing translated cart link. Product prices retain their previously rendered valid value where available. To provide a clear translated unavailable-price label, permission is requested for the smallest follow-up locale-only change: add one price-unavailable key to both `locales/en.default.json` and `locales/ar.json`. Those files were not modified.
+ 
+-Extended matrix also executed in this pass (all PASS): minor units `0, 1, 99, 100, 123456, 123499, 123450, 123456789, -123456, -50` across all eight confirmed placeholders, plus `${{amount}} USD` and `<span class="money">${{amount}}</span>` HTML formats (markup preserved, numeric part escaped), and whitespace-free canonical forms only — `{{ amount }}` with inner spaces is not a Shopify-generated format and is left literal.
++## Cart-page tests
+ 
+-Drawer line prices and subtotal render through `safeMoneyHtml()`, which falls back to the escaped raw value if the formatter ever throws, so malformed API prices cannot break drawer rendering.
++These scenarios exercised the actual cart-page handlers in a Node VM with mocked DOM events and mocked locale-aware Ajax responses. They are implementation tests, not browser tests.
+ 
+-The cart page's native checkout submit is marked with `data-cart-checkout` at init, so the shared pending-mutation guard disables it while a quantity change is unconfirmed, matching the drawer checkout behavior.
++| Scenario | Expected | Actual | Result |
++|---|---|---|---|
++| A. Successful quantity update | Reconcile server quantity; allow checkout after confirmation | Quantity and confirmed value became `3`; checkout was enabled after response | PASS |
++| B. Update fails, reconciliation succeeds | Restore server quantity; show translated error; allow checkout once confirmed | Quantity restored to `2`; error shown; checkout enabled | PASS |
++| C. Update and reconciliation both fail | Restore last confirmed visible quantity; keep checkout blocked; offer recovery | Quantity restored to `2`; checkout remained blocked; `/ar/cart` recovery link shown; submit prevented | PASS |
++| D. Rapid consecutive changes (`2`, then `3`) | Serialize requests and apply later queued value | Only first request started initially; second started after first completed; final quantity `3` | PASS |
++| E. Checkout during pending update | Prevent submit while pending; allow after confirmed response | Pending submit prevented; after success checkout enabled and submit not prevented | PASS |
++| F. Invalid fractional quantity (`1.5`) | Reject before request and restore confirmed quantity | No request sent; quantity restored to `2`; translated validation message shown | PASS |
+ 
+-EGP-specific storefront formatting, rounding, and rendering were **NOT TESTED** because this pass had no Shopify store or theme preview. No EGP currency logic was added.
++The native cart form has one idempotent `submit` listener. Mouse submission, Enter-key submission, and `requestSubmit()` are expected to dispatch that event, but those input methods were **NOT TESTED in a browser**. Synthetic submit events and the pending/success states were tested.
+ 
+-## Implementation checks
++## Validation and remaining issues
+ 
+-| Check | Status | Evidence |
++| Check | Status | Notes |
+ |---|---|---|
+-| JavaScript syntax | PASS | `node --check shopify-theme-migration/assets/theme.js` passed |
+-| Theme Check | NOT RUN | No Shopify CLI or Theme Check was available; tooling was not installed |
+-| Shopify unpublished-theme upload | NOT TESTED | No Shopify store or upload credentials were used |
+-| Money formatter | PASS | 15 format cases and 4 invalid-input cases passed in Node VM |
+-| Negative money sign | PASS | Scoped formatter prepends the sign when the format does not contain one |
+-| JSON parsing | NOT RUN in this pass | JSON files were not changed |
+-| Existing/URL-selected variant combinations | NOT TESTED | Static implementation only; requires Shopify render |
+-| Nonexistent variant combinations | NOT TESTED | Static implementation only; requires Shopify render |
+-| Sold-out/all-sold-out variants | NOT TESTED | Native fallback and button state implemented statically |
+-| Variant price and compare-at updates | NOT TESTED | No Shopify storefront render |
+-| Add to cart | NOT TESTED | No Shopify store environment |
+-| Cart drawer refresh | NOT TESTED | Mutation and confirmed-cart rendering implemented statically |
+-| Cart quantity validation | PASS | Static code rejects fractional, negative, and nonnumeric values before requests |
+-| Cart update errors | NOT TESTED | Explicit status handling implemented statically |
+-| Checkout handoff | NOT TESTED | Native `routes.cart_url` checkout form added; no checkout executed |
+-| Payment | NOT TESTED | No payment test was attempted |
+-| Contact form | NOT TESTED | No Shopify store environment |
+-| Newsletter form | NOT TESTED | No Shopify store environment |
+-| App blocks | NOT TESTED | No app IDs or store apps configured |
+-| Arabic and English | NOT TESTED in browser | Locale strings remain unchanged; no visual browser test |
+-| Desktop/mobile | NOT TESTED | No visual renderer or browser store preview |
+-| Keyboard operation | NOT TESTED | Existing focus management was retained; no browser test |
+-| Visual comparison | NOT PERFORMED | No visual comparison was authorized or rendered |
+-
+-## Remaining issues
+-
+-- Theme Check remains unavailable in this environment.
+-- EGP storefront formatting and JavaScript-updated prices remain unverified.
+-- Variant, sold-out, add-to-cart, cart refresh, checkout, forms, app blocks, and RTL behavior require an unpublished Shopify theme preview.
+-- Checkout and payment testing are not possible without owner-authorized Shopify store access.
+-- The native no-JavaScript variant selector submits only an available choice because sold-out options are disabled.
+-- The all-sold-out state disables the native product submit control.
++| JavaScript syntax | PASS | `node --check shopify-theme-migration/assets/theme.js` |
++| Theme Check | NOT RUN | Shopify CLI/Theme Check is unavailable; no tooling was installed |
++| Cart mutation scenarios A–F | PASS | Isolated Node VM with mocked DOM/fetch; not a Shopify storefront |
++| Shopify unpublished-theme upload | NOT TESTED | No store access used |
++| Browser interaction and accessibility | NOT TESTED | No browser test performed |
++| EGP storefront rendering | NOT TESTED | Formatting tests exercise patterns, not a configured EGP storefront |
++| Checkout handoff or payment | NOT TESTED | No checkout/payment operation attempted |
++
++Remaining issue: a translated unavailable-price string requires owner approval for the two locale-file additions listed above. The existing cart-page link is used as the safe fallback in cart rendering until then.

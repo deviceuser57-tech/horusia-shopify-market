@@ -19,7 +19,7 @@
     var numeric = typeof cents === 'number' || (typeof cents === 'string' && cents.trim() !== '')
       ? Number(cents)
       : NaN;
-    if (!Number.isFinite(numeric) || !Number.isInteger(numeric)) {
+    if (!Number.isSafeInteger(numeric)) {
       throw new RangeError('Money values must be finite integer minor units.');
     }
 
@@ -36,6 +36,14 @@
       throw new RangeError('A Shopify money format is required.');
     }
 
+    function signed(value, token) {
+      if (!negative) return value;
+      var index = fmt.indexOf(token);
+      var prefix = index < 0 ? '' : fmt.slice(0, index);
+      var explicitlySigned = /(?:^|>)\s*[-\u2212]\s*$/.test(prefix);
+      return explicitlySigned ? value : '-' + value;
+    }
+
     var replacements = [
       ['{{amount_no_decimals_with_apostrophe_separator}}', groupThousands(roundedWhole, "'")],
       ['{{amount_no_decimals_with_comma_separator}}', groupThousands(roundedWhole, '.')],
@@ -49,30 +57,48 @@
     ];
 
     var out = String(fmt);
+    var didReplace = false;
     replacements.forEach(function (pair) {
-      out = out.split(pair[0]).join(pair[1]);
+      if (out.indexOf(pair[0]) === -1) return;
+      didReplace = true;
+      out = out.split(pair[0]).join(escapeHtml(signed(pair[1], pair[0])));
     });
 
-    var hadSign = out.indexOf('-') !== -1 || out.indexOf('\u2212') !== -1;
-    if (negative && !hadSign) out = '-' + out;
+    if (!didReplace || /\{\{[^{}]*\}\}/.test(out)) {
+      throw new RangeError('The Shopify money format contains an unsupported placeholder.');
+    }
     return out;
   }
 
   function setMoney(node, cents) {
-    if (!node) return;
+    if (!node) return false;
     try {
       node.innerHTML = moneyHtml(cents);
+      return true;
     } catch (error) {
-      node.textContent = '';
+      return false;
     }
   }
 
-  function safeMoneyHtml(cents) {
+  var confirmedMoneyHtml = Object.create(null);
+
+  function safeMoneyHtml(cents, cacheKey) {
     try {
-      return moneyHtml(cents);
+      var formatted = moneyHtml(cents);
+      if (cacheKey) confirmedMoneyHtml[cacheKey] = formatted;
+      return formatted;
     } catch (error) {
-      return escapeHtml(String(cents));
+      return cacheKey && Object.prototype.hasOwnProperty.call(confirmedMoneyHtml, cacheKey)
+        ? confirmedMoneyHtml[cacheKey]
+        : null;
     }
+  }
+
+  function cartPriceHtml(cents, cacheKey) {
+    var formatted = safeMoneyHtml(cents, cacheKey);
+    if (formatted !== null) return formatted;
+    var cartUrl = I18N.cart_page_url || '#';
+    return '<a href="' + escapeHtml(cartUrl) + '">' + escapeHtml(I18N.view_cart || '') + '</a>';
   }
 
   function escapeHtml(value) {
@@ -159,11 +185,16 @@
   var cartMutationSequence = 0;
   var cartReadSequence = 0;
   var pendingCartMutations = 0;
+  var cartStateUnconfirmed = false;
   var cartMutationQueue = Promise.resolve();
+
+  function cartCheckoutBlocked() {
+    return pendingCartMutations > 0 || cartStateUnconfirmed;
+  }
 
   function setPendingCheckoutState() {
     qsa('[data-cart-checkout]').forEach(function (control) {
-      control.disabled = pendingCartMutations > 0;
+      control.disabled = cartCheckoutBlocked();
     });
   }
 
@@ -243,18 +274,66 @@
         + '<label class="cart-drawer-qty">' + escapeHtml(I18N.cart_quantity || '')
         + ' <input type="number" min="0" step="1" value="' + escapeHtml(item.quantity) + '" data-confirmed-quantity="' + escapeHtml(item.quantity) + '" data-cart-key="' + escapeHtml(item.key) + '" aria-label="' + escapeHtml(I18N.cart_quantity || '') + '"></label>'
         + '<button type="button" class="cart-drawer-remove" data-cart-remove="' + escapeHtml(item.key) + '">' + escapeHtml(I18N.cart_remove || '') + '</button>'
-        + '<p class="cart-drawer-line-price">' + safeMoneyHtml(item.final_line_price) + '</p>'
+        + '<p class="cart-drawer-line-price">' + cartPriceHtml(item.final_line_price, 'line:' + item.key) + '</p>'
         + '</div></li>';
     });
     html += '</ul>'
       + '<p class="cart-drawer-subtotal">' + escapeHtml(I18N.cart_subtotal || '')
-      + ': <strong>' + safeMoneyHtml(cart.total_price) + '</strong></p>';
+      + ': <strong>' + cartPriceHtml(cart.total_price, 'cart:total') + '</strong></p>';
     els.content.innerHTML = html;
   }
 
   function showDrawerStatus(message) {
     var els = drawerElements();
     if (els && els.status) els.status.textContent = message || '';
+  }
+
+  function cartPageStatus() {
+    var status = qs('[data-cart-page-status]');
+    if (!status) return null;
+    return status;
+  }
+
+  function showCartPageUpdateError(withRecoveryLink) {
+    var status = cartPageStatus();
+    if (!status) return;
+    var message = escapeHtml(I18N.cart_update_error || '');
+    if (withRecoveryLink) {
+      var cartUrl = escapeHtml(I18N.cart_page_url || '#');
+      var viewCart = escapeHtml(I18N.view_cart || '');
+      status.innerHTML = message + ' <a href="' + cartUrl + '">' + viewCart + '</a>';
+    } else {
+      status.textContent = I18N.cart_update_error || '';
+    }
+  }
+
+  function reconcileCartPage(cart) {
+    if (!cart || !Array.isArray(cart.items)) return;
+    var lines = Object.create(null);
+    cart.items.forEach(function (item) { lines[item.key] = item.quantity; });
+    qsa('[data-cart-update]').forEach(function (input) {
+      var key = input.getAttribute('data-cart-update');
+      var quantity = Object.prototype.hasOwnProperty.call(lines, key) ? lines[key] : 0;
+      input.value = quantity;
+      input.setAttribute('data-confirmed-quantity', quantity);
+    });
+    var totalNode = qs('#CartForm .cart-summary p strong');
+    if (totalNode) setMoney(totalNode, cart.total_price);
+  }
+
+  function restoreConfirmedCartQuantities() {
+    qsa('[data-cart-key], [data-cart-update]').forEach(function (input) {
+      var confirmed = input.getAttribute('data-confirmed-quantity');
+      if (confirmed !== null) input.value = confirmed;
+    });
+  }
+
+  function requestCartSnapshot() {
+    return fetch(I18N.cart_js_url || '/cart.js', { headers: { Accept: 'application/json' } })
+      .then(function (response) {
+        if (!response.ok) throw new Error('cart reconciliation failed');
+        return response.json();
+      });
   }
 
   function refreshCart() {
@@ -272,13 +351,15 @@
   }
 
   function updateCartItem(key, quantity) {
-    if (!Number.isInteger(Number(quantity)) || Number(quantity) < 0 || String(quantity).trim() === '') {
+    var rawQuantity = String(quantity);
+    var numericQuantity = Number(rawQuantity);
+    if (!rawQuantity.trim() || !Number.isFinite(numericQuantity)
+      || !Number.isInteger(numericQuantity) || numericQuantity < 0) {
       showDrawerStatus(I18N.invalid_quantity || I18N.cart_update_error || '');
-      refreshCart();
       return Promise.resolve();
     }
     var updates = {};
-    updates[key] = Number(quantity);
+    updates[key] = numericQuantity;
     showDrawerStatus('');
     return enqueueCartMutation(function (mutationId) {
       return fetch(I18N.cart_update_url || '/cart/update.js', {
@@ -292,13 +373,29 @@
         })
         .then(function (cart) {
           ++cartReadSequence;
+          cartStateUnconfirmed = false;
+          reconcileCartPage(cart);
           if (mutationId === cartMutationSequence) renderCartDrawer(cart);
           return cart;
+        })
+        .catch(function () {
+          return requestCartSnapshot().then(function (cart) {
+            ++cartReadSequence;
+            cartStateUnconfirmed = false;
+            reconcileCartPage(cart);
+            renderCartDrawer(cart);
+            showDrawerStatus(I18N.cart_update_error || '');
+            showCartPageUpdateError(false);
+            return cart;
+          }).catch(function () {
+            cartStateUnconfirmed = true;
+            setPendingCheckoutState();
+            restoreConfirmedCartQuantities();
+            showDrawerStatus(I18N.cart_update_error || '');
+            showCartPageUpdateError(true);
+            return null;
+          });
         });
-    }).catch(function () {
-      ++cartReadSequence;
-      showDrawerStatus(I18N.cart_update_error || '');
-      return refreshCart();
     });
   }
 
@@ -474,8 +571,18 @@
       setMoney(priceNode, variant.price);
       if (compareNode) {
         var hasCompare = variant.compare_at_price && variant.compare_at_price > variant.price;
-        compareNode.hidden = !hasCompare;
-        compareNode.innerHTML = hasCompare ? moneyHtml(variant.compare_at_price) : '';
+        if (hasCompare) {
+          try {
+            compareNode.innerHTML = moneyHtml(variant.compare_at_price);
+            compareNode.hidden = false;
+          } catch (error) {
+            compareNode.innerHTML = '';
+            compareNode.hidden = true;
+          }
+        } else {
+          compareNode.innerHTML = '';
+          compareNode.hidden = true;
+        }
       }
       if (submit) {
         submit.disabled = !variant.available;
@@ -565,17 +672,24 @@
 
   function initCartPageUpdates(scope) {
     var root = scope && scope.matches && scope.matches('body') ? document : (scope || document);
+    var cartForm = root.matches && root.matches('#CartForm') ? root : qs('#CartForm', root);
+    if (cartForm) {
+      qsa('[name="checkout"]', cartForm).forEach(function (control) {
+        control.setAttribute('data-cart-checkout', '');
+      });
+      if (!cartForm.dataset.cartCheckoutGuardInit) {
+        cartForm.dataset.cartCheckoutGuardInit = '1';
+        cartForm.addEventListener('submit', function (event) {
+          if (cartCheckoutBlocked()) event.preventDefault();
+        });
+      }
+      setPendingCheckoutState();
+    }
+
     qsa('[data-cart-update]', root).forEach(function (input) {
       if (input.dataset.jsInit) return;
       input.dataset.jsInit = '1';
-      // Let the shared pending-mutation guard disable the native checkout
-      // submit while a quantity change is unconfirmed.
-      var cartForm = input.closest('form');
-      var checkoutControl = cartForm && cartForm.querySelector('[name="checkout"]');
-      if (checkoutControl && !checkoutControl.dataset.jsInit) {
-        checkoutControl.dataset.jsInit = '1';
-        checkoutControl.setAttribute('data-cart-checkout', '');
-      }
+      input.setAttribute('data-confirmed-quantity', input.value);
       input.addEventListener('change', function () {
         var rawQuantity = input.value;
         var quantity = Number(rawQuantity);
@@ -589,6 +703,7 @@
           if (form) form.appendChild(status);
         }
         if (!Number.isFinite(quantity) || !Number.isInteger(quantity) || quantity < 0 || rawQuantity.trim() === '') {
+          input.value = input.getAttribute('data-confirmed-quantity') || '';
           if (status) status.textContent = I18N.invalid_quantity || I18N.cart_update_error || '';
           return;
         }
@@ -606,14 +721,30 @@
             })
             .then(function (cart) {
             ++cartReadSequence;
-            if (mutationId !== cartMutationSequence) return cart;
-            window.location.reload();
+            cartStateUnconfirmed = false;
+            reconcileCartPage(cart);
+            renderCartDrawer(cart);
+            if (mutationId === cartMutationSequence) window.location.reload();
             return cart;
+          })
+          .catch(function () {
+            return requestCartSnapshot().then(function (cart) {
+              ++cartReadSequence;
+              cartStateUnconfirmed = false;
+              reconcileCartPage(cart);
+              renderCartDrawer(cart);
+              showCartPageUpdateError(false);
+              showDrawerStatus(I18N.cart_update_error || '');
+              return cart;
+            }).catch(function () {
+              cartStateUnconfirmed = true;
+              setPendingCheckoutState();
+              restoreConfirmedCartQuantities();
+              showCartPageUpdateError(true);
+              showDrawerStatus(I18N.cart_update_error || '');
+              return null;
+            });
           });
-        }).catch(function () {
-            if (status) {
-              status.textContent = I18N.cart_update_error || '';
-            }
         });
       });
     });
