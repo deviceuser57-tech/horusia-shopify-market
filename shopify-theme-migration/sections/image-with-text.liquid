@@ -1,0 +1,20 @@
+<section class="image-with-text page-width">
+  {% if section.settings.image != blank %}
+    <div class="image-with-text-media">{{ section.settings.image | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '400,800,1200', alt: section.settings.heading }}</div>
+  {% endif %}
+  <div class="image-with-text-copy">
+    {% if section.settings.heading != blank %}<h2>{{ section.settings.heading }}</h2>{% endif %}
+    {% if section.settings.text != blank %}<div class="rte">{{ section.settings.text }}</div>{% endif %}
+  </div>
+</section>
+{% schema %}
+{
+ "name":"Image with text","tag":"section","class":"section-image-text",
+ "settings":[
+  {"type":"image_picker","id":"image","label":"Image"},
+  {"type":"text","id":"heading","label":"Heading","default":"Our Philosophy"},
+  {"type":"richtext","id":"text","label":"Text","default":"<p>Quality, trust, and modern living.</p>"}
+ ],
+ "presets":[{"name":"Image with text"}]
+}
+{% endschema %}

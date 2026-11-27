@@ -1,0 +1,19 @@
+<section class="collections-page page-width">
+  <h1>{{ 'general.collection.all_collections' | t }}</h1>
+  <div class="collection-grid">
+    {% paginate collections by 24 %}
+      {% for collection in collections %}
+        <a class="collection-card" href="{{ collection.url }}">
+          {% if collection.featured_image %}
+            {{ collection.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '400,700,900', alt: collection.title }}
+          {% endif %}
+          <h2>{{ collection.title }}</h2>
+        </a>
+      {% endfor %}
+      {% if paginate.pages > 1 %}{% render 'pagination', paginate: paginate %}{% endif %}
+    {% endpaginate %}
+  </div>
+</section>
+{% schema %}
+{"name":"Collection list","tag":"section","class":"section-list-collections","settings":[],"presets":[{"name":"Collection list"}]}
+{% endschema %}

@@ -1,0 +1,11 @@
+<section class="app-section page-width">
+  {% for block in section.blocks %}
+    {% case block.type %}
+      {% when '@app' %}
+        {% render block %}
+    {% endcase %}
+  {% endfor %}
+</section>
+{% schema %}
+{"name":"App section","tag":"section","class":"section-app","settings":[],"blocks":[{"type":"@app"}],"presets":[{"name":"App section"}]}
+{% endschema %}

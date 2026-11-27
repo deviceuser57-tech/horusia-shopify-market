@@ -1,0 +1,7 @@
+{
+  "sections":{
+    "services":{"type":"services-grid","settings":{"heading":"Our Services","text":"<p>Customized solutions for unique needs.</p>"},"blocks":{"custom":{"type":"service","settings":{"title":"Custom Handmade Creations","text":"<p>Unique pieces for engagements, weddings, corporate gifts, and home decor.</p>"}},"restoration":{"type":"service","settings":{"title":"Heritage Restoration","text":"<p>Replica artifacts, historical-inspired art, and museum-style decor.</p>"}},"events":{"type":"service","settings":{"title":"Event Personalization","text":"<p>Custom items for Ramadan events, weddings, celebrations, and corporate events.</p>"}},"consultation":{"type":"service","settings":{"title":"Art & Styling Consultation","text":"<p>Guidance for choosing artwork and matching decor themes.</p>"}},"gifts":{"type":"service","settings":{"title":"Premium Gift Services","text":"<p>Gift packaging and personalization for memorable occasions.</p>"}}},"block_order":["custom","restoration","events","consultation","gifts"]},
+    "inquiry":{"type":"contact-form","settings":{"heading":"Request an inquiry","text":"<p>This basic inquiry is submitted through Shopify Contact. It does not provide booking or scheduling.</p>"}}
+  },
+  "order":["services","inquiry"]
+}

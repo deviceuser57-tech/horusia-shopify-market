@@ -1,0 +1,15 @@
+<aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="{{ 'general.cart.title' | t }}">
+  <div class="cart-drawer-backdrop" data-cart-close></div>
+  <div class="cart-drawer-panel" role="dialog" aria-modal="true">
+    <button type="button" class="cart-drawer-close" data-cart-close aria-label="{{ 'general.accessibility.close' | t }}">&times;</button>
+    <h2>{{ 'general.cart.title' | t }}</h2>
+    <div data-cart-drawer-content>
+      {% if cart.item_count > 0 %}
+        <p>{{ 'general.cart.items_in_cart' | t: count: cart.item_count }}</p>
+      {% else %}
+        <p>{{ 'general.cart.empty' | t }}</p>
+      {% endif %}
+    </div>
+    <a class="button" href="{{ routes.cart_url }}">{{ 'general.cart.view_cart' | t }}</a>
+  </div>
+</aside>

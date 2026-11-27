@@ -1,0 +1,35 @@
+<section class="contact-section page-width">
+  <div>
+    <h1>{% if section.settings.heading != blank %}{{ section.settings.heading }}{% else %}{{ 'general.contact.title' | t }}{% endif %}</h1>
+    {% if section.settings.text != blank %}<div class="rte">{{ section.settings.text }}</div>{% endif %}
+  </div>
+  {% form 'contact', class: 'contact-form' %}
+    {% if form.posted_successfully? %}
+      <p role="status">{{ 'general.contact.success' | t }}</p>
+    {% else %}
+      {{ form.errors | default_errors }}
+      <label for="ContactName">{{ 'general.contact.name' | t }}</label>
+      <input id="ContactName" type="text" name="contact[name]" value="{{ form.name }}" autocomplete="name" required>
+      <label for="ContactEmail">{{ 'general.contact.email' | t }}</label>
+      <input id="ContactEmail" type="email" name="contact[email]" value="{{ form.email }}" autocomplete="email" required>
+      <label for="ContactPhone">{{ 'general.contact.phone' | t }}</label>
+      <input id="ContactPhone" type="tel" name="contact[phone]" value="{{ form.phone }}" autocomplete="tel">
+      <label for="ContactSubject">{{ 'general.contact.subject' | t }}</label>
+      <input id="ContactSubject" type="text" name="contact[subject]" value="{{ form.subject }}" required>
+      <label for="ContactBody">{{ 'general.contact.message' | t }}</label>
+      <textarea id="ContactBody" name="contact[body]" required>{{ form.body }}</textarea>
+      <button type="submit" class="button">{{ 'general.contact.send' | t }}</button>
+    {% endif %}
+  {% endform %}
+</section>
+{% schema %}
+{
+ "name":"Contact form","tag":"section","class":"section-contact",
+ "settings":[
+  {"type":"text","id":"heading","label":"Heading","default":"Contact us"},
+  {"type":"richtext","id":"text","label":"Text","default":"<p>Send a message for general questions or service inquiries.</p>"}
+ ],
+ "presets":[{"name":"Contact form"}],
+ "enabled_on":{"templates":["page","page.contact","page.services"]}
+}
+{% endschema %}

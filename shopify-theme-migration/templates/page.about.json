@@ -1,0 +1,9 @@
+{
+  "sections":{
+    "main":{"type":"main-page","settings":{}},
+    "story":{"type":"rich-text","settings":{"heading":"Our Story","text":"<p>HORUSIA was born from a simple philosophy: that shopping should be an experience built on trust, quality, and authenticity. Inspired by the Eye of Horus - symbol of protection, vision, and truth - we curate Egyptian-heritage products and modern essentials.</p><p>As our one-stop store, we maintain traditional values of integrity and excellence. Every product is chosen with care and every interaction is designed with respect.</p>"}},
+    "values":{"type":"image-with-text","settings":{"heading":"Our Values","text":"<p><strong>Calmness:</strong> A peaceful shopping experience.</p><p><strong>Trust:</strong> Quality products and clear information.</p><p><strong>Excellence:</strong> A carefully curated modern lifestyle selection.</p>"}},
+    "apps":{"type":"apps","settings":{},"blocks":{},"block_order":[]}
+  },
+  "order":["main","story","values","apps"]
+}

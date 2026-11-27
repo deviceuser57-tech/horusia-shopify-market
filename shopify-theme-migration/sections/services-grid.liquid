@@ -1,0 +1,36 @@
+<section class="services-section page-width">
+  {% if section.settings.heading != blank %}<h1>{{ section.settings.heading }}</h1>{% endif %}
+  {% if section.settings.text != blank %}<div class="rte">{{ section.settings.text }}</div>{% endif %}
+  <div class="services-grid">
+    {% for block in section.blocks %}
+      <article class="service-card" {{ block.shopify_attributes }}>
+        {% if block.settings.title != blank %}<h2>{{ block.settings.title }}</h2>{% endif %}
+        {% if block.settings.text != blank %}<div class="rte">{{ block.settings.text }}</div>{% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% schema %}
+{
+ "name":"Services","tag":"section","class":"section-services",
+ "settings":[
+  {"type":"text","id":"heading","label":"Heading","default":"Our Services"},
+  {"type":"richtext","id":"text","label":"Intro"}
+ ],
+ "blocks":[
+  {"type":"service","name":"Service","settings":[
+   {"type":"text","id":"title","label":"Title","default":"Custom service"},
+   {"type":"richtext","id":"text","label":"Description"}
+  ]}
+ ],
+ "presets":[
+  {"name":"Services","blocks":[
+   {"type":"service","settings":{"title":"Custom Handmade Creations"}},
+   {"type":"service","settings":{"title":"Heritage Restoration"}},
+   {"type":"service","settings":{"title":"Event Personalization"}},
+   {"type":"service","settings":{"title":"Art & Styling Consultation"}},
+   {"type":"service","settings":{"title":"Premium Gift Services"}}
+  ]}
+ ]
+}
+{% endschema %}

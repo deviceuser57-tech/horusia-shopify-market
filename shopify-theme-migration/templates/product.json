@@ -1,0 +1,7 @@
+{
+  "sections": {
+    "main": {"type":"main-product","settings":{"enable_zoom":false},"blocks":{},"block_order":[]},
+    "apps": {"type":"apps","settings":{},"blocks":{},"block_order":[]}
+  },
+  "order":["main","apps"]
+}

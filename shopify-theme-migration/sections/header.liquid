@@ -1,0 +1,54 @@
+<header class="site-header" style="--header-bg: {{ section.settings.background }};">
+  <div class="header-inner page-width">
+    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+      {% if section.settings.logo != blank %}
+        {{ section.settings.logo | image_url: width: 400 | image_tag: widths: '200, 300, 400', class: 'brand-logo', loading: 'eager' }}
+      {% else %}
+        <span class="brand-name">{{ shop.name }}</span>
+      {% endif %}
+    </a>
+    <nav class="desktop-nav" aria-label="{{ 'general.navigation.main' | t }}">
+      {% if section.settings.menu != blank %}
+        {% for link in section.settings.menu.links %}
+          <a href="{{ link.url }}" {% if link.current %}aria-current="page"{% endif %}>{{ link.title }}</a>
+        {% endfor %}
+      {% endif %}
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="MobileMenu" aria-label="{{ 'general.navigation.menu' | t }}">
+        <span></span><span></span><span></span>
+      </button>
+      <a class="icon-button" href="{{ routes.search_url }}" aria-label="{{ 'general.search.search' | t }}">
+        {% render 'icon-search' %}
+      </a>
+      {%- if shop.customer_accounts_enabled -%}
+        <a class="icon-button account-link" href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" aria-label="{{ 'general.account.account' | t }}">
+          {% render 'icon-account' %}
+        </a>
+      {%- endif -%}
+      <a class="cart-link" href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'general.cart.view_cart' | t }}">
+        {% render 'icon-cart' %}
+        <span data-cart-count>{{ cart.item_count }}</span>
+      </a>
+    </div>
+  </div>
+  <nav id="MobileMenu" class="mobile-nav" hidden aria-label="{{ 'general.navigation.mobile' | t }}">
+    {% if section.settings.menu != blank %}
+      {% for link in section.settings.menu.links %}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {% endfor %}
+    {% endif %}
+  </nav>
+</header>
+{% schema %}
+{
+  "name": "Header",
+  "tag": "section",
+  "class": "section-header",
+  "settings": [
+    {"type":"image_picker","id":"logo","label":"Logo"},
+    {"type":"link_list","id":"menu","label":"Main menu","default":"main-menu"},
+    {"type":"color","id":"background","label":"Header background","default":"#f4f6f8"}
+  ]
+}
+{% endschema %}

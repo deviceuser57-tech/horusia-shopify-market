@@ -1,0 +1,70 @@
+<section class="product-page page-width" data-product-section>
+  <div class="product-media">
+    {% if product.featured_media %}
+      <div class="product-main-image">
+        {{ product.featured_media.preview_image | image_url: width: 1200 | image_tag: loading: 'eager', widths: '400,800,1200', sizes: '(min-width: 990px) 50vw, 100vw', alt: product.featured_media.alt | default: product.title }}
+      </div>
+    {% endif %}
+    {% if product.media.size > 1 %}
+      <div class="product-thumbnails" role="list">
+        {% for media in product.media %}
+          <button type="button" role="listitem" data-product-media="{{ media.id }}" aria-label="{{ 'general.product.view_image' | t }} {{ forloop.index }}">
+            {{ media.preview_image | image_url: width: 200 | image_tag: loading: 'lazy', alt: media.alt | default: product.title }}
+          </button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="product-details">
+    <h1>{{ product.title }}</h1>
+    <div class="product-price" data-product-price>{{ product.selected_or_first_available_variant.price | money }}</div>
+    {% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}
+      <div class="compare-price">{{ product.selected_or_first_available_variant.compare_at_price | money }}</div>
+    {% endif %}
+    <div class="rte product-description">{{ product.description }}</div>
+    {%- assign selected_variant = product.selected_or_first_available_variant -%}
+    {% form 'product', product, id: 'ProductForm', class: 'product-form', novalidate: 'novalidate' %}
+      {% if product.has_only_default_variant == false %}
+        {% for option in product.options_with_values %}
+          <fieldset class="variant-field">
+            <legend>{{ option.name }}</legend>
+            <div class="option-values">
+              {% for value in option.values %}
+                <label>
+                  <input type="radio" name="options[{{ option.name | escape }}]" value="{{ value | escape }}" {% if forloop.first %}checked{% endif %}>
+                  <span>{{ value }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+        {% endfor %}
+      {% endif %}
+      <input type="hidden" name="id" value="{{ selected_variant.id }}" data-variant-id>
+      <label for="Quantity">{{ 'general.product.quantity' | t }}</label>
+      <input id="Quantity" name="quantity" type="number" min="1" value="1" required>
+      <button type="submit" class="button product-submit" {% unless selected_variant.available %}disabled{% endunless %}>
+        {% if selected_variant.available %}{{ 'general.product.add_to_cart' | t }}{% else %}{{ 'general.product.sold_out' | t }}{% endif %}
+      </button>
+      <p class="form-status" role="status" data-form-status></p>
+    {% endform %}
+    {% if product.metafields.reviews.rating %}
+      {% comment %}Reserved for Shopify app block; no review implementation is embedded.{% endcomment %}
+    {% endif %}
+    {% for block in section.blocks %}
+      {% if block.type == '@app' %}{% render block %}{% endif %}
+    {% endfor %}
+  </div>
+</section>
+<script type="application/json" data-product-json>{{ product | json }}</script>
+{% schema %}
+{
+  "name":"Main product",
+  "tag":"section",
+  "class":"section-main-product",
+  "settings":[
+    {"type":"checkbox","id":"enable_zoom","label":"Enable image zoom","default":false}
+  ],
+  "blocks":[{"type":"@app"}],
+  "presets":[{"name":"Main product"}]
+}
+{% endschema %}

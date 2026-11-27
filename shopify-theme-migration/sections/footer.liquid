@@ -1,0 +1,56 @@
+<footer class="site-footer" style="--footer-bg: {{ section.settings.background }}; --footer-fg: {{ section.settings.text_color }};">
+  <div class="page-width footer-grid">
+    <div>
+      {% if section.settings.logo != blank %}
+        {{ section.settings.logo | image_url: width: 300 | image_tag: widths: '150, 300', class: 'footer-logo', loading: 'lazy' }}
+      {% endif %}
+      {% if section.settings.heading != blank %}<h2>{{ section.settings.heading }}</h2>{% endif %}
+      {% if section.settings.text != blank %}<div class="rte">{{ section.settings.text }}</div>{% endif %}
+    </div>
+    {% if section.settings.menu != blank %}
+      <nav aria-label="{{ 'general.navigation.footer' | t }}">
+        <h2>{{ section.settings.menu.title }}</h2>
+        <ul>
+          {% for link in section.settings.menu.links %}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+    {% endif %}
+    <div>
+      <h2>{{ 'general.newsletter.title' | t }}</h2>
+      {% form 'customer', class: 'newsletter-form' %}
+        {% if form.posted_successfully? %}
+          <p role="status">{{ 'general.newsletter.success' | t }}</p>
+        {% elsif form.errors %}
+          {{ form.errors | default_errors }}
+        {% else %}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <label for="NewsletterEmail-{{ section.id }}">{{ 'general.newsletter.email' | t }}</label>
+          <div class="newsletter-fields">
+            <input id="NewsletterEmail-{{ section.id }}" type="email" name="contact[email]" autocomplete="email" required>
+            <button type="submit">{{ 'general.newsletter.subscribe' | t }}</button>
+          </div>
+        {% endif %}
+      {% endform %}
+    </div>
+  </div>
+  <div class="page-width footer-bottom">
+    <small>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ 'general.footer.rights' | t }}</small>
+  </div>
+</footer>
+{% schema %}
+{
+  "name": "Footer",
+  "tag": "section",
+  "class": "section-footer",
+  "settings": [
+    {"type":"image_picker","id":"logo","label":"Logo"},
+    {"type":"text","id":"heading","label":"Heading","default":"HORUSIA"},
+    {"type":"richtext","id":"text","label":"Description"},
+    {"type":"link_list","id":"menu","label":"Footer menu","default":"footer"},
+    {"type":"color","id":"background","label":"Background","default":"#0a192f"},
+    {"type":"color","id":"text_color","label":"Text","default":"#f4f6f8"}
+  ]
+}
+{% endschema %}
