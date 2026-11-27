@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "RapidAPI Hub - Website ContactCrawler": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.rapidapi.com",
+        "--header",
+        "x-api-host: website-contactcrawler.p.rapidapi.com",
+        "--header",
+        "x-api-key: 8518ac16bcmsh6b6778d0316e837p1dbbbbjsn2baf3bf9420f"
+      ]
+    }
+  }
+}
