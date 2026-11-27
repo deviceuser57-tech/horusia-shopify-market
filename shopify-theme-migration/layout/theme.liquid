@@ -24,16 +24,24 @@
       window.Shopify.currency = window.Shopify.currency || {};
       window.Shopify.currency.active = {{ cart.currency.iso_code | json }};
       if (typeof window.Shopify.formatMoney !== 'function') {
+        {% raw %}
         window.Shopify.formatMoney = function(cents, format) {
-          var value = (Number(cents) / 100).toFixed(2);
-          return (format || '${{amount}}').replace('{{amount}}', value).replace('{{amount_no_decimals}}', value.split('.')[0]).replace('{{amount_with_comma_separator}}', value.replace('.', ','));
+          var amount = Number(cents) / 100;
+          var value = amount.toFixed(2);
+          var valueNoDecimals = amount.toFixed(0);
+          var valueWithComma = value.replace('.', ',');
+          return String(format || window.Shopify.money_format)
+            .split('{{amount}}').join(value)
+            .split('{{amount_no_decimals}}').join(valueNoDecimals)
+            .split('{{amount_with_comma_separator}}').join(valueWithComma);
         };
+        {% endraw %}
       }
     </script>
     {{ 'base.css' | asset_url | stylesheet_tag }}
     <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
   </head>
-  <body class="template-{{ template.name }}" style="--color-background: {{ settings.color_background }}; --color-foreground: {{ settings.color_foreground }}; --color-primary: {{ settings.color_primary }}; --color-border: {{ settings.color_border }}; font-family: {{ settings.body_font.family }}, {{ settings.body_font.fallback_families }};">
+  <body class="template-{{ template.name }}" style="--color-background: {{ settings.color_background }}; --color-foreground: {{ settings.color_foreground }}; --color-primary: {{ settings.color_primary }}; --color-border: {{ settings.color_border }}; font-family: {{ settings.body_font.family }}, {{ settings.body_font.fallback_families }}; --font-heading: {{ settings.heading_font.family }}, {{ settings.heading_font.fallback_families }};">
     <a class="skip-link" href="#MainContent">{{ 'general.accessibility.skip_to_content' | t }}</a>
     {% sections 'header-group' %}
     <main id="MainContent" role="main" tabindex="-1">
@@ -41,6 +49,23 @@
     </main>
     {% sections 'footer-group' %}
     {% render 'cart-drawer' %}
+    <script type="application/json" data-i18n>{
+      "add_to_cart": {{ 'general.product.add_to_cart' | t | json }},
+      "sold_out": {{ 'general.product.sold_out' | t | json }},
+      "added_to_cart": {{ 'general.product.added_to_cart' | t | json }},
+      "add_error": {{ 'general.product.add_error' | t | json }},
+      "invalid_quantity": {{ 'general.product.invalid_quantity' | t | json }},
+      "combination_unavailable": {{ 'general.product.combination_unavailable' | t | json }},
+      "cart_empty": {{ 'general.cart.empty' | t | json }},
+      "cart_subtotal": {{ 'general.cart.subtotal' | t | json }},
+      "cart_checkout": {{ 'general.cart.checkout' | t | json }},
+      "cart_remove": {{ 'general.cart.remove' | t | json }},
+      "cart_update_error": {{ 'general.cart.update_error' | t | json }},
+      "cart_quantity": {{ 'general.product.quantity' | t | json }},
+      "carousel_pause": {{ 'general.carousel.pause' | t | json }},
+      "carousel_play": {{ 'general.carousel.play' | t | json }},
+      "view_cart": {{ 'general.cart.view_cart' | t | json }}
+    }</script>
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   </body>
 </html>

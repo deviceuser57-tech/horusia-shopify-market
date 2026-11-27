@@ -19,7 +19,7 @@
   {
     "name":"Typography",
     "settings":[
-      {"type":"font_picker","id":"heading_font","label":"Heading font","default":"serif"},
+      {"type":"font_picker","id":"heading_font","label":"Heading font","default":"playfairdisplay_n7"},
       {"type":"font_picker","id":"body_font","label":"Body font","default":"assistant_n4"}
     ]
   },

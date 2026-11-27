@@ -18,6 +18,7 @@
         {% endfor %}
       </div>
       <div class="cart-summary">
+        <p class="cart-page-status" data-cart-page-status role="status" aria-live="polite"></p>
         <p>{{ 'general.cart.subtotal' | t }}: <strong>{{ cart.total_price | money }}</strong></p>
         <button type="submit" name="update">{{ 'general.cart.update' | t }}</button>
         <button type="submit" name="checkout" class="button">{{ 'general.cart.checkout' | t }}</button>

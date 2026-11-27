@@ -24,7 +24,7 @@ Zip the theme folders and files directly inside `shopify-theme-migration`; do no
 2. Add the About, Contact, and Services Shopify pages. Assign their templates with suffixes `about`, `contact`, and `services`.
 3. Create collections and import products using Shopify Admin or a Shopify-approved CSV workflow.
 4. Set policy pages in Shopify Settings.
-5. Add the logo and initial banner images through Theme Settings and the Hero Carousel section.
+5. Add the logo and initial banner images through Theme Settings and the Hero Carousel section. Until images are selected, the hero falls back to the bundled `hero-banner.jpg` theme asset, and the featured-collection section falls back to the `all` collection.
 6. Configure English and Arabic languages in Shopify Markets and Shopify Publishing.
 7. Configure product options, variants, inventory, and availability in Shopify Admin.
 

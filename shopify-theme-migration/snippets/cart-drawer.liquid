@@ -1,15 +1,31 @@
 <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="{{ 'general.cart.title' | t }}">
   <div class="cart-drawer-backdrop" data-cart-close></div>
-  <div class="cart-drawer-panel" role="dialog" aria-modal="true">
+  <div class="cart-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="CartDrawerTitle">
     <button type="button" class="cart-drawer-close" data-cart-close aria-label="{{ 'general.accessibility.close' | t }}">&times;</button>
-    <h2>{{ 'general.cart.title' | t }}</h2>
+    <h2 id="CartDrawerTitle">{{ 'general.cart.title' | t }}</h2>
     <div data-cart-drawer-content>
       {% if cart.item_count > 0 %}
-        <p>{{ 'general.cart.items_in_cart' | t: count: cart.item_count }}</p>
+        <ul class="cart-drawer-items">
+          {% for item in cart.items %}
+            <li class="cart-drawer-item">
+              <a class="cart-drawer-item-media" href="{{ item.url }}">
+                {% if item.image %}<img src="{{ item.image | image_url: width: 128, height: 128, crop: 'center' }}" alt="{{ item.title | escape }}" width="64" height="64" loading="lazy">{% endif %}
+              </a>
+              <div class="cart-drawer-item-info">
+                <a href="{{ item.url }}">{{ item.product.title }}</a>
+                {% if item.variant.title != 'Default Title' %}<p class="cart-drawer-variant">{{ item.variant.title }}</p>{% endif %}
+                <p class="cart-drawer-line-price">{{ item.final_line_price | money }}</p>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="cart-drawer-subtotal">{{ 'general.cart.subtotal' | t }}: <strong>{{ cart.total_price | money }}</strong></p>
       {% else %}
         <p>{{ 'general.cart.empty' | t }}</p>
       {% endif %}
     </div>
-    <a class="button" href="{{ routes.cart_url }}">{{ 'general.cart.view_cart' | t }}</a>
+    <p class="cart-drawer-status" data-cart-drawer-status role="status" aria-live="polite"></p>
+    <a class="button" href="{{ routes.checkout_url }}" data-cart-checkout>{{ 'general.cart.checkout' | t }}</a>
+    <a class="button cart-drawer-view-cart" href="{{ routes.cart_url }}">{{ 'general.cart.view_cart' | t }}</a>
   </div>
 </aside>

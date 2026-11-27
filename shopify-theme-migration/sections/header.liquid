@@ -9,9 +9,20 @@
     </a>
     <nav class="desktop-nav" aria-label="{{ 'general.navigation.main' | t }}">
       {% if section.settings.menu != blank %}
-        {% for link in section.settings.menu.links %}
-          <a href="{{ link.url }}" {% if link.current %}aria-current="page"{% endif %}>{{ link.title }}</a>
-        {% endfor %}
+        <ul class="desktop-nav-list">
+          {% for link in section.settings.menu.links %}
+            <li class="{% if link.links != blank %}has-submenu{% endif %}">
+              <a href="{{ link.url }}" {% if link.current %}aria-current="page"{% endif %}>{{ link.title }}</a>
+              {% if link.links != blank %}
+                <ul class="sub-menu">
+                  {% for child in link.links %}
+                    <li><a href="{{ child.url }}" {% if child.current %}aria-current="page"{% endif %}>{{ child.title }}</a></li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
       {% endif %}
     </nav>
     <div class="header-actions">
@@ -34,9 +45,23 @@
   </div>
   <nav id="MobileMenu" class="mobile-nav" hidden aria-label="{{ 'general.navigation.mobile' | t }}">
     {% if section.settings.menu != blank %}
-      {% for link in section.settings.menu.links %}
-        <a href="{{ link.url }}">{{ link.title }}</a>
-      {% endfor %}
+      <ul class="mobile-nav-list">
+        {% for link in section.settings.menu.links %}
+          <li>
+            <a href="{{ link.url }}">{{ link.title }}</a>
+            {% if link.links != blank %}
+              <button type="button" class="submenu-toggle" aria-expanded="false" aria-label="{{ 'general.navigation.toggle_submenu' | t }} {{ link.title }}">
+                <span aria-hidden="true">+</span>
+              </button>
+              <ul class="sub-menu" hidden>
+                {% for child in link.links %}
+                  <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
     {% endif %}
   </nav>
 </header>

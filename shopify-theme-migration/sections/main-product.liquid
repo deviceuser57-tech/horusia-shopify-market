@@ -1,16 +1,24 @@
-<section class="product-page page-width" data-product-section>
+<section class="product-page page-width" data-product-section data-zoom-enabled="{{ section.settings.enable_zoom }}">
   <div class="product-media">
     {% if product.featured_media %}
-      <div class="product-main-image">
-        {{ product.featured_media.preview_image | image_url: width: 1200 | image_tag: loading: 'eager', widths: '400,800,1200', sizes: '(min-width: 990px) 50vw, 100vw', alt: product.featured_media.alt | default: product.title }}
+      <div class="product-main-image" data-product-main-image-wrapper>
+        <img id="MainProductImage" src="{{ product.featured_media.preview_image | image_url: width: 1200 }}"
+             srcset="{{ product.featured_media.preview_image | image_url: width: 400 }} 400w, {{ product.featured_media.preview_image | image_url: width: 800 }} 800w, {{ product.featured_media.preview_image | image_url: width: 1200 }} 1200w"
+             sizes="(min-width: 990px) 50vw, 100vw" width="1200" height="1200"
+             loading="eager" alt="{{ product.featured_media.alt | default: product.title | escape }}" data-product-main-image>
       </div>
     {% endif %}
     {% if product.media.size > 1 %}
-      <div class="product-thumbnails" role="list">
+      <div class="product-thumbnails" role="group" aria-label="{{ 'general.product.view_image' | t }}">
         {% for media in product.media %}
-          <button type="button" role="listitem" data-product-media="{{ media.id }}" aria-label="{{ 'general.product.view_image' | t }} {{ forloop.index }}">
-            {{ media.preview_image | image_url: width: 200 | image_tag: loading: 'lazy', alt: media.alt | default: product.title }}
-          </button>
+          {% if media.preview_image %}
+            <button type="button" data-product-media="{{ media.id }}" aria-pressed="false" aria-label="{{ 'general.product.view_image' | t }} {{ forloop.index }}"
+              data-media-src="{{ media.preview_image | image_url: width: 1200 }}"
+              data-media-srcset="{{ media.preview_image | image_url: width: 1200 }} 1200w, {{ media.preview_image | image_url: width: 800 }} 800w, {{ media.preview_image | image_url: width: 400 }} 400w"
+              data-media-alt="{{ media.alt | default: product.title | escape }}">
+              {{ media.preview_image | image_url: width: 200 | image_tag: loading: 'lazy', alt: media.alt | default: product.title }}
+            </button>
+          {% endif %}
         {% endfor %}
       </div>
     {% endif %}
@@ -18,9 +26,9 @@
   <div class="product-details">
     <h1>{{ product.title }}</h1>
     <div class="product-price" data-product-price>{{ product.selected_or_first_available_variant.price | money }}</div>
-    {% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}
-      <div class="compare-price">{{ product.selected_or_first_available_variant.compare_at_price | money }}</div>
-    {% endif %}
+    <div class="compare-price" data-compare-price {% unless product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}hidden{% endunless %}>
+      {{ product.selected_or_first_available_variant.compare_at_price | money }}
+    </div>
     <div class="rte product-description">{{ product.description }}</div>
     {%- assign selected_variant = product.selected_or_first_available_variant -%}
     {% form 'product', product, id: 'ProductForm', class: 'product-form', novalidate: 'novalidate' %}
@@ -29,9 +37,11 @@
           <fieldset class="variant-field">
             <legend>{{ option.name }}</legend>
             <div class="option-values">
+              {% assign option_index = forloop.index0 %}
+              {% assign selected_option_value = selected_variant.options[option_index] %}
               {% for value in option.values %}
                 <label>
-                  <input type="radio" name="options[{{ option.name | escape }}]" value="{{ value | escape }}" {% if forloop.first %}checked{% endif %}>
+                  <input type="radio" name="options[{{ option.name | escape }}]" value="{{ value | escape }}" {% if value == selected_option_value %}checked{% endif %}>
                   <span>{{ value }}</span>
                 </label>
               {% endfor %}
@@ -54,8 +64,8 @@
       {% if block.type == '@app' %}{% render block %}{% endif %}
     {% endfor %}
   </div>
+  <script type="application/json" data-product-json>{{ product | json }}</script>
 </section>
-<script type="application/json" data-product-json>{{ product | json }}</script>
 {% schema %}
 {
   "name":"Main product",
