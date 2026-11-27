@@ -107,8 +107,8 @@ const Terms = () => {
                 <h2 className="text-2xl font-bold text-primary mb-4">Contact Information</h2>
                 <p className="leading-relaxed">
                   For questions about these Terms of Service, please contact us at{" "}
-                  <a href="mailto:tumaninahveritasstore@gmail.com" className="text-primary hover:underline">
-                    tumaninahveritasstore@gmail.com
+                  <a href="mailto:Hoorusia-store@gmail.com" className="text-primary hover:underline">
+                    Hoorusia-store@gmail.com
                   </a>
                 </p>
               </div>

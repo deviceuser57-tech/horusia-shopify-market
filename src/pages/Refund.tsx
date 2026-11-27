@@ -66,7 +66,7 @@ const Refund = () => {
             <div className="prose prose-lg max-w-none">
               <h2 className="text-2xl font-bold text-primary mb-4">How to Request a Refund</h2>
               <ol className="text-muted-foreground leading-relaxed space-y-2">
-                <li>Contact our customer service team at tumaninahveritasstore@gmail.com</li>
+                <li>Contact our customer service team at Hoorusia-store@gmail.com</li>
                 <li>Provide your order number and reason for return</li>
                 <li>Wait for return authorization and instructions</li>
                 <li>Ship the item back using the provided return label</li>
@@ -86,8 +86,8 @@ const Refund = () => {
               <h2 className="text-2xl font-bold text-primary mb-4 mt-8">Questions?</h2>
               <p className="text-muted-foreground leading-relaxed">
                 For any questions about our refund policy, please reach out to{" "}
-                <a href="mailto:tumaninahveritasstore@gmail.com" className="text-primary hover:underline">
-                  tumaninahveritasstore@gmail.com
+                <a href="mailto:Hoorusia-store@gmail.com" className="text-primary hover:underline">
+                  Hoorusia-store@gmail.com
                 </a>
               </p>
             </div>

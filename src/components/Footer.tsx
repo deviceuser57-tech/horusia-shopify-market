@@ -36,10 +36,10 @@ export const Footer = () => {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="h-4 w-4 flex-shrink-0" />
                 <a 
-                  href="mailto:support@tumaninahveritas.com" 
+                  href="mailto:Hoorusia-store@gmail.com" 
                   className="hover:text-primary transition-colors"
                 >
-                  support@tumaninahveritas.com
+                  Hoorusia-store@gmail.com
                 </a>
               </div>
             </div>

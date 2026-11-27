@@ -77,8 +77,8 @@ const Shipping = () => {
               <h2 className="text-2xl font-bold text-primary mb-4 mt-8">Contact Us</h2>
               <p className="text-muted-foreground leading-relaxed">
                 If you have any questions about shipping or need help tracking your order, please contact us at{" "}
-                <a href="mailto:tumaninahveritasstore@gmail.com" className="text-primary hover:underline">
-                  tumaninahveritasstore@gmail.com
+                <a href="mailto:Hoorusia-store@gmail.com" className="text-primary hover:underline">
+                  Hoorusia-store@gmail.com
                 </a>
               </p>
             </div>

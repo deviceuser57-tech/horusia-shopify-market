@@ -55,7 +55,7 @@ const Contact = () => {
     <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Contact Us - HORUSIA | Get in Touch</title>
-        <meta name="description" content="Contact HORUSIA for inquiries, support, or questions. Reach us via email at tumaninahveritasstore@gmail.com or WhatsApp." />
+        <meta name="description" content="Contact HORUSIA for inquiries, support, or questions. Reach us via email at Hoorusia-store@gmail.com or WhatsApp." />
         <meta property="og:title" content="Contact Us - HORUSIA" />
         <meta property="og:description" content="Get in touch with HORUSIA. We're here to help with any questions or concerns." />
         <link rel="canonical" href="https://eagles-veritas-shop.lovable.app/contact" />
@@ -100,7 +100,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                    <p className="text-muted-foreground">tumaninahveritasstore@gmail.com</p>
+                    <p className="text-muted-foreground">Hoorusia-store@gmail.com</p>
                   </div>
                 </div>
 

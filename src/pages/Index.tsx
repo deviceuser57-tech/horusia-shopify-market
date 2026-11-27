@@ -128,7 +128,7 @@ const Index = () => {
           "https://www.instagram.com/tumaninahveritasstore/",
           "https://www.tiktok.com/@tumaninah_veritas_store"
         ]}
-        contactEmail="contact@tumaninahveritas.com"
+        contactEmail="Hoorusia-store@gmail.com"
       />
       <WebSiteSchema
         name="HORUSIA"

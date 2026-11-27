@@ -94,8 +94,8 @@ const Privacy = () => {
                 <h2 className="text-2xl font-bold text-primary mb-4">Contact Us</h2>
                 <p className="leading-relaxed">
                   If you have any questions about this privacy policy or our data practices, please contact us at{" "}
-                  <a href="mailto:tumaninahveritasstore@gmail.com" className="text-primary hover:underline">
-                    tumaninahveritasstore@gmail.com
+                  <a href="mailto:Hoorusia-store@gmail.com" className="text-primary hover:underline">
+                    Hoorusia-store@gmail.com
                   </a>
                 </p>
               </div>
