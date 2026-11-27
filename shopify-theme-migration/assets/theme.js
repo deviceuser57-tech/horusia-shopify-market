@@ -424,7 +424,7 @@
       if (form.dataset.jsInit) return;
       form.dataset.jsInit = '1';
       form.addEventListener('submit', function (event) {
-        if (pendingCartMutations > 0) event.preventDefault();
+        if (cartCheckoutBlocked()) event.preventDefault();
       });
     });
 
