@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "sdk_version": "3.5.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://c--64dbfed5-e10b-4cda-a208-82569cb4f41d-prod.lovable.cloud/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "tumaninah-veritas-store",
+      "version": "1.0.0",
+      "title": "HORUSIA"
+    },
+    "tools": [
+      {
+        "name": "search_products",
+        "title": "Search Store Products",
+        "description": "Search active products in HORUSIA by keyword or category.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Search term matching product titles or descriptions",
+              "type": "string"
+            },
+            "category": {
+              "description": "Filter by category name",
+              "type": "string"
+            },
+            "limit": {
+              "default": 10,
+              "description": "Maximum number of products to return",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_categories",
+        "title": "List Store Categories",
+        "description": "Get all distinct active product categories available in the store catalog.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
