@@ -2,7 +2,105 @@
 // To take ownership, delete this banner line; the plugin then leaves the file alone.
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
+// src/lib/mcp/index.ts
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.5.0";
+
+// src/lib/mcp/tools/search-products.ts
+import { defineTool } from "npm:@lovable.dev/mcp-js@3.5.0";
+import { z } from "npm:zod@^4.6.7";
+
+// src/lib/mcp/supabase.ts
+import { createClient } from "npm:@supabase/supabase-js@^2.80.0";
+function supabaseForUser(ctx) {
+  const token = ctx.getToken();
+  if (!token) return null;
+  const url = "https://c--64dbfed5-e10b-4cda-a208-82569cb4f41d-prod.lovable.cloud";
+  const key = "sb_publishable_pt3XEkknqhPVI1NGLNSq-g_aWdzPpRk";
+  if (!url || !key) return null;
+  return createClient(url, key, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+
+// src/lib/mcp/tools/search-products.ts
+var search_products_default = defineTool({
+  name: "search_products",
+  title: "Search Store Products",
+  description: "Search active products in HORUSIA by keyword or category.",
+  inputSchema: {
+    query: z.string().optional().describe("Search term matching product titles or descriptions"),
+    category: z.string().optional().describe("Filter by category name"),
+    limit: z.number().int().min(1).max(50).default(10).describe("Maximum number of products to return")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ query, category, limit }, ctx) => {
+    const client = supabaseForUser(ctx);
+    if (!client) {
+      return { content: [{ type: "text", text: "Authentication required." }], isError: true };
+    }
+    let dbQuery = client.from("store_products").select("id, title, title_ar, price, currency, category, business_model, image_url, status").eq("status", "ACTIVE").limit(limit);
+    if (category) {
+      dbQuery = dbQuery.ilike("category", `%${category}%`);
+    }
+    if (query) {
+      dbQuery = dbQuery.or(
+        `title.ilike.%${query}%,title_ar.ilike.%${query}%,description.ilike.%${query}%`
+      );
+    }
+    const { data, error } = await dbQuery;
+    if (error) {
+      return { content: [{ type: "text", text: `Database error: ${error.message}` }], isError: true };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
+      structuredContent: { products: data ?? [] }
+    };
+  }
+});
+
+// src/lib/mcp/tools/list-categories.ts
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@3.5.0";
+var list_categories_default = defineTool2({
+  name: "list_categories",
+  title: "List Store Categories",
+  description: "Get all distinct active product categories available in the store catalog.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async (_args, ctx) => {
+    const client = supabaseForUser(ctx);
+    if (!client) {
+      return { content: [{ type: "text", text: "Authentication required." }], isError: true };
+    }
+    const { data, error } = await client.from("store_products").select("category").eq("status", "ACTIVE");
+    if (error) {
+      return { content: [{ type: "text", text: `Failed to fetch categories: ${error.message}` }], isError: true };
+    }
+    const categories = Array.from(
+      new Set((data ?? []).map((row) => row.category).filter((c) => Boolean(c)))
+    );
+    return {
+      content: [{ type: "text", text: JSON.stringify(categories) }],
+      structuredContent: { categories }
+    };
+  }
+});
+
+// src/lib/mcp/index.ts
+var supabaseUrl = "https://c--64dbfed5-e10b-4cda-a208-82569cb4f41d-prod.lovable.cloud";
+var issuer = supabaseUrl ? `${supabaseUrl.replace(/\/$/, "")}/auth/v1` : "";
+var mcp_default = defineMcp({
+  name: "tumaninah-veritas-store",
+  title: "HORUSIA",
+  version: "1.0.0",
+  instructions: "Search products and browse categories in the HORUSIA catalog (zero-inventory: dropshipping and affiliate products).",
+  auth: issuer ? auth.oauth.issuer({
+    issuer,
+    acceptedAudiences: "authenticated"
+  }) : void 0,
+  tools: [search_products_default, list_categories_default]
+});
+
 // lovable-mcp-supabase-entry.ts
-import mcp from "npm:D:\\TUMMANINNA\\eagles-veritas-shop\\src\\lib\\mcp\\index.ts";
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@3.6.0/stacks/supabase";
-Deno.serve(createSupabaseHandler(mcp, { functionName: "mcp" }));
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@3.5.0/stacks/supabase";
+Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
