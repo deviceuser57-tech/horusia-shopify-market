@@ -4,7 +4,10 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { fetchCollectionByHandle } from "@/lib/shopify";
-import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import egyptianGoddess from "@/assets/egyptian-goddess.jpg";
 import tutankhamunMask from "@/assets/tutankhamun-mask.jpg";
@@ -21,6 +24,29 @@ const CollectionDetail = () => {
 
   const collection = data?.collection;
   const products = data?.products || [];
+
+  // Local catalog fallback: when Shopify is disabled, collections resolve
+  // against store_products categories/tags instead.
+  const { data: localProducts = [] } = useQuery({
+    queryKey: ["collection-local", handle],
+    enabled: !!handle,
+    queryFn: async () => {
+      const { data: rows } = await supabase
+        .from("store_products")
+        .select("id,title,title_ar,description,category,image_url,price,currency,affiliate_url,business_model,tags")
+        .eq("status", "ACTIVE");
+      const slug = (handle ?? "").toLowerCase();
+      const words = slug.split("-").filter((w) => w.length > 2);
+      const slugify = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const haystack = (p: { category: string | null; tags: unknown }) =>
+        `${slugify(p.category ?? "")} ${(Array.isArray(p.tags) ? p.tags : []).map((t) => slugify(String(t))).join(" ")}`;
+      const all = rows ?? [];
+      const strict = all.filter((p) => words.length > 0 && words.every((w) => haystack(p).includes(w)));
+      if (strict.length > 0) return strict;
+      return all.filter((p) => words.some((w) => haystack(p).includes(w)));
+    },
+  });
+  const addLocalItem = useCartStore((state) => state.addLocalItem);
 
   const isEgyptianHeritage = handle === "egyptian-heritage";
   const isFreeGifts = handle === "free-gifts";
@@ -199,20 +225,60 @@ const CollectionDetail = () => {
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
-          ) : products.length > 0 ? (
+          ) : products.length > 0 || localProducts.length > 0 ? (
             <>
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-semibold text-foreground">
                   {isFreeGifts ? "Available Free Gifts" : "Products in this Collection"}
                 </h2>
                 <p className="text-muted-foreground mt-2">
-                  {products.length} {products.length === 1 ? 'product' : 'products'} available
+                  {products.length + localProducts.length} {products.length + localProducts.length === 1 ? 'product' : 'products'} available
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.node.id} product={product} />
                 ))}
+                {localProducts.map((product) => {
+                  const price = Number(product.price ?? 0);
+                  const image = product.image_url ?? "/placeholder.svg";
+                  return (
+                    <article key={product.id} className="space-y-3 rounded-xl border p-4">
+                      <img src={image} alt={product.title_ar || product.title} className="aspect-square w-full rounded-lg object-cover" />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs rounded-full bg-secondary px-2 py-1">{product.business_model}</span>
+                        <span className="text-xs text-muted-foreground">{product.currency}</span>
+                      </div>
+                      <h3 className="font-semibold">{product.title_ar || product.title}</h3>
+                      {product.description && <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>}
+                      <p className="font-bold text-primary">{price.toFixed(2)}</p>
+                      <div className="flex gap-2">
+                        {product.affiliate_url ? (
+                          <Button size="sm" className="flex-1" asChild>
+                            <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">Visit merchant</a>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              addLocalItem({
+                                productId: product.id,
+                                title: product.title,
+                                price,
+                                currency: product.currency || "USD",
+                                imageUrl: image,
+                              });
+                              toast.success(`"${product.title}" added to cart.`);
+                            }}
+                          >
+                            <ShoppingCart className="mr-1 h-3.5 w-3.5" /> Add to cart
+                          </Button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </>
           ) : (

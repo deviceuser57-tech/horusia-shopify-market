@@ -130,7 +130,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link 
-                  to="/pages/155371274550" 
+                  to="/contact" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors block"
                 >
                   FAQ
@@ -161,7 +161,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link 
-                  to="/pages/155325530422" 
+                  to="/privacy" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors block"
                 >
                   Your Privacy Choices

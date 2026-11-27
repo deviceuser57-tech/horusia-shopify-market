@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchCollections } from '@/lib/shopify';
+import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -20,7 +21,34 @@ export default function Collections() {
     const loadCollections = async () => {
       try {
         const data = await fetchCollections(50);
-        setCollections(data);
+        if (data.length > 0) {
+          setCollections(data);
+        } else {
+          // Local fallback: derive collections from store_products categories
+          // when Shopify is disabled.
+          const { data: products } = await supabase
+            .from("store_products")
+            .select("id,title,category,image_url")
+            .eq("status", "ACTIVE");
+          const byCategory = new Map<string, { count: number; image?: string | null }>();
+          (products ?? []).forEach((p) => {
+            const cat = (p.category ?? "").trim() || "General";
+            const entry = byCategory.get(cat) ?? { count: 0, image: null };
+            entry.count += 1;
+            entry.image = entry.image ?? p.image_url;
+            byCategory.set(cat, entry);
+          });
+          const slugify = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          setCollections(
+            [...byCategory.entries()].map(([title, meta], i) => ({
+              id: `local-${i}`,
+              title,
+              handle: slugify(title),
+              description: `${meta.count} product${meta.count === 1 ? "" : "s"} in this collection`,
+              image: meta.image ? { url: meta.image, altText: title } : null,
+            })) as unknown as ShopifyCollection[]
+          );
+        }
       } catch (error) {
         console.error('Error loading collections:', error);
       } finally {
