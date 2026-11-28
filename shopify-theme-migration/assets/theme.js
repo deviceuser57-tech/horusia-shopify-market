@@ -98,7 +98,9 @@
     var formatted = safeMoneyHtml(cents, cacheKey);
     if (formatted !== null) return formatted;
     var cartUrl = I18N.cart_page_url || '#';
-    return '<a href="' + escapeHtml(cartUrl) + '">' + escapeHtml(I18N.view_cart || '') + '</a>';
+    var unavailable = I18N.price_unavailable || '';
+    return (unavailable ? escapeHtml(unavailable) + ' ' : '')
+      + '<a href="' + escapeHtml(cartUrl) + '">' + escapeHtml(I18N.view_cart || '') + '</a>';
   }
 
   function escapeHtml(value) {

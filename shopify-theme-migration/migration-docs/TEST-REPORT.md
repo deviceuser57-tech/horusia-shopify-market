@@ -15,7 +15,7 @@
 | `shopify-theme-migration/assets/theme.js` | Reject invalid money formats/values, avoid raw-price fallbacks, preserve last valid price output, handle explicit negative signs, guard checkout while cart state is pending/unknown, and reconcile failed cart updates. |
 | `shopify-theme-migration/migration-docs/TEST-REPORT.md` | Replace prior-round claims with this pass's baseline, current behavior, test results, and remaining limitations. |
 
-No other source file was changed.
+That statement applies to the original pass only. The separately approved translation follow-up is recorded below.
 
 ## Money formatting and error-path tests
 
@@ -57,7 +57,25 @@ Additional error-path results:
 
 For negative values, the sign is applied to the numeric replacement. A single explicit leading `-` or `−` immediately before the amount placeholder (at the format start or after an HTML tag boundary) is retained instead of adding another sign. Other unrelated markup/text does not suppress the numeric sign.
 
-No suitable translated “price unavailable” message exists in the current locale files. For an unformattable cart price with no prior formatted value, the theme omits the amount and shows the existing translated cart link. Product prices retain their previously rendered valid value where available. To provide a clear translated unavailable-price label, permission is requested for the smallest follow-up locale-only change: add one price-unavailable key to both `locales/en.default.json` and `locales/ar.json`. Those files were not modified.
+At the original pass, no translated “price unavailable” message existed. That limitation was resolved in the approved follow-up below. For an unformattable cart price with no prior formatted value, the current cart rendering omits the amount, shows a localized unavailable-price message, and links to the localized cart page. Product prices retain their previously rendered valid value where available.
+
+## Approved translation follow-up
+
+- Baseline branch: `migration/shopify-liquid-theme`
+- Baseline HEAD: `fca34eb6e883f2a0106423c4f4b02e5612fdf57e`
+- Baseline working tree: clean.
+- Files changed in this follow-up:
+  - `shopify-theme-migration/assets/theme.js`: display the localized unavailable-price text with the existing cart link when a cart price cannot be formatted and no confirmed formatted value is available.
+  - `shopify-theme-migration/layout/theme.liquid`: expose the translated message to JavaScript through the existing `data-i18n` JSON.
+  - `shopify-theme-migration/locales/en.default.json`: add `general.cart.price_unavailable` as “Price unavailable”.
+  - `shopify-theme-migration/locales/ar.json`: add `general.cart.price_unavailable` as “السعر غير متاح”.
+  - `shopify-theme-migration/migration-docs/TEST-REPORT.md`: record this follow-up and its validation.
+- Isolated Node VM rendering test: invalid money amount + English translation + `/en/cart` link produced `Price unavailable <a href="/en/cart">View cart</a>` — PASS.
+- Isolated Node VM rendering test: invalid money amount + Arabic translation + `/ar/cart` link produced `السعر غير متاح <a href="/ar/cart">عرض السلة</a>` — PASS.
+- `node --check shopify-theme-migration/assets/theme.js`: PASS.
+- JSON parsing for both locale files: PASS.
+- `git diff --check`: PASS.
+- Browser rendering and Shopify storefront behavior: NOT TESTED.
 
 ## Cart-page tests
 
@@ -86,4 +104,4 @@ The native cart form has one idempotent `submit` listener. Mouse submission, Ent
 | EGP storefront rendering | NOT TESTED | Formatting tests exercise patterns, not a configured EGP storefront |
 | Checkout handoff or payment | NOT TESTED | No checkout/payment operation attempted |
 
-Remaining issue: a translated unavailable-price string requires owner approval for the two locale-file additions listed above. The existing cart-page link is used as the safe fallback in cart rendering until then.
+The translated unavailable-price fallback is now implemented and passed isolated rendering checks. Browser rendering, Theme Check, and Shopify upload remain untested as noted above.

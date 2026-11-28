@@ -4,7 +4,7 @@
     "navigation":{"main":"Main navigation","mobile":"Mobile navigation","footer":"Footer navigation","menu":"Menu","toggle_submenu":"Toggle submenu for"},
     "search":{"search":"Search","title":"Search","placeholder":"Search products","submit":"Search","results_count":"{{ count }} results for \"{{ terms }}\""},
     "account":{"account":"Account"},
-    "cart":{"title":"Your cart","view_cart":"View cart","empty":"Your cart is empty","continue_shopping":"Continue shopping","subtotal":"Subtotal","update":"Update","checkout":"Checkout","remove":"Remove","items_in_cart":"{{ count }} items in cart","update_error":"Unable to update the cart. Please try again."},
+    "cart":{"title":"Your cart","view_cart":"View cart","empty":"Your cart is empty","continue_shopping":"Continue shopping","subtotal":"Subtotal","price_unavailable":"Price unavailable","update":"Update","checkout":"Checkout","remove":"Remove","items_in_cart":"{{ count }} items in cart","update_error":"Unable to update the cart. Please try again."},
     "product":{"quantity":"Quantity","add_to_cart":"Add to cart","sold_out":"Sold out","view_image":"View image","added_to_cart":"Added to cart.","add_error":"Unable to add this item. Please try again.","invalid_quantity":"Please enter a valid quantity.","combination_unavailable":"This combination is not available.","variant":"Variant"},
     "collection":{"all_collections":"Collections","no_products":"No products found"},
     "newsletter":{"title":"Newsletter","email":"Email address","subscribe":"Subscribe","success":"Thank you for subscribing."},

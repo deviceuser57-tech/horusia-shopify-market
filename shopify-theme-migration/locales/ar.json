@@ -4,7 +4,7 @@
     "navigation":{"main":"التنقل الرئيسي","mobile":"تنقل الهاتف","footer":"تنقل التذييل","menu":"القائمة","toggle_submenu":"تبديل القائمة الفرعية لـ"},
     "search":{"search":"بحث","title":"البحث","placeholder":"البحث عن المنتجات","submit":"بحث","results_count":"{{ count }} نتيجة عن \"{{ terms }}\""},
     "account":{"account":"الحساب"},
-    "cart":{"title":"سلة التسوق","view_cart":"عرض السلة","empty":"سلتك فارغة","continue_shopping":"متابعة التسوق","subtotal":"المجموع الفرعي","update":"تحديث","checkout":"إتمام الشراء","remove":"إزالة","items_in_cart":"{{ count }} منتجات في السلة","update_error":"تعذر تحديث السلة. حاول مرة أخرى."},
+    "cart":{"title":"سلة التسوق","view_cart":"عرض السلة","empty":"سلتك فارغة","continue_shopping":"متابعة التسوق","subtotal":"المجموع الفرعي","price_unavailable":"السعر غير متاح","update":"تحديث","checkout":"إتمام الشراء","remove":"إزالة","items_in_cart":"{{ count }} منتجات في السلة","update_error":"تعذر تحديث السلة. حاول مرة أخرى."},
     "product":{"quantity":"الكمية","add_to_cart":"أضف إلى السلة","sold_out":"نفد المخزون","view_image":"عرض الصورة","added_to_cart":"تمت الإضافة إلى السلة.","add_error":"تعذر إضافة هذا المنتج. حاول مرة أخرى.","invalid_quantity":"يرجى إدخال كمية صحيحة.","combination_unavailable":"هذا الاختيار غير متوفر.","variant":"المتغير"},
     "collection":{"all_collections":"التصنيفات","no_products":"لا توجد منتجات"},
     "newsletter":{"title":"النشرة البريدية","email":"البريد الإلكتروني","subscribe":"اشترك","success":"شكرًا لاشتراكك."},
