@@ -7,7 +7,7 @@
 {% if has_comparison_rows %}
   <section class="product-content-section page-width">
     <h2>{% if section.settings.heading != blank %}{{ section.settings.heading }}{% else %}{{ 'general.product.comparison' | t }}{% endif %}</h2>
-    <div class="comparison-table-wrap" role="region" aria-label="{{ section.settings.heading | default: 'general.product.comparison' | t }}" tabindex="0">
+    <div class="comparison-table-wrap" role="region" aria-label="{{ section.settings.heading | default: product.title | escape }}" tabindex="0">
       <table class="comparison-table">
         <thead>
           <tr>

@@ -1,6 +1,6 @@
 {
   "type":"header",
   "name":"Header group",
-  "sections":{"header":{"type":"header","settings":{"logo":null,"menu":"main-menu","background":"#ffffff"}}},
+  "sections":{"header":{"type":"header","settings":{"logo":null,"menu":"main-menu","background":"#0c1429","text_color":"#f7f7f5"}}},
   "order":["header"]
 }

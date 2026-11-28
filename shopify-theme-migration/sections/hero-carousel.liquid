@@ -2,9 +2,9 @@
   <div class="hero-slides" aria-live="polite">
     {%- for block in section.blocks -%}
       <article class="hero-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide>
-        <div class="hero-content" style="text-align: {{ block.settings.text_align }};">
+        <div class="hero-content hero-content--{{ block.settings.text_align }}" style="text-align: {{ block.settings.text_align }};">
           {% if block.settings.badge != blank %}<p class="hero-badge">{{ block.settings.badge }}</p>{% endif %}
-          {% if block.settings.heading != blank %}<h1>{{ block.settings.heading }}</h1>{% endif %}
+          <h1>{% if block.settings.heading != blank %}{{ block.settings.heading }}{% else %}{{ shop.name }}{% endif %}</h1>
           {% if block.settings.text != blank %}<div class="hero-text">{{ block.settings.text }}</div>{% endif %}
           {% if block.settings.button_link != blank %}
             <a class="button" href="{{ block.settings.button_link }}">{% if block.settings.button_label != blank %}{{ block.settings.button_label }}{% else %}{{ 'general.home.shop' | t }}{% endif %}</a>

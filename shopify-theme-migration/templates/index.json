@@ -1,9 +1,9 @@
 {
   "sections": {
-    "hero": {"type":"hero-carousel","settings":{"autoplay":false,"interval":6},"blocks":{"slide1":{"type":"slide","settings":{"badge":"","heading":"Rooted in heritage.","text":"<p>Inspired by the future.</p>","button_label":"","button_link":"shopify://collections/all","overlay_opacity":0,"text_align":"start"}}},"block_order":["slide1"]},
+    "hero": {"type":"hero-carousel","settings":{"autoplay":false,"interval":6},"blocks":{"slide1":{"type":"slide","settings":{"badge":"","heading":"","text":"","button_label":"","button_link":"shopify://collections/all","overlay_opacity":0,"text_align":"start"}}},"block_order":["slide1"]},
     "featured": {"type":"featured-collection","settings":{"heading":"","products_to_show":8}},
     "brand_values": {"type":"brand-values","settings":{},"blocks":{},"block_order":[]},
-    "brand_story": {"type":"image-with-text","settings":{"image":null,"heading":"Rooted in heritage.","text":"<p>Inspired by the future.</p>"}},
+    "brand_story": {"type":"image-with-text","settings":{"image":null,"heading":"","text":""}},
     "faq": {"type":"faq","settings":{},"blocks":{},"block_order":[]},
     "apps": {"type":"apps","settings":{},"blocks":{},"block_order":[]}
   },

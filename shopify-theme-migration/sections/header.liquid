@@ -1,5 +1,5 @@
 {%- assign header_logo = section.settings.logo | default: settings.brand_logo -%}
-<header class="site-header" style="--header-bg: {{ section.settings.background }};">
+<header class="site-header" style="--header-bg: {{ section.settings.background }}; --header-fg: {{ section.settings.text_color }};">
   <div class="header-inner page-width">
     <a class="brand" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
       {% if header_logo != blank %}
@@ -74,7 +74,8 @@
   "settings": [
     {"type":"image_picker","id":"logo","label":"Logo"},
     {"type":"link_list","id":"menu","label":"Main menu","default":"main-menu"},
-    {"type":"color","id":"background","label":"Header background","default":"#ffffff"}
+    {"type":"color","id":"background","label":"Header background","default":"#0c1429"},
+    {"type":"color","id":"text_color","label":"Header text and icons","default":"#f7f7f5"}
   ]
 }
 {% endschema %}

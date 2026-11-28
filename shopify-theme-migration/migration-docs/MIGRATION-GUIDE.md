@@ -24,7 +24,7 @@ Zip the theme folders and files directly inside `shopify-theme-migration`; do no
 2. Add the About, Contact, and Services Shopify pages. Assign their templates with suffixes `about`, `contact`, and `services`.
 3. Create collections and import products using Shopify Admin or a Shopify-approved CSV workflow.
 4. Set policy pages in Shopify Settings.
-5. Add the logo and initial banner images through Theme Settings and the Hero Carousel section. Until images are selected, the hero falls back to the bundled `hero-banner.jpg` theme asset, and the featured-collection section falls back to the `all` collection.
+5. Confirm the Shopify store name is `HORUSIA` in Shopify Admin settings; uploading a theme does not rename the store. A supplied logo PNG is bundled byte-for-byte as `assets/horusia-logo.png` and has an opaque navy background matched by the default header/footer color. Replace it in Theme settings or the section logo picker if needed. The hero falls back to the bundled `hero-banner.jpg` asset, and the featured-collection section reads from Shopify's `all` collection.
 6. Configure English and Arabic languages in Shopify Markets and Shopify Publishing.
 7. Configure product options, variants, inventory, and availability in Shopify Admin.
 
@@ -41,6 +41,12 @@ The owned source assets found in `src/assets/` and `public/share-preview.jpg` ar
 ## Languages
 
 The theme uses `request.locale.iso_code` to set RTL for `ar` and LTR for other locales. Interface strings are in `locales/en.default.json` and `locales/ar.json`. Page, collection, product, and policy content must be translated separately in Shopify.
+
+## Design and editable content
+
+The current theme source uses a light neutral surface, charcoal text, restrained gold accents, and HORUSIA navy in the header/footer. Homepage hero carousel, featured collection, brand highlights, image/text, FAQ, and app sections are separate and reorderable. Product pages have optional editable highlight, metafield specification, comparison, FAQ, and app sections. Empty optional content sections stay hidden; reviews, product claims, comparison facts, and product values are not fabricated. Configure their content in the theme editor only when verified information is available.
+
+The home hero uses the bundled banner when a desktop image is not selected. Its heading falls back to the dynamic Shopify store name and its button is localized. Hero autoplay is off by default. Product and collection cards use real Shopify resources; an empty featured collection shows a translated empty state rather than fake product cards.
 
 ## Apps
 
@@ -89,3 +95,7 @@ Before publishing a theme, verify in an unpublished Shopify theme:
 - Navigation menus
 - Product and collection imports
 - App blocks
+- Desktop/mobile layout and supplied logo appearance
+- Optional product content sections after verified content is entered
+
+Shopify Theme Check and browser screenshots were not run during the source redesign; do not treat JSON parsing or a JavaScript syntax check as Shopify compatibility evidence.

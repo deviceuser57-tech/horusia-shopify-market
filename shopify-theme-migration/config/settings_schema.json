@@ -17,7 +17,7 @@
       {"type":"color","id":"color_surface","label":"Card and header background","default":"#ffffff"},
       {"type":"color","id":"color_surface_alt","label":"Soft background","default":"#f0f2f3"},
       {"type":"color","id":"color_muted","label":"Muted text","default":"#667085"},
-      {"type":"color","id":"color_brand_dark","label":"Brand navy","default":"#101a2d"},
+      {"type":"color","id":"color_brand_dark","label":"Brand navy","default":"#0c1429"},
       {"type":"color","id":"color_on_dark","label":"Text on navy","default":"#f7f7f5"}
     ]
   },

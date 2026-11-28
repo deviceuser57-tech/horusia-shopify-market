@@ -7,10 +7,12 @@
 | `src/components/HeroCarousel.tsx` | `sections/hero-carousel.liquid` |
 | `src/components/admin/HeroBannerStudio.tsx` | Theme editor controls in hero blocks and settings |
 | `src/pages/Index.tsx` | `templates/index.json` with carousel and featured collection sections |
+| Homepage brand-story/configuration | Editable `sections/brand-values.liquid`, `sections/image-with-text.liquid`, and `sections/faq.liquid` |
 | `src/pages/Shop.tsx` | Shopify collections/all routing |
 | `src/pages/Collections.tsx` | `templates/list-collections.json` |
 | `src/pages/CollectionDetail.tsx` | `templates/collection.json` |
 | `src/pages/ProductDetail.tsx` | `templates/product.json` and `sections/main-product.liquid` |
+| Product content blocks | `sections/product-benefits.liquid`, `sections/product-specifications.liquid`, `sections/product-comparison.liquid`, and `sections/faq.liquid`; empty/unverified content is not populated |
 | `src/components/ProductCard.tsx` | `snippets/product-card.liquid` |
 | `src/stores/cartStore.ts` | Native Shopify cart plus `assets/theme.js` Ajax cart enhancement |
 | `src/components/CartDrawer.tsx` | `snippets/cart-drawer.liquid` |
