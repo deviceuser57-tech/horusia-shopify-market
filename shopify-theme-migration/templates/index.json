@@ -1,9 +1,11 @@
 {
   "sections": {
-    "hero": {"type":"hero-carousel","settings":{"autoplay":false,"interval":6},"blocks":{"slide1":{"type":"slide","settings":{"badge":"HORUSIA","heading":"HORUSIA","text":"<p>One Stop Store - Quality products, trusted service, modern lifestyle.</p>","button_label":"Shop now","button_link":"shopify://collections/all","overlay_opacity":25,"text_align":"start"}}},"block_order":["slide1"]},
-    "latest": {"type":"featured-collection","settings":{"heading":"Latest Products","products_to_show":8}},
-    "philosophy": {"type":"rich-text","settings":{"heading":"Our Philosophy","text":"<p>At HORUSIA, we believe in providing more than just products. We offer a curated experience of quality, trust, and modern living.</p>","button_label":"About us","button_link":"shopify://pages/about"}},
+    "hero": {"type":"hero-carousel","settings":{"autoplay":false,"interval":6},"blocks":{"slide1":{"type":"slide","settings":{"badge":"","heading":"Rooted in heritage.","text":"<p>Inspired by the future.</p>","button_label":"","button_link":"shopify://collections/all","overlay_opacity":0,"text_align":"start"}}},"block_order":["slide1"]},
+    "featured": {"type":"featured-collection","settings":{"heading":"","products_to_show":8}},
+    "brand_values": {"type":"brand-values","settings":{},"blocks":{},"block_order":[]},
+    "brand_story": {"type":"image-with-text","settings":{"image":null,"heading":"Rooted in heritage.","text":"<p>Inspired by the future.</p>"}},
+    "faq": {"type":"faq","settings":{},"blocks":{},"block_order":[]},
     "apps": {"type":"apps","settings":{},"blocks":{},"block_order":[]}
   },
-  "order":["hero","latest","philosophy","apps"]
+  "order":["hero","featured","brand_values","brand_story","faq","apps"]
 }

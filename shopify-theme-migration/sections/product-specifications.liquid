@@ -1,0 +1,45 @@
+{% assign has_specification_rows = false %}
+{% for block in section.blocks %}
+  {% if block.settings.label != blank and block.settings.namespace != blank and block.settings.key != blank %}
+    {% assign namespace_values = product.metafields[block.settings.namespace] %}
+    {% assign metafield_value = namespace_values[block.settings.key] %}
+    {% if metafield_value != blank %}{% assign has_specification_rows = true %}{% endif %}
+  {% endif %}
+{% endfor %}
+{% if has_specification_rows %}
+  <section class="product-content-section page-width">
+    <h2>{% if section.settings.heading != blank %}{{ section.settings.heading }}{% else %}{{ 'general.product.specifications' | t }}{% endif %}</h2>
+    <dl class="specification-list">
+      {% for block in section.blocks %}
+        {% if block.settings.label != blank and block.settings.namespace != blank and block.settings.key != blank %}
+          {% assign namespace_values = product.metafields[block.settings.namespace] %}
+          {% assign metafield_value = namespace_values[block.settings.key] %}
+          {% if metafield_value != blank %}
+            <div class="specification-row" {{ block.shopify_attributes }}>
+              <dt>{{ block.settings.label }}</dt>
+              <dd>{{ metafield_value | metafield_tag }}</dd>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </dl>
+  </section>
+{% endif %}
+{% schema %}
+{
+  "name":"Product specifications",
+  "tag":"section",
+  "class":"section-product-specifications",
+  "settings":[{"type":"text","id":"heading","label":"Heading"}],
+  "blocks":[
+    {"type":"metafield","name":"Product metafield","settings":[
+      {"type":"text","id":"label","label":"Label"},
+      {"type":"text","id":"namespace","label":"Metafield namespace"},
+      {"type":"text","id":"key","label":"Metafield key"}
+    ]}
+  ],
+  "max_blocks":12,
+  "presets":[{"name":"Product specifications"}],
+  "enabled_on":{"templates":["product"]}
+}
+{% endschema %}

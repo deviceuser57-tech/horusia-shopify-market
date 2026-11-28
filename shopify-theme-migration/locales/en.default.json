@@ -5,12 +5,13 @@
     "search":{"search":"Search","title":"Search","placeholder":"Search products","submit":"Search","results_count":"{{ count }} results for \"{{ terms }}\""},
     "account":{"account":"Account"},
     "cart":{"title":"Your cart","view_cart":"View cart","empty":"Your cart is empty","continue_shopping":"Continue shopping","subtotal":"Subtotal","price_unavailable":"Price unavailable","update":"Update","checkout":"Checkout","remove":"Remove","items_in_cart":"{{ count }} items in cart","update_error":"Unable to update the cart. Please try again."},
-    "product":{"quantity":"Quantity","add_to_cart":"Add to cart","sold_out":"Sold out","view_image":"View image","added_to_cart":"Added to cart.","add_error":"Unable to add this item. Please try again.","invalid_quantity":"Please enter a valid quantity.","combination_unavailable":"This combination is not available.","variant":"Variant"},
-    "collection":{"all_collections":"Collections","no_products":"No products found"},
+    "product":{"quantity":"Quantity","add_to_cart":"Add to cart","sold_out":"Sold out","view_image":"View image","added_to_cart":"Added to cart.","add_error":"Unable to add this item. Please try again.","invalid_quantity":"Please enter a valid quantity.","combination_unavailable":"This combination is not available.","variant":"Variant","highlights":"Product highlights","specifications":"Specifications","comparison":"Product comparison","faq":"Frequently asked questions"},
+    "collection":{"all_collections":"Collections","no_products":"No products found","featured":"Featured collection"},
+    "home":{"shop":"Shop the collection","highlights":"Explore HORUSIA"},
     "newsletter":{"title":"Newsletter","email":"Email address","subscribe":"Subscribe","success":"Thank you for subscribing."},
     "contact":{"title":"Contact us","name":"Name","email":"Email","phone":"Phone","subject":"Subject","message":"Message","send":"Send","success":"Your message was sent successfully."},
     "footer":{"rights":"All rights reserved."},
-    "pagination":{"title":"Pagination","previous":"Previous","next":"Next"},
+    "pagination":{"title":"Pagination","previous":"Previous","next":"Next","page":"Page {{ number }}"},
     "carousel":{"previous":"Previous slide","next":"Next slide","pause":"Pause carousel","play":"Play carousel"},
     "404":{"title":"Page not found","message":"The page you requested could not be found.","back":"Back to the store"}
   }

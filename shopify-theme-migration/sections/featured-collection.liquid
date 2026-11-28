@@ -1,17 +1,15 @@
 <section class="featured-section page-width">
-  {% if section.settings.heading != blank %}<h2>{{ section.settings.heading }}</h2>{% endif %}
+  <h2>{% if section.settings.heading != blank %}{{ section.settings.heading }}{% else %}{{ 'general.collection.featured' | t }}{% endif %}</h2>
   {% assign collection = section.settings.collection %}
   {% if collection == blank %}{% assign collection = collections.all %}{% endif %}
-  {% if collection != blank %}
+  {% if collection != blank and collection.products_count > 0 %}
     <div class="product-grid">
       {% for product in collection.products limit: section.settings.products_to_show %}
         {% render 'product-card', product: product %}
-      {% else %}
-        {% for i in (1..section.settings.products_to_show) %}
-          {% render 'product-card-placeholder', index: i %}
-        {% endfor %}
       {% endfor %}
     </div>
+  {% else %}
+    <p class="empty-state">{{ 'general.collection.no_products' | t }}</p>
   {% endif %}
 </section>
 {% schema %}

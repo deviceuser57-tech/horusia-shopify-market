@@ -1,7 +1,11 @@
 {
   "sections": {
     "main": {"type":"main-product","settings":{"enable_zoom":false},"blocks":{},"block_order":[]},
+    "benefits": {"type":"product-benefits","settings":{},"blocks":{},"block_order":[]},
+    "specifications": {"type":"product-specifications","settings":{},"blocks":{},"block_order":[]},
+    "comparison": {"type":"product-comparison","settings":{},"blocks":{},"block_order":[]},
+    "faq": {"type":"faq","settings":{},"blocks":{},"block_order":[]},
     "apps": {"type":"apps","settings":{},"blocks":{},"block_order":[]}
   },
-  "order":["main","apps"]
+  "order":["main","benefits","specifications","comparison","faq","apps"]
 }

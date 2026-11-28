@@ -1,0 +1,37 @@
+{% assign has_faq_items = false %}
+{% for block in section.blocks %}
+  {% if block.settings.question != blank and block.settings.answer != blank %}
+    {% assign has_faq_items = true %}
+  {% endif %}
+{% endfor %}
+{% if has_faq_items %}
+  <section class="faq-section page-width">
+    <h2>{% if section.settings.heading != blank %}{{ section.settings.heading }}{% else %}{{ 'general.product.faq' | t }}{% endif %}</h2>
+    <div class="faq-list">
+      {% for block in section.blocks %}
+        {% if block.settings.question != blank and block.settings.answer != blank %}
+          <details class="faq-item" {{ block.shopify_attributes }}>
+            <summary>{{ block.settings.question }}</summary>
+            <div class="faq-answer rte">{{ block.settings.answer }}</div>
+          </details>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+{% schema %}
+{
+  "name":"Frequently asked questions",
+  "tag":"section",
+  "class":"section-faq",
+  "settings":[{"type":"text","id":"heading","label":"Heading"}],
+  "blocks":[
+    {"type":"question","name":"Question","settings":[
+      {"type":"text","id":"question","label":"Question"},
+      {"type":"richtext","id":"answer","label":"Answer"}
+    ]}
+  ],
+  "max_blocks":12,
+  "presets":[{"name":"Frequently asked questions"}]
+}
+{% endschema %}

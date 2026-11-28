@@ -1,0 +1,54 @@
+{% assign has_comparison_rows = false %}
+{% for block in section.blocks %}
+  {% if block.settings.feature != blank or block.settings.product_value != blank or block.settings.alternative_value != blank %}
+    {% assign has_comparison_rows = true %}
+  {% endif %}
+{% endfor %}
+{% if has_comparison_rows %}
+  <section class="product-content-section page-width">
+    <h2>{% if section.settings.heading != blank %}{{ section.settings.heading }}{% else %}{{ 'general.product.comparison' | t }}{% endif %}</h2>
+    <div class="comparison-table-wrap" role="region" aria-label="{{ section.settings.heading | default: 'general.product.comparison' | t }}" tabindex="0">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'general.product.feature' | t }}</th>
+            <th scope="col">{{ product.title | escape }}</th>
+            {% if section.settings.alternative_label != blank %}<th scope="col">{{ section.settings.alternative_label }}</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for block in section.blocks %}
+            {% if block.settings.feature != blank or block.settings.product_value != blank or block.settings.alternative_value != blank %}
+              <tr {{ block.shopify_attributes }}>
+                <th scope="row">{{ block.settings.feature }}</th>
+                <td>{{ block.settings.product_value }}</td>
+                {% if section.settings.alternative_label != blank %}<td>{{ block.settings.alternative_value }}</td>{% endif %}
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endif %}
+{% schema %}
+{
+  "name":"Product comparison",
+  "tag":"section",
+  "class":"section-product-comparison",
+  "settings":[
+    {"type":"text","id":"heading","label":"Heading"},
+    {"type":"text","id":"alternative_label","label":"Comparison column label"}
+  ],
+  "blocks":[
+    {"type":"row","name":"Comparison row","settings":[
+      {"type":"text","id":"feature","label":"Feature"},
+      {"type":"text","id":"product_value","label":"This product"},
+      {"type":"text","id":"alternative_value","label":"Comparison value"}
+    ]}
+  ],
+  "max_blocks":12,
+  "presets":[{"name":"Product comparison"}],
+  "enabled_on":{"templates":["product"]}
+}
+{% endschema %}

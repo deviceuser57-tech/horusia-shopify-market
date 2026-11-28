@@ -10,10 +10,15 @@
   {
     "name":"Colors",
     "settings":[
-      {"type":"color","id":"color_background","label":"Background","default":"#f4f6f8"},
-      {"type":"color","id":"color_foreground","label":"Text","default":"#0a192f"},
-      {"type":"color","id":"color_primary","label":"Primary","default":"#9a6f2e"},
-      {"type":"color","id":"color_border","label":"Border","default":"#d6dde4"}
+      {"type":"color","id":"color_background","label":"Page background","default":"#f7f7f5"},
+      {"type":"color","id":"color_foreground","label":"Primary text","default":"#202631"},
+      {"type":"color","id":"color_primary","label":"Gold accent","default":"#b58a43"},
+      {"type":"color","id":"color_border","label":"Borders","default":"#e6e5e1"},
+      {"type":"color","id":"color_surface","label":"Card and header background","default":"#ffffff"},
+      {"type":"color","id":"color_surface_alt","label":"Soft background","default":"#f0f2f3"},
+      {"type":"color","id":"color_muted","label":"Muted text","default":"#667085"},
+      {"type":"color","id":"color_brand_dark","label":"Brand navy","default":"#101a2d"},
+      {"type":"color","id":"color_on_dark","label":"Text on navy","default":"#f7f7f5"}
     ]
   },
   {
@@ -26,7 +31,15 @@
   {
     "name":"Brand",
     "settings":[
+      {"type":"image_picker","id":"brand_logo","label":"Store logo"},
+      {"type":"range","id":"brand_logo_width","min":140,"max":360,"step":10,"unit":"px","label":"Logo width","default":270},
       {"type":"image_picker","id":"favicon","label":"Favicon"}
+    ]
+  },
+  {
+    "name":"Layout",
+    "settings":[
+      {"type":"range","id":"page_width","min":1040,"max":1600,"step":40,"unit":"px","label":"Content width","default":1320}
     ]
   }
 ]

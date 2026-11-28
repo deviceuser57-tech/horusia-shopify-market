@@ -1,10 +1,11 @@
+{%- assign header_logo = section.settings.logo | default: settings.brand_logo -%}
 <header class="site-header" style="--header-bg: {{ section.settings.background }};">
   <div class="header-inner page-width">
-    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
-      {% if section.settings.logo != blank %}
-        {{ section.settings.logo | image_url: width: 400 | image_tag: widths: '200, 300, 400', class: 'brand-logo', loading: 'eager' }}
+    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
+      {% if header_logo != blank %}
+        {{ header_logo | image_url: width: settings.brand_logo_width | image_tag: widths: '140, 200, 270, 340, 360', class: 'brand-logo', loading: 'eager', alt: shop.name }}
       {% else %}
-        <span class="brand-name">{{ shop.name }}</span>
+        <img class="brand-logo brand-logo-default" src="{{ 'horusia-logo.png' | asset_url }}" alt="{{ shop.name | escape }}" width="{{ settings.brand_logo_width }}" loading="eager">
       {% endif %}
     </a>
     <nav class="desktop-nav" aria-label="{{ 'general.navigation.main' | t }}">
@@ -73,7 +74,7 @@
   "settings": [
     {"type":"image_picker","id":"logo","label":"Logo"},
     {"type":"link_list","id":"menu","label":"Main menu","default":"main-menu"},
-    {"type":"color","id":"background","label":"Header background","default":"#f4f6f8"}
+    {"type":"color","id":"background","label":"Header background","default":"#ffffff"}
   ]
 }
 {% endschema %}

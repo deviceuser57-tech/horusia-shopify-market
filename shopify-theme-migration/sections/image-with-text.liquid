@@ -1,4 +1,4 @@
-<section class="image-with-text page-width">
+<section class="image-with-text page-width{% if section.settings.image == blank %} image-with-text--text-only{% endif %}">
   {% if section.settings.image != blank %}
     <div class="image-with-text-media">{{ section.settings.image | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '400,800,1200', alt: section.settings.heading }}</div>
   {% endif %}

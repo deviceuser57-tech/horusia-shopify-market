@@ -1,17 +1,33 @@
 {
   "current":{
-    "color_background":"#f4f6f8",
-    "color_foreground":"#0a192f",
-    "color_primary":"#9a6f2e",
-    "color_border":"#d6dde4",
+    "color_background":"#f7f7f5",
+    "color_foreground":"#202631",
+    "color_primary":"#b58a43",
+    "color_border":"#e6e5e1",
+    "color_surface":"#ffffff",
+    "color_surface_alt":"#f0f2f3",
+    "color_muted":"#667085",
+    "color_brand_dark":"#101a2d",
+    "color_on_dark":"#f7f7f5",
+    "brand_logo":null,
+    "brand_logo_width":270,
+    "page_width":1320,
     "sections":{}
   },
   "presets":{
     "Default":{
-      "color_background":"#f4f6f8",
-      "color_foreground":"#0a192f",
-      "color_primary":"#9a6f2e",
-      "color_border":"#d6dde4",
+      "color_background":"#f7f7f5",
+      "color_foreground":"#202631",
+      "color_primary":"#b58a43",
+      "color_border":"#e6e5e1",
+      "color_surface":"#ffffff",
+      "color_surface_alt":"#f0f2f3",
+      "color_muted":"#667085",
+      "color_brand_dark":"#101a2d",
+      "color_on_dark":"#f7f7f5",
+      "brand_logo":null,
+      "brand_logo_width":270,
+      "page_width":1320,
       "sections":{}
     }
   }

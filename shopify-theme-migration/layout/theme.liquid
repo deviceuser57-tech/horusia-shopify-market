@@ -1,3 +1,4 @@
+{%- assign page_title_text = page_title | strip_html | default: shop.name -%}
 <!doctype html>
 <html class="no-js" lang="{{ request.locale.iso_code }}" dir="{% if request.locale.iso_code == 'ar' %}rtl{% else %}ltr{% endif %}">
   <head>
@@ -8,16 +9,28 @@
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
     {%- endif -%}
-    <title>
-      {{ page_title }}
-      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
-      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
-    </title>
+    <title>{{ page_title_text | escape }}{% if current_tags %} — {{ current_tags | join: ', ' | escape }}{% endif %}{% if current_page != 1 %} — {{ 'general.pagination.page' | t: number: current_page }}{% endif %}{% unless page_title_text contains shop.name %} | {{ shop.name | escape }}{% endunless %}</title>
     {% if page_description %}<meta name="description" content="{{ page_description | escape }}">{% endif %}
     {{ content_for_header }}
     {{ settings.heading_font | font_face: font_display: 'swap' }}
     {{ settings.body_font | font_face: font_display: 'swap' }}
+    <style>
+      :root {
+        --color-background: {{ settings.color_background }};
+        --color-foreground: {{ settings.color_foreground }};
+        --color-primary: {{ settings.color_primary }};
+        --color-border: {{ settings.color_border }};
+        --color-surface: {{ settings.color_surface }};
+        --color-surface-alt: {{ settings.color_surface_alt }};
+        --color-muted: {{ settings.color_muted }};
+        --color-brand-dark: {{ settings.color_brand_dark }};
+        --color-on-dark: {{ settings.color_on_dark }};
+        --page-width: {{ settings.page_width }}px;
+        --brand-logo-width: {{ settings.brand_logo_width }}px;
+        --font-heading: {{ settings.heading_font.family | json }}, {{ settings.heading_font.fallback_families }};
+        --font-body: {{ settings.body_font.family | json }}, {{ settings.body_font.fallback_families }};
+      }
+    </style>
     <script>
       window.Shopify = window.Shopify || {};
       window.Shopify.money_format = {{ shop.money_format | json }};
@@ -27,7 +40,7 @@
     {{ 'base.css' | asset_url | stylesheet_tag }}
     <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
   </head>
-  <body class="template-{{ template.name }}" style="--color-background: {{ settings.color_background }}; --color-foreground: {{ settings.color_foreground }}; --color-primary: {{ settings.color_primary }}; --color-border: {{ settings.color_border }}; font-family: {{ settings.body_font.family }}, {{ settings.body_font.fallback_families }}; --font-heading: {{ settings.heading_font.family }}, {{ settings.heading_font.fallback_families }};">
+  <body class="template-{{ template.name }}">
     <a class="skip-link" href="#MainContent">{{ 'general.accessibility.skip_to_content' | t }}</a>
     {% sections 'header-group' %}
     <main id="MainContent" role="main" tabindex="-1">

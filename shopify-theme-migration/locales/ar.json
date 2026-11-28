@@ -5,12 +5,13 @@
     "search":{"search":"بحث","title":"البحث","placeholder":"البحث عن المنتجات","submit":"بحث","results_count":"{{ count }} نتيجة عن \"{{ terms }}\""},
     "account":{"account":"الحساب"},
     "cart":{"title":"سلة التسوق","view_cart":"عرض السلة","empty":"سلتك فارغة","continue_shopping":"متابعة التسوق","subtotal":"المجموع الفرعي","price_unavailable":"السعر غير متاح","update":"تحديث","checkout":"إتمام الشراء","remove":"إزالة","items_in_cart":"{{ count }} منتجات في السلة","update_error":"تعذر تحديث السلة. حاول مرة أخرى."},
-    "product":{"quantity":"الكمية","add_to_cart":"أضف إلى السلة","sold_out":"نفد المخزون","view_image":"عرض الصورة","added_to_cart":"تمت الإضافة إلى السلة.","add_error":"تعذر إضافة هذا المنتج. حاول مرة أخرى.","invalid_quantity":"يرجى إدخال كمية صحيحة.","combination_unavailable":"هذا الاختيار غير متوفر.","variant":"المتغير"},
-    "collection":{"all_collections":"التصنيفات","no_products":"لا توجد منتجات"},
+    "product":{"quantity":"الكمية","add_to_cart":"أضف إلى السلة","sold_out":"نفد المخزون","view_image":"عرض الصورة","added_to_cart":"تمت الإضافة إلى السلة.","add_error":"تعذر إضافة هذا المنتج. حاول مرة أخرى.","invalid_quantity":"يرجى إدخال كمية صحيحة.","combination_unavailable":"هذا الاختيار غير متوفر.","variant":"المتغير","highlights":"مميزات المنتج","specifications":"المواصفات","comparison":"مقارنة المنتج","faq":"الأسئلة الشائعة"},
+    "collection":{"all_collections":"التصنيفات","no_products":"لا توجد منتجات","featured":"مجموعة مختارة"},
+    "home":{"shop":"تسوق المجموعة","highlights":"اكتشف HORUSIA"},
     "newsletter":{"title":"النشرة البريدية","email":"البريد الإلكتروني","subscribe":"اشترك","success":"شكرًا لاشتراكك."},
     "contact":{"title":"اتصل بنا","name":"الاسم","email":"البريد الإلكتروني","phone":"الهاتف","subject":"الموضوع","message":"الرسالة","send":"إرسال","success":"تم إرسال رسالتك بنجاح."},
     "footer":{"rights":"جميع الحقوق محفوظة."},
-    "pagination":{"title":"ترقيم الصفحات","previous":"السابق","next":"التالي"},
+    "pagination":{"title":"ترقيم الصفحات","previous":"السابق","next":"التالي","page":"الصفحة {{ number }}"},
     "carousel":{"previous":"الشريحة السابقة","next":"الشريحة التالية","pause":"إيقاف مؤقت","play":"تشغيل المعرض"},
     "404":{"title":"الصفحة غير موجودة","message":"تعذر العثور على الصفحة المطلوبة.","back":"العودة إلى المتجر"}
   }

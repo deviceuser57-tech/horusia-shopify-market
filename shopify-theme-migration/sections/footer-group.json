@@ -1,6 +1,6 @@
 {
   "type":"footer",
   "name":"Footer group",
-  "sections":{"footer":{"type":"footer","settings":{"heading":"HORUSIA","text":"<p>One Stop Store for quality products and trusted service.</p>","menu":"footer","background":"#0a192f","text_color":"#f4f6f8"}}},
+  "sections":{"footer":{"type":"footer","settings":{"heading":"","text":"","menu":"footer","background":"#101a2d","text_color":"#f7f7f5"}}},
   "order":["footer"]
 }
